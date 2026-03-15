@@ -42,5 +42,6 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/research.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

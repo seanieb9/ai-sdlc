@@ -96,5 +96,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/testing-standards.md
 @/Users/seanlew/.claude/sdlc/references/resilience-patterns.md
 @/Users/seanlew/.claude/sdlc/templates/test-cases.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

@@ -99,5 +99,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/data-standards.md
 @/Users/seanlew/.claude/sdlc/references/resilience-patterns.md
 @/Users/seanlew/.claude/sdlc/references/microservices.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

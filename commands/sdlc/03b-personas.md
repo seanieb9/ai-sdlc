@@ -60,4 +60,5 @@ Flags:
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/personas.md
 @/Users/seanlew/.claude/sdlc/references/product-standards.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>

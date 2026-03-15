@@ -63,5 +63,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/clean-architecture.md
 @/Users/seanlew/.claude/sdlc/references/microservices.md
 @/Users/seanlew/.claude/sdlc/templates/api-spec.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

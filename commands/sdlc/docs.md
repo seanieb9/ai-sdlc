@@ -66,5 +66,6 @@ Flags:
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/docs.md
 @/Users/seanlew/.claude/sdlc/references/doc-management.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

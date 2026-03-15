@@ -55,4 +55,5 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/voc.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>

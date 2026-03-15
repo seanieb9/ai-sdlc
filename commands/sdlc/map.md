@@ -23,4 +23,5 @@ On completion, update `.sdlc/STATE.md` to record that the codebase has been mapp
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/map.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>

@@ -68,5 +68,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/resilience-patterns.md
 @/Users/seanlew/.claude/sdlc/references/observability-standards.md
 @/Users/seanlew/.claude/sdlc/references/process.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

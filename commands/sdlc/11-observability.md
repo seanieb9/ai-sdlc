@@ -70,5 +70,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/workflows/observability.md
 @/Users/seanlew/.claude/sdlc/references/observability-standards.md
 @/Users/seanlew/.claude/sdlc/templates/observability.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

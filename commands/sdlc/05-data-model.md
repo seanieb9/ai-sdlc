@@ -55,5 +55,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/workflows/data-model.md
 @/Users/seanlew/.claude/sdlc/references/data-standards.md
 @/Users/seanlew/.claude/sdlc/templates/data-model.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 

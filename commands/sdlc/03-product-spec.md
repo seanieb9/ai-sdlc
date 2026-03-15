@@ -51,5 +51,6 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/product-standards.md
 @/Users/seanlew/.claude/sdlc/references/testing-standards.md
 @/Users/seanlew/.claude/sdlc/templates/product-spec.md
+@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>
 
