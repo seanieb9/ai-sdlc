@@ -367,3 +367,24 @@ Append to the `## Verification Log` section of STATE.md:
 If FAIL: update the phase status back to 🔄 In Progress in STATE.md.
 
 If the `## Verification Log` section does not exist in STATE.md, add it.
+
+---
+
+## Step 6: Update ROADMAP.md Phase Log
+
+If `.sdlc/ROADMAP.md` exists, update the Phase Log row for the verified phase:
+
+**On PASS or PASS WITH WARNINGS:**
+Find the matching row in the `## Phase Log` table and update:
+```
+| [N]. [Phase name] | ✅ Complete | [sessions used if known, else "—"] | [ISO date] | [one-line note if warnings] |
+```
+
+**On FAIL:**
+```
+| [N]. [Phase name] | 🔄 In Progress | — | — | Verify failed — [top failure reason] |
+```
+
+**Sessions used:** if the user mentioned how many sessions this phase took during the work, record it. Otherwise leave `—`. The roadmap estimate vs actual comparison is valuable over time but never block on it.
+
+If ROADMAP.md does not exist (solo developer skipped roadmap): skip this step silently.

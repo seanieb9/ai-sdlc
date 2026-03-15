@@ -1122,11 +1122,30 @@ If any cross-check fails: fix before marking done — do not defer.
 ## Step 12: Mark Task Complete
 
 After implementation and verification:
-1. Update `.sdlc/TODO.md` — mark task done: `[x] TASK-NNN`
+1. Update `.sdlc/TODO.md` — mark task done: `[x] TASK-NNN`, move to Done section
 2. Update `.sdlc/STATE.md` — note phase progress
-3. Show what was implemented, which specs were satisfied, and what comes next
+3. Check phase completion (see below)
+4. Show what was implemented, which specs were satisfied, and what comes next
 
-Output:
+**Phase completion check:**
+After marking the task `[x]`, scan TODO.md:
+- If any tasks remain in Active or Upcoming → show next task, continue
+- If Active and Upcoming are both empty (all tasks `[x]` in Done) → Phase 8 is complete:
+
+```
+✅ Phase 8 (Code) COMPLETE — all [N] tasks done
+
+Update ROADMAP.md Phase Log:
+  Phase 8 → ✅ Complete | [date]
+
+Recommended next:
+  /sdlc:verify --phase 8    ← run the quality gate before proceeding
+  /sdlc:09-test-cases       ← after verify passes
+```
+
+Also update `.sdlc/ROADMAP.md` Phase Log row for Phase 8 to `✅ Complete | [date]` if ROADMAP.md exists.
+
+**Standard task output (when more tasks remain):**
 ```
 ✅ TASK-[NNN] Complete: [description]
 
