@@ -66,6 +66,26 @@ Generates: clean architecture skeleton, multi-stage Dockerfile (non-root user, l
 ```
 Verification goes beyond "does the file exist?" — it checks completeness (no placeholders, all required sections), internal consistency (every entity has timestamps and invariants), and cross-phase consistency (every NFR in the spec has an architectural decision that addresses it, every API endpoint has a contract test).
 
+### Context management that actually works across sessions
+One of the hardest problems with AI-assisted development is losing context — mid-session when Claude auto-compacts, or the next morning when you start fresh. AI-SDLC solves this with a structured daily loop:
+
+**End of day — `/sdlc:eod`**
+Reaches a clean stopping point, commits work in progress with a descriptive message, saves a precise snapshot of where you are (phase, step, open decisions, anything said verbally that isn't in the docs), and tells you exactly what to run first tomorrow.
+
+**During the day — `/loop 15m /sdlc:checkpoint`**
+Auto-saves your session state every 15 minutes. If context fills and Claude auto-compacts, nothing is lost. `/clear` followed by `/sdlc:resume` restores full context in under a minute.
+
+**Start of day — `/sdlc:sod`**
+Reads yesterday's checkpoint, flags any stale decisions or unverified phases, sets a realistic goal for the day, and delivers a structured brief — before executing a single thing. One "go" and you're working again.
+
+```
+Morning:  /sdlc:sod
+During:   /loop 15m /sdlc:checkpoint
+Evening:  /sdlc:eod
+```
+
+No more "where was I?". No more re-explaining context to a fresh Claude. No more lost decisions. The project state lives in files — and the daily ritual keeps those files exactly current.
+
 ---
 
 ## The Lifecycle
