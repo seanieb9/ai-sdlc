@@ -1,6 +1,18 @@
 ---
 name: sdlc:explore
-description: Codebase explorer for brownfield projects. Reads CODEBASE_MAP.md first, then executes targeted grep. Answers "where is X", "what calls Y", "what does Z depend on", and "show me all X" without reading entire files.
+description: >
+  Codebase explorer for brownfield projects. Reads CODEBASE_MAP.md first, then executes targeted grep. Answers "where is X", "what calls Y", "what does Z depend on", and "show me all X" without reading entire files.
+  AUTO-TRIGGER — invoke this skill when the user asks a question about the existing codebase structure, location, or behaviour.
+  Trigger patterns (any of these):
+  - Location questions: "where is X handled?", "where is X implemented?", "which file does X?"
+  - Caller questions: "what calls X?", "who uses X?", "what depends on X?"
+  - Dependency questions: "what does X depend on?", "what does X import?", "what does X use?"
+  - Pattern questions: "show me all X", "find all X", "list all X"
+  - Convention questions: "how is X done here?", "how are errors handled?", "how is logging done?"
+  - Change impact: "if I change X what breaks?", "what uses this field?", "what would be affected by X?"
+  - Understanding: "explain what X does", "how does X work?", "walk me through X"
+  Do NOT trigger on questions about SDLC phase progress, requirements, or general design discussions.
+  Do NOT trigger if .sdlc/CODEBASE_MAP.md does not exist — tell the user to run /sdlc:map first.
 argument-hint: "<question about the codebase>"
 allowed-tools:
   - Read

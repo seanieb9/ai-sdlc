@@ -1,6 +1,15 @@
 ---
 name: sdlc:status
-description: Show the current SDLC state — phases completed, active work, todos, doc health, and recommended next action.
+description: >
+  Show the current SDLC state — phases completed, active work, todos, doc health, and recommended next action.
+  AUTO-TRIGGER — invoke this skill when the user expresses uncertainty about direction or asks what to do next.
+  Trigger patterns (any of these):
+  - Asking for direction: "what should we do next?", "what's next?", "where do we go from here?", "what should I do now?"
+  - Asking about progress: "where are we?", "how far along are we?", "what phase are we on?", "what have we done so far?"
+  - Asking if ready to proceed: "are we done?", "can we move on?", "is this phase complete?", "are we ready to start X?"
+  - Asking for a plan check: "what's left?", "what's still todo?", "what's outstanding?"
+  Do NOT trigger on questions about specific technical topics, codebase questions, or general conversation.
+  Do NOT trigger if .sdlc/STATE.md does not exist (no active SDLC project).
 argument-hint: "[--verbose] [--docs] [--todos]"
 allowed-tools:
   - Read
