@@ -59,6 +59,18 @@ Structured JSON logging with mandatory `trace_id` and `span_id` fields. OpenTele
 ```
 Generates: clean architecture skeleton, multi-stage Dockerfile (non-root user, layer caching), docker-compose local dev stack, Kubernetes manifests (Deployment, Service, ConfigMap, HPA, PDB), Kustomize overlays for staging/production, GitHub Actions CI/CD pipeline with Trivy CVE scanning, graceful shutdown handler, all three health probes.
 
+### Decisions captured automatically — never lost to context
+
+Every architectural and product decision made in conversation is silently recorded to `.sdlc/STATE.md` by an always-on background skill. No command to run. No reminder needed. The moment you say "we'll use Postgres", "JWT not sessions", or "dropping bulk import from v1" — it's written down with the reason and a flag for any downstream documents that may now be stale.
+
+### Documents structured for both human and AI reading
+
+Every document produced by AI-SDLC follows a strict writing standard that serves two goals simultaneously: readable by a human in under 5 minutes, and answerable by Claude using the minimum possible tokens.
+
+The **50-line rule**: every document's first 50 lines contain a TL;DR and a contents index — so Claude can orient and jump to the relevant section without loading the whole file. **Tables over prose**: structured data (requirements, fields, decisions, error codes) always in tables at ~40% fewer tokens. **IDs at line start**: every REQ-ID, BR-ID, TC-ID, ADR-ID begins its line so any reference is a single grep away. **Complexity budgets**: hard limits per document type that trigger sharding before a file becomes a monolith Claude loads in full every time.
+
+The result: as your project grows to dozens of documents, token cost stays flat because Claude loads what it needs — not everything.
+
 ### An independent quality gate between every phase
 ```bash
 /sdlc:verify --phase 5   # after data model
@@ -181,7 +193,8 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:checkpoint` | **Mid-session save.** Writes phase/step, next action, open decisions, and verbal context to `.sdlc/NEXT_ACTION.md`. Use with `/loop 15m /sdlc:checkpoint` |
 | `/sdlc:resume` | **Resume after `/clear`.** Reads checkpoint, delivers brief, waits for confirmation |
 | `/sdlc:verify [--phase N\|--last\|--all]` | **Run after every phase.** Independent quality gate with per-phase checklists |
-| `/sdlc:status` | Live dashboard — phases, todos, doc health, recommended next action |
+| `/sdlc:status` | Live dashboard — phases, todos, doc health, recommended next action. **Auto-triggers** when you ask "what's next?" or "where are we?" |
+| `/sdlc:decide` | **Always-on.** Silently records decisions to STATE.md and flags downstream impact. Never needs to be called. |
 | `/sdlc:help [command]` | System guide, or detailed help for a specific command |
 
 ### Discovery
@@ -228,7 +241,7 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | Command | Flags | Description |
 |---------|-------|-------------|
 | `/sdlc:map` | `--refresh` `--focus <area>` | Map the existing codebase into `.sdlc/CODEBASE_MAP.md` — tech stack, architecture, domain concepts, API routes, hotspots, search recipes |
-| `/sdlc:explore <question>` | | Answer codebase questions: location, callers, dependencies, conventions, change impact. Updates the map when new knowledge is found |
+| `/sdlc:explore <question>` | | Answer codebase questions: location, callers, dependencies, conventions, change impact. **Auto-triggers** on "where is X?", "what calls X?", "how does X work?". Updates the map when new knowledge is found |
 
 ### Maintenance
 | Command | Flags | Description |
@@ -294,11 +307,13 @@ This system encodes industry standards so you don't have to look them up or reme
 |------|------------------|
 | Data modeling | DDD (bounded contexts, aggregates, entities, value objects), ISO 4217, ISO 8601, RFC 4122, E.164, domain-specific (ISO 20022, FHIR, GS1, etc.) |
 | Architecture | Clean Architecture, Ports & Adapters, C4 Model, OpenAPI 3.x, CQRS, Saga, Outbox Pattern |
+| Product | SMART NFRs, MoSCoW prioritisation (≤40% Must), JTBD (functional/emotional/social), BDD completeness, anti-personas |
 | Testing | MECE, Given/When/Then (BDD), Testing Pyramid, Contract Testing (Pact), 8-layer coverage model |
 | Observability | OpenTelemetry, W3C TraceContext, Prometheus/OpenMetrics, structured JSON logging, RED metrics |
 | Resilience | Circuit Breaker, Retry + Full Jitter Backoff, Bulkhead, Graceful Degradation, Load Shedding, Chaos Testing |
 | API design | REST conventions, versioning strategy, cursor pagination, idempotency keys, OWASP API Top 10 |
 | Deployment | Multi-stage Dockerfile, non-root containers, K8s resource limits/probes/HPA/PDB, graceful shutdown |
+| Documentation | 50-line rule, tables over prose, ID-first formatting, complexity budgets, shard-for-partial-loading |
 
 ---
 
@@ -313,6 +328,8 @@ This system encodes industry standards so you don't have to look them up or reme
 **Verify before you proceed.** Each phase has an independent verification step that checks completeness, internal consistency, and cross-phase references. The orchestrator warns if you skip it.
 
 **Documents are living artifacts.** When requirements change, update `PRODUCT_SPEC.md`. When the data model evolves, update `DATA_MODEL.md` with a change history entry. IDs (REQ, BR, TC) are permanent — only deprecated, never deleted.
+
+**Token cost is a design constraint.** Documents are structured to be partially loadable — first 50 lines orient, sections answer one question each, shards are independently readable. Claude loads what it needs, not everything. This keeps context cost flat as the project grows.
 
 ---
 
