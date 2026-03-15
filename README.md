@@ -1,96 +1,159 @@
-# SDLC — Enterprise Software Development Lifecycle for Claude Code
+# AI-SDLC — Enterprise Software Development Lifecycle for Claude Code
 
-An intent-based SDLC orchestration system built as Claude Code custom commands. Covers the full lifecycle from raw idea to production-ready code — with process gates, canonical documents, and quality enforced at every step.
+> Turn Claude Code into a disciplined engineering team. Go from raw idea to production-ready, fully documented, thoroughly tested software — with process gates, architecture standards, and quality enforced at every step.
 
 ---
 
-## Quick Start
+## The Problem
 
+AI coding assistants are powerful but undisciplined. Left to their own devices they:
+
+- Jump straight to code before requirements are understood
+- Build on shaky data models that break everything downstream
+- Skip architecture decisions that matter at scale
+- Write tests that test implementation details instead of requirements
+- Ship code with no observability, no resilience patterns, no runbooks
+- Produce undocumented decisions that haunt the team six months later
+
+The result is fast-looking progress that collapses under real-world conditions.
+
+---
+
+## The Solution
+
+**AI-SDLC** is a set of Claude Code custom commands (`/sdlc:*`) that enforce a rigorous, opinionated software development lifecycle. It works the way a senior engineering team works — research before spec, spec before data model, data model before architecture, architecture before code — and it doesn't let you skip steps.
+
+Every phase produces a canonical document. Every document is verified before the next phase starts. Every requirement traces forward to a test case. Every test case maps to an automation script. Every architectural decision is recorded as an ADR with a review trigger. Nothing falls through the cracks.
+
+**One command to start anything:**
 ```bash
-# Start anything new here — the orchestrator figures out the rest
-/sdlc:00-start "I want to add payment processing to the checkout flow"
-
-# Check where you are at any time
-/sdlc:status
-
-# Get help on any command
-/sdlc:help
-/sdlc:help data-model
+/sdlc:00-start "I want to build a payment processing integration"
 ```
+The orchestrator reads your project state, figures out where you are, enforces what gates need to pass, and routes you to exactly the right next step.
+
+---
+
+## What You Get
+
+### Requirements that actually drive the work
+Every requirement gets a `REQ-ID`. Every business rule gets a `BR-ID`. Every NFR gets a **numeric threshold** — not "fast" but "p95 < 200ms at 1000 RPS". These IDs flow all the way through to test cases and automation. When a requirement changes, you know exactly what breaks.
+
+### A data model that's the single source of truth
+The canonical data model is designed before architecture and code. Everything derives from it — API shapes, domain entities, test factories, database migrations. Change a field in the data model and automatic impact analysis tells you exactly what breaks downstream before you touch a line of code.
+
+### Clean architecture that stays clean
+Code is implemented in strict layer order: domain → application → infrastructure → delivery. The dependency rule (no infrastructure imports in domain or application layers) is enforced. Every external integration goes through a port interface. No God objects, no magic numbers, no spaghetti.
+
+### Tests anchored to requirements, not vibes
+Test cases are derived from every source: requirements, API spec, data model invariants, architecture decisions, observability commitments. Eight test layers — unit, integration, contract, E2E, performance, resilience, observability, security — all with TC-IDs that trace back to a source document. No orphaned tests. No uncovered requirements. Coverage gates fail the CI build.
+
+### Resilience built in, not bolted on
+Every external dependency is classified (CRITICAL / DEGRADABLE / OPTIONAL) with explicit timeouts, circuit breakers, fallbacks, and retry logic. The system checks that your CRITICAL dependencies have circuit breakers, your DEGRADABLE dependencies have fallbacks, and every client has explicit connect and read timeouts. Chaos tests verify it all actually works.
+
+### Observability as a first-class deliverable
+Structured JSON logging with mandatory `trace_id` and `span_id` fields. OpenTelemetry distributed tracing with W3C context propagation. Prometheus RED metrics at every service boundary. Health endpoints (`/health/live`, `/health/ready`, `/health/startup`) that actually check dependencies. All committed to `OBSERVABILITY.md` with `OBS-IDs` that test cases verify.
+
+### Production-ready microservice scaffolding in one command
+```bash
+/sdlc:microservices "payment-service"
+```
+Generates: clean architecture skeleton, multi-stage Dockerfile (non-root user, layer caching), docker-compose local dev stack, Kubernetes manifests (Deployment, Service, ConfigMap, HPA, PDB), Kustomize overlays for staging/production, GitHub Actions CI/CD pipeline with Trivy CVE scanning, graceful shutdown handler, all three health probes.
+
+### An independent quality gate between every phase
+```bash
+/sdlc:verify --phase 5   # after data model
+/sdlc:verify --all       # full audit
+```
+Verification goes beyond "does the file exist?" — it checks completeness (no placeholders, all required sections), internal consistency (every entity has timestamps and invariants), and cross-phase consistency (every NFR in the spec has an architectural decision that addresses it, every API endpoint has a contract test).
 
 ---
 
 ## The Lifecycle
 
-Every project and feature flows through these phases in order. The orchestrator enforces gates — you cannot skip ahead without explicit override.
-
 ```
 IDEA
  │
  ▼
-RESEARCH          /sdlc:01-research        Market, competitive, customer voice
+RESEARCH          /sdlc:01-research        Deep competitive intelligence, SWOT, best practices, trends
  │
  ▼
-VOICE OF CUSTOMER /sdlc:01b-voc           Primary data synthesis (interviews, tickets, NPS)
+VOICE OF CUSTOMER /sdlc:01b-voc            Interview themes, ticket patterns, NPS → prioritized pain points
  │
  ▼
-SYNTHESIZE        /sdlc:02-synthesize      Research + existing codebase → unified picture
+SYNTHESIZE        /sdlc:02-synthesize      Research + existing codebase → unified strategic picture
  │
  ▼
-PRODUCT SPEC      /sdlc:03-product-spec    Requirements, BDD, business rules, exceptions
+PRODUCT SPEC      /sdlc:03-product-spec    REQ-IDs, BR-IDs, NFRs with thresholds, BDD scenarios, error table
  │
  ▼
-PERSONAS          /sdlc:03b-personas       JTBD, empathy maps, anti-personas
+PERSONAS          /sdlc:03b-personas       Jobs-to-be-Done, empathy maps, anti-personas
  │
  ▼
-CUSTOMER JOURNEY  /sdlc:04-customer-journey  Personas, journey maps, screen flows
+CUSTOMER JOURNEY  /sdlc:04-customer-journey  Journey maps, failure paths, emotional states, screen flows
  │
  ▼
-DATA MODEL  ⚠️    /sdlc:05-data-model      Canonical model — EVERYTHING derives from here
+DATA MODEL  ⚠️    /sdlc:05-data-model      Canonical model — architecture, APIs, and code all derive from this
  │
  ▼
-TECH ARCH         /sdlc:06-tech-arch       Clean architecture, C4, API spec, ADRs
+TECH ARCH         /sdlc:06-tech-arch       C4 diagrams, clean architecture, security, resilience, ADRs
  │
  ▼
-PLAN              /sdlc:07-plan            Phased task breakdown with dependencies
+PLAN              /sdlc:07-plan            Layered task breakdown: domain → app → infra → delivery
  │
  ▼
-CODE              /sdlc:08-code            Implement tasks (clean arch, no vibe)
+CODE              /sdlc:08-code            Clean architecture implementation — never vibe coding
  │
  ▼
-TEST CASES        /sdlc:09-test-cases      MECE Given/When/Then, full traceability
+TEST CASES        /sdlc:09-test-cases      8 layers, full traceability, MECE — anchored to every source doc
  │
  ▼
-TEST AUTOMATION   /sdlc:10-test-automation Scripts from test cases (TC-ID mapped)
+TEST AUTOMATION   /sdlc:10-test-automation 1:1 TC-ID mapping, coverage gates, drift detection
  │
  ▼
-OBSERVABILITY     /sdlc:11-observability   OTel tracing, structured logging, metrics
+OBSERVABILITY     /sdlc:11-observability   OTel tracing, structured logging, Prometheus metrics
  │
  ▼
-SRE               /sdlc:12-sre             SLOs, runbooks, incident response
+SRE               /sdlc:12-sre             SLOs, runbooks, incident response, resilience review
  │
  ▼
-REVIEW            /sdlc:13-review          Cross-cutting quality audit
+REVIEW            /sdlc:13-review          Cross-cutting quality audit across all 8 dimensions
 ```
 
 ---
 
 ## Phase Gates
 
-These are hard-enforced by the orchestrator. Bypass with `--force <phase>` (reason logged to STATE.md).
+Hard-enforced by the orchestrator. Bypass with `--force <phase>` (reason logged to STATE.md).
 
 | Gate | Blocks | Requires |
 |------|--------|---------|
-| DATA-MODEL | `tech-arch`, `plan`, `code` | `docs/data/DATA_MODEL.md` AND `docs/data/DATA_DICTIONARY.md` both exist |
-| TECH-ARCH | `plan`, `code` | `TECH_ARCHITECTURE.md` AND `API_SPEC.md` AND `SOLUTION_DESIGN.md` all exist |
-| PRODUCT-SPEC | `data-model`, `test-cases` | `docs/product/PRODUCT_SPEC.md` exists |
-| PLAN | `code` | `.sdlc/PLAN.md` exists with tasks |
-| TEST-CASES | `test-automation` | `docs/qa/TEST_CASES.md` exists |
-| OBSERVABILITY | `sre` | `docs/sre/OBSERVABILITY.md` exists |
+| PRODUCT-SPEC | `data-model`, `test-cases` | `docs/product/PRODUCT_SPEC.md` |
+| DATA-MODEL ⚠️ | `tech-arch`, `plan`, `code` | `DATA_MODEL.md` **and** `DATA_DICTIONARY.md` |
+| TECH-ARCH | `plan`, `code` | `TECH_ARCHITECTURE.md` **and** `API_SPEC.md` **and** `SOLUTION_DESIGN.md` |
+| PLAN | `code` | `.sdlc/PLAN.md` with tasks |
+| TEST-CASES | `test-automation` | `docs/qa/TEST_CASES.md` |
+| OBSERVABILITY | `sre` | `docs/sre/OBSERVABILITY.md` |
 
-**Verification gate:** Run `/sdlc:verify --phase N` after completing each phase. The orchestrator soft-warns if you start Phase N+1 without verifying Phase N. Verification checks completeness, consistency, and cross-references — not just file existence.
+After every phase, `/sdlc:verify --phase N` independently checks that outputs are complete, consistent, and cross-reference correctly before the next phase starts.
 
-**The data model is the most critical gate.** Architecture, APIs, and code all derive from it — not the other way around. Any change to an existing entity triggers automatic impact analysis.
+---
+
+## Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/seanieb9/ai-sdlc.git
+
+# Copy commands into Claude Code's custom commands directory
+cp -r ai-sdlc/commands/sdlc ~/.claude/commands/
+
+# Copy the workflow engine, references, and templates
+cp -r ai-sdlc/workflows ai-sdlc/references ai-sdlc/templates ~/.claude/sdlc/
+```
+
+That's it. Open any project in Claude Code and run `/sdlc:00-start`.
+
+> **Note:** The `@file` references inside each command point to `~/.claude/sdlc/`. If you install to a different path, update the `<execution_context>` blocks in `commands/sdlc/*.md`.
 
 ---
 
@@ -99,195 +162,135 @@ These are hard-enforced by the orchestrator. Bypass with `--force <phase>` (reas
 ### Orchestration
 | Command | Description |
 |---------|-------------|
-| `/sdlc:00-start <idea>` | **Always start here.** Reads state, classifies intent, enforces gates, routes to correct phase |
-| `/sdlc:verify [--phase N\|--last\|--all]` | **Run after every phase.** Independent quality gate — checks completeness, consistency, and cross-references |
-| `/sdlc:status` | Dashboard — phases, todos, doc health, recommended next action |
+| `/sdlc:00-start <idea>` | **Always start here.** Reads state, enforces gates, routes to the right phase |
+| `/sdlc:verify [--phase N\|--last\|--all]` | **Run after every phase.** Independent quality gate with per-phase checklists |
+| `/sdlc:status` | Live dashboard — phases, todos, doc health, recommended next action |
 | `/sdlc:help [command]` | System guide, or detailed help for a specific command |
 
 ### Discovery
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:01-research <topic>` | `--deep` `--competitive-only` `--customer-only` | Market, competitive, and customer voice research |
-| `/sdlc:02-synthesize [area]` | `--codebase-only` `--research-only` | Merge research findings with codebase analysis |
-
-### Customer Understanding
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:01b-voc [topic]` | `--interviews` `--tickets` `--nps` `--guided` | Synthesize primary customer data into evidence-backed findings |
-| `/sdlc:03b-personas [name]` | `--new` `--update` `--validate` `--anti-persona` | JTBD personas, empathy maps, anti-personas |
+| `/sdlc:01-research <topic>` | `--deep` `--competitive-only` `--customer-only` | Market landscape, competitive SWOT, best practices, emerging trends |
+| `/sdlc:01b-voc [topic]` | `--interviews` `--tickets` `--nps` `--guided` | Synthesize raw customer data into prioritized, evidence-backed pain points |
+| `/sdlc:02-synthesize [area]` | `--codebase-only` `--research-only` | Merge research + existing codebase into a unified strategic picture |
 
 ### Specification
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:03-product-spec <feature>` | `--new-section` `--update <section>` | Requirements, BDD scenarios, business rules, exceptions, NFRs |
-| `/sdlc:04-customer-journey <persona>` | `--new-persona` `--update-flow` | Personas, journey maps, failure paths, screen flows |
+| `/sdlc:03-product-spec <feature>` | `--new-section` `--update <section>` | Requirements, BDD scenarios, business rules, NFRs, error handling |
+| `/sdlc:03b-personas [name]` | `--new` `--update` `--validate` `--anti-persona` | JTBD personas, empathy maps, anti-personas |
+| `/sdlc:04-customer-journey <persona>` | `--new-persona` `--update-flow` | Journey maps, failure paths, screen flows, emotional states |
 
 ### Design
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:05-data-model <domain>` | `--review` `--impact-analysis` `--new-domain` | Canonical data model — DDD, ERDs, standards validation |
-| `/sdlc:06-tech-arch <system>` | `--c4` `--api-spec` `--solution-design` `--patterns` | Clean architecture, C4 diagrams, API spec, ADRs |
+| `/sdlc:05-data-model <domain>` | `--review` `--impact-analysis` `--new-domain` | DDD canonical data model — aggregates, ERDs, invariants, industry standards |
+| `/sdlc:06-tech-arch <system>` | `--c4` `--api-spec` `--solution-design` `--patterns` | C4 architecture, clean layers, security, resilience design, ADRs |
 
 ### Execution
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:07-plan <feature>` | `--breakdown` `--estimate` `--dependencies` | Phased execution plan + TODO list |
-| `/sdlc:08-code <task>` | `--task <id>` `--layer <layer>` `--dry-run` | Implement tasks following clean architecture |
-| `/sdlc:microservices <service-name>` | `--scaffold-only` `--k8s-only` `--ci-only` | Scaffold service: skeleton, Dockerfile, docker-compose, K8s manifests, CI/CD |
+| `/sdlc:07-plan <feature>` | `--breakdown` `--estimate` `--dependencies` | Layered execution plan + TODO list |
+| `/sdlc:08-code <task>` | `--task <id>` `--layer <layer>` `--dry-run` | Implement tasks following strict clean architecture |
+| `/sdlc:microservices <service>` | `--scaffold-only` `--k8s-only` `--ci-only` | Full production service scaffold: code + Docker + K8s + CI/CD |
 
 ### Quality
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:09-test-cases <feature>` | `--layer` `--coverage-check` `--mece-check` | MECE GWT test cases with requirement traceability |
-| `/sdlc:10-test-automation <feature>` | `--framework` `--layer` `--update-only` | Automation scripts mapped 1:1 to test case IDs |
-| `/sdlc:13-review [area]` | `--full` `--arch` `--data` `--test` `--obs` `--code` | Cross-cutting quality audit across all artifacts |
+| `/sdlc:09-test-cases <feature>` | `--layer` `--coverage-check` `--mece-check` | 8-layer MECE test cases anchored to every source document |
+| `/sdlc:10-test-automation <feature>` | `--framework` `--layer` `--update-only` | Automation scripts with TC-ID mapping, drift detection, coverage gates |
+| `/sdlc:13-review [area]` | `--full` `--arch` `--data` `--test` `--obs` `--code` | 12-dimension quality audit: requirements, data, arch, tests, resilience, deployment |
 
 ### Reliability
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | Enterprise observability: OTel, structured logs, Prometheus |
-| `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, reliability patterns |
+| `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | OTel distributed tracing, structured logging, Prometheus RED metrics |
+| `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, resilience pattern implementation |
 
 ### Maintenance
 | Command | Flags | Description |
 |---------|-------|-------------|
-| `/sdlc:docs` | `--audit` `--index` `--clean` `--status` | Document health, audit, cleanup, index rebuild |
+| `/sdlc:docs` | `--audit` `--index` `--clean` `--status` | Document health audit, stale doc detection, index rebuild |
 
 ---
 
-## Document Registry
+## What Gets Produced
 
-These are the **only** documents created. Documents are updated — never recreated, never versioned with `_v2` suffixes.
+Every phase outputs to a canonical document. Documents are **updated in place** — never versioned with `_v2` suffixes, never duplicated.
 
 ```
 docs/
   research/
-    RESEARCH.md              Market landscape, competitive analysis, technology trends
+    RESEARCH.md              Market landscape, competitive intelligence, SWOT, best practices
     GAP_ANALYSIS.md          Customer pain points, unmet needs, ranked opportunities
-    VOC.md                   Primary customer data: interview themes, ticket patterns, NPS insights
-    SYNTHESIS.md             Research + codebase combined: gaps, reuse, risks
+    VOC.md                   Interview themes, ticket patterns, NPS insights — evidence-backed
+    SYNTHESIS.md             Research + codebase → unified gaps, reuse opportunities, risks
 
   product/
-    PERSONAS.md              ⚠️  Rigorous personas (JTBD, empathy maps, anti-personas, validation)
-    PRODUCT_SPEC.md          Requirements (MoSCoW), BDD, business rules, exceptions, NFRs
-    CUSTOMER_JOURNEY.md      Personas, journey maps, screen flows, business processes
+    PERSONAS.md              JTBD personas, empathy maps, anti-personas
+    PRODUCT_SPEC.md          REQ-IDs, BR-IDs, NFRs, BDD scenarios, error codes, acceptance criteria
+    CUSTOMER_JOURNEY.md      Journey maps, failure paths, emotional states, screen flows
 
   data/
-    DATA_MODEL.md            ⚠️  Canonical data model: bounded contexts, aggregates, ERDs
-    DATA_DICTIONARY.md       Every field: type, constraints, business meaning, standard ref
+    DATA_MODEL.md            ⚠️  Canonical: bounded contexts, aggregates, ERDs, domain events, invariants
+    DATA_DICTIONARY.md       Every field: type, constraints, business meaning, standard references
 
   architecture/
-    TECH_ARCHITECTURE.md     C4 diagrams, clean architecture layers, patterns used
+    TECH_ARCHITECTURE.md     C4 diagrams, clean architecture layers, security, dependency classification
     API_SPEC.md              Full OpenAPI 3.x specification
-    SOLUTION_DESIGN.md       Architecture Decision Records (ADRs)
+    SOLUTION_DESIGN.md       Architecture Decision Records — context, decision, rationale, review trigger
 
   qa/
-    TEST_CASES.md            MECE Given/When/Then test cases with coverage matrix
-    TEST_AUTOMATION.md       Automation index, framework guide, TC-ID coverage
+    TEST_CASES.md            MECE Given/When/Then across 8 layers with full coverage matrix
+    TEST_AUTOMATION.md       TC-ID to file map, coverage gates, automation completeness audit
 
   sre/
-    OBSERVABILITY.md         Logging standard, tracing setup, metrics catalog, alerting
-    RUNBOOKS.md              Operational runbooks for every critical procedure
+    OBSERVABILITY.md         Structured log spec (OBS-IDs), trace propagation, metrics catalog
+    RUNBOOKS.md              Runbook per critical failure scenario
     SLO.md                   Service Level Objectives and error budgets
     INCIDENT_RESPONSE.md     Severity classification, response process, post-mortem template
 
   review/
-    REVIEW_REPORT.md         Quality review findings with severity and remediation tasks
+    REVIEW_REPORT.md         Findings by severity across all 12 review dimensions + remediation tasks
 
 .sdlc/
-  STATE.md                   Project state, phase progress, document index, decisions
-  TODO.md                    Active task list: [ ] pending, [~] in progress, [x] done
+  STATE.md                   Phase progress, document index, decisions, verification log
+  TODO.md                    Active task list with priority and phase
   PLAN.md                    Execution plan: phases, tasks, dependencies, risk register
-  DECISIONS.md               Overflow ADRs and key decisions
-```
-
-**Sharding** is allowed when a single-domain section exceeds ~400 lines: `PRODUCT_SPEC_[DOMAIN].md`, `DATA_MODEL_[CONTEXT].md`, etc. The parent document is always the index.
-
-**IDs are permanent.** REQ-IDs, TC-IDs, BR-IDs are never renumbered. Only deprecated (with reason and date, never deleted).
-
----
-
-## Key Design Principles
-
-### 1. Data Model First
-The canonical data model is the foundation. Architecture, API shapes, and code all derive from it. Running `/sdlc:06-tech-arch` or `/sdlc:08-code` without an approved data model is blocked.
-
-### 2. No Code Without a Plan
-`/sdlc:08-code` requires `.sdlc/PLAN.md` to exist. Tasks are atomic, layered (domain → application → infrastructure → delivery), and independently verifiable.
-
-### 3. Clean Architecture
-All implementation follows the dependency rule: domain → application → infrastructure → delivery. Domain code has zero infrastructure dependencies. All external integrations go through port interfaces.
-
-### 4. MECE Test Design
-Test cases are designed from requirements, journeys, API specs, and code — not from the implementation alone. Every requirement traces to at least one test. No duplicate test cases. MECE check runs before finalizing.
-
-### 5. Enterprise Observability Built In
-Observability is designed alongside code, not bolted on after. Mandatory structured JSON logging with trace IDs, OpenTelemetry distributed tracing with W3C context propagation, and Prometheus RED metrics at every service boundary.
-
-### 6. Documents Are Living, Not Versioned
-When requirements change: update `PRODUCT_SPEC.md`. When the data model evolves: update `DATA_MODEL.md` with a change history entry. Never create parallel documents.
-
----
-
-## System Structure
-
-```
-~/.claude/
-  commands/sdlc/          18 slash commands (/sdlc:*)
-  sdlc/
-    workflows/            18 detailed workflow instruction files
-    references/           6 standards reference files
-    templates/            6 document starter templates
-  agents/
-    sdlc-researcher.md        Market and customer research
-    sdlc-data-architect.md    DDD data modeling and impact analysis
-    sdlc-solution-architect.md  Clean architecture and API design
-    sdlc-test-designer.md     MECE test case design
-    sdlc-reviewer.md          Cross-cutting quality review
-```
-
----
-
-## Examples
-
-### New Project
-```
-/sdlc:00-start "Build a SaaS invoicing platform for freelancers"
-```
-Orchestrator initializes STATE.md, asks clarifying questions, then routes to research.
-
-### New Feature on Existing Project
-```
-/sdlc:00-start "Add recurring invoice support"
-```
-Orchestrator reads existing state, identifies completed phases, routes to the correct next step.
-
-### Check Status
-```
-/sdlc:status
-```
-
-### Jump to a Specific Phase (with gate check)
-```
-/sdlc:05-data-model "Invoice and Payment entities"
-/sdlc:09-test-cases "recurring billing flow"
-/sdlc:11-observability "invoice-service"
-```
-
-### Override a Gate (use with documented reason)
-```
-/sdlc:00-start "quick bug fix" --force plan
 ```
 
 ---
 
 ## Standards Encoded
 
+This system encodes industry standards so you don't have to look them up or remember to apply them.
+
 | Area | Standards Applied |
 |------|------------------|
-| Data modeling | DDD (bounded contexts, aggregates), ISO 4217, ISO 8601, RFC 4122, E.164, domain-specific (ISO 20022, FHIR, etc.) |
-| Architecture | Clean Architecture, Ports & Adapters, C4 Model, OpenAPI 3.x |
-| Testing | MECE, Given/When/Then (BDD), Testing Pyramid, Contract Testing |
-| Observability | OpenTelemetry, W3C TraceContext, Prometheus/OpenMetrics, structured JSON logging |
-| API design | REST conventions, HTTP status codes, cursor pagination, versioning strategy |
-| Reliability | RED metrics, SLOs + error budgets, Circuit Breaker, Retry + Backoff, Bulkhead |
+| Data modeling | DDD (bounded contexts, aggregates, entities, value objects), ISO 4217, ISO 8601, RFC 4122, E.164, domain-specific (ISO 20022, FHIR, GS1, etc.) |
+| Architecture | Clean Architecture, Ports & Adapters, C4 Model, OpenAPI 3.x, CQRS, Saga, Outbox Pattern |
+| Testing | MECE, Given/When/Then (BDD), Testing Pyramid, Contract Testing (Pact), 8-layer coverage model |
+| Observability | OpenTelemetry, W3C TraceContext, Prometheus/OpenMetrics, structured JSON logging, RED metrics |
+| Resilience | Circuit Breaker, Retry + Full Jitter Backoff, Bulkhead, Graceful Degradation, Load Shedding, Chaos Testing |
+| API design | REST conventions, versioning strategy, cursor pagination, idempotency keys, OWASP API Top 10 |
+| Deployment | Multi-stage Dockerfile, non-root containers, K8s resource limits/probes/HPA/PDB, graceful shutdown |
+
+---
+
+## Key Design Principles
+
+**Data model first.** Architecture, API shapes, and code all derive from the canonical data model — not the other way around. Any change to an existing entity triggers automatic impact analysis showing exactly what breaks downstream.
+
+**No code without a plan.** Tasks are atomic, layered (domain → application → infrastructure → delivery), and independently verifiable. The clean architecture dependency rule is enforced — domain code has zero infrastructure dependencies.
+
+**Tests from requirements, not from code.** Test cases are derived from every source document: requirements, API spec, data model invariants, architecture decisions, observability contracts. Eight test layers ensure nothing is missed. Every TC-ID traces to a source.
+
+**Verify before you proceed.** Each phase has an independent verification step that checks completeness, internal consistency, and cross-phase references. The orchestrator warns if you skip it.
+
+**Documents are living artifacts.** When requirements change, update `PRODUCT_SPEC.md`. When the data model evolves, update `DATA_MODEL.md` with a change history entry. IDs (REQ, BR, TC) are permanent — only deprecated, never deleted.
+
+---
+
+## License
+
+MIT
