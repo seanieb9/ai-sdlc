@@ -70,54 +70,25 @@ Verification goes beyond "does the file exist?" — it checks completeness (no p
 
 ## The Lifecycle
 
-```
-IDEA
- │
- ▼
-RESEARCH          /sdlc:01-research        Deep competitive intelligence, SWOT, best practices, trends
- │
- ▼
-VOICE OF CUSTOMER /sdlc:01b-voc            Interview themes, ticket patterns, NPS → prioritized pain points
- │
- ▼
-SYNTHESIZE        /sdlc:02-synthesize      Research + existing codebase → unified strategic picture
- │
- ▼
-PRODUCT SPEC      /sdlc:03-product-spec    REQ-IDs, BR-IDs, NFRs with thresholds, BDD scenarios, error table
- │
- ▼
-PERSONAS          /sdlc:03b-personas       Jobs-to-be-Done, empathy maps, anti-personas
- │
- ▼
-CUSTOMER JOURNEY  /sdlc:04-customer-journey  Journey maps, failure paths, emotional states, screen flows
- │
- ▼
-DATA MODEL  ⚠️    /sdlc:05-data-model      Canonical model — architecture, APIs, and code all derive from this
- │
- ▼
-TECH ARCH         /sdlc:06-tech-arch       C4 diagrams, clean architecture, security, resilience, ADRs
- │
- ▼
-PLAN              /sdlc:07-plan            Layered task breakdown: domain → app → infra → delivery
- │
- ▼
-CODE              /sdlc:08-code            Clean architecture implementation — never vibe coding
- │
- ▼
-TEST CASES        /sdlc:09-test-cases      8 layers, full traceability, MECE — anchored to every source doc
- │
- ▼
-TEST AUTOMATION   /sdlc:10-test-automation 1:1 TC-ID mapping, coverage gates, drift detection
- │
- ▼
-OBSERVABILITY     /sdlc:11-observability   OTel tracing, structured logging, Prometheus metrics
- │
- ▼
-SRE               /sdlc:12-sre             SLOs, runbooks, incident response, resilience review
- │
- ▼
-REVIEW            /sdlc:13-review          Cross-cutting quality audit across all 8 dimensions
-```
+Each phase must be verified with `/sdlc:verify` before the next begins. Hard gates are marked ⚠️.
+
+| # | Phase | Command | What it does | Output |
+|---|-------|---------|-------------|--------|
+| 1 | **Research** | `/sdlc:01-research` | Deep competitive intelligence, SWOT analysis, best practices, emerging trends | `RESEARCH.md`, `GAP_ANALYSIS.md` |
+| 1b | **Voice of Customer** | `/sdlc:01b-voc` | Synthesizes interviews, support tickets, NPS data into prioritized, evidence-backed pain points | `VOC.md` |
+| 2 | **Synthesize** | `/sdlc:02-synthesize` | Merges research findings with existing codebase analysis into a unified strategic picture | `SYNTHESIS.md` |
+| 3 | **Product Spec** | `/sdlc:03-product-spec` | Defines REQ-IDs, BR-IDs, numeric NFRs, BDD scenarios, error handling table, acceptance criteria | `PRODUCT_SPEC.md` |
+| 3b | **Personas** | `/sdlc:03b-personas` | Rigorous persona definitions using Jobs-to-be-Done, empathy maps, and anti-personas | `PERSONAS.md` |
+| 4 | **Customer Journey** | `/sdlc:04-customer-journey` | Journey maps for every persona — happy paths, failure paths, emotional states, screen flows | `CUSTOMER_JOURNEY.md` |
+| 5 | **Data Model** ⚠️ | `/sdlc:05-data-model` | Canonical DDD data model — bounded contexts, aggregates, ERDs, invariants, data dictionary. Everything downstream derives from this. | `DATA_MODEL.md`, `DATA_DICTIONARY.md` |
+| 6 | **Tech Architecture** ⚠️ | `/sdlc:06-tech-arch` | C4 diagrams, clean architecture layers, security design, dependency classification, resilience strategy, ADRs | `TECH_ARCHITECTURE.md`, `API_SPEC.md`, `SOLUTION_DESIGN.md` |
+| 7 | **Plan** | `/sdlc:07-plan` | Breaks work into atomic tasks ordered by clean architecture layer: domain → application → infrastructure → delivery | `PLAN.md`, `TODO.md` |
+| 8 | **Code** | `/sdlc:08-code` | Implements tasks following strict clean architecture — no shortcuts, no vibe coding | Source code |
+| 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 8 layers, anchored to every source document with full traceability | `TEST_CASES.md` |
+| 10 | **Test Automation** | `/sdlc:10-test-automation` | Automation scripts with 1:1 TC-ID mapping, coverage gate enforcement, and drift detection | `TEST_AUTOMATION.md`, test files |
+| 11 | **Observability** | `/sdlc:11-observability` | Structured logging spec, OpenTelemetry tracing, Prometheus RED metrics — designed in, not bolted on | `OBSERVABILITY.md` |
+| 12 | **SRE** | `/sdlc:12-sre` | SLOs, operational runbooks per critical failure scenario, incident response, resilience pattern verification | `RUNBOOKS.md`, `SLO.md` |
+| 13 | **Review** | `/sdlc:13-review` | Cross-cutting quality audit across 12 dimensions: requirements, data, architecture, tests, resilience, deployment, and more | `REVIEW_REPORT.md` |
 
 ---
 
