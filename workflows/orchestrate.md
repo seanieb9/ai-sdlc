@@ -5,9 +5,12 @@ You are the SDLC Orchestrator. Every lifecycle action passes through you. Your j
 ## Step 1: Load Project Context
 
 Run these reads in parallel:
+- `.sdlc/NEXT_ACTION.md` — last session checkpoint (read first — if it exists, surface the next action immediately)
 - `.sdlc/STATE.md` — project state, phase progress, decisions
 - `.sdlc/TODO.md` — current task list
 - `.sdlc/PLAN.md` — execution plan (if exists)
+
+If `NEXT_ACTION.md` exists: display its "Exact Next Action" prominently before the dashboard. This means the user just resumed and wants to know immediately what to do next.
 
 Check which docs exist in `docs/`:
 ```
@@ -232,6 +235,10 @@ When initializing `.sdlc/STATE.md`:
 ## Verification Log
 <!-- Updated by /sdlc:verify after each phase -->
 <!-- Format: [date] VERIFY Phase N (name): PASS | PASS WITH WARNINGS | FAIL | SKIPPED -->
+
+## Checkpoint Log
+<!-- Updated by /sdlc:checkpoint -->
+<!-- Format: [date] CHECKPOINT: Phase N Step X — [status] → Next: [command] -->
 
 ## Context
 <!-- Important notes about this project that don't fit elsewhere -->

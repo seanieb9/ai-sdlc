@@ -134,6 +134,8 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | Command | Description |
 |---------|-------------|
 | `/sdlc:00-start <idea>` | **Always start here.** Reads state, enforces gates, routes to the right phase |
+| `/sdlc:checkpoint` | **Save session state.** Writes current phase/step, next action, open decisions, and any verbal context to `.sdlc/NEXT_ACTION.md`. Run before `/clear` or on a timer with `/loop 15m /sdlc:checkpoint` |
+| `/sdlc:resume` | **Resume after `/clear`.** Reads the checkpoint and all state files, delivers a structured brief, waits for confirmation before continuing |
 | `/sdlc:verify [--phase N\|--last\|--all]` | **Run after every phase.** Independent quality gate with per-phase checklists |
 | `/sdlc:status` | Live dashboard — phases, todos, doc health, recommended next action |
 | `/sdlc:help [command]` | System guide, or detailed help for a specific command |
