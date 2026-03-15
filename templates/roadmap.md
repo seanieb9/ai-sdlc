@@ -66,6 +66,26 @@ Invest extra Design sessions here before proceeding.
 
 ---
 
+## Parallel Work Windows (Microsquad)
+
+After Phase 3 completes and is pushed, two threads can run simultaneously:
+
+```
+Phase 3 (BA) ──────────── PUSH ──┬─────────────────────────────────────────────────
+                                  │
+   BA thread:                     └─→ Phase 3b (Personas) → Phase 4 (Journey) → free during Phase 8
+                                                                                       ↓
+   Eng thread:                    └─→ Phase 5 (Data Model) → Phase 6 (Arch) → Phase 7 (Plan) → Phase 8
+                                                                                       ↓
+                                                            Both threads rejoin: Phase 9, 13
+```
+
+**File separation guarantees no conflicts during parallel operation.**
+BA writes: PERSONAS.md, CUSTOMER_JOURNEY.md
+Eng writes: DATA_MODEL.md, DATA_DICTIONARY.md, TECH_ARCHITECTURE.md, API_SPEC.md, SOLUTION_DESIGN.md
+
+---
+
 ## Sync Points
 
 | Sync | After Phase | Owner(s) | Agenda |

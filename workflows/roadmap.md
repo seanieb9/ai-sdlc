@@ -19,8 +19,9 @@ If STATE.md does not exist: tell the user to run `/sdlc:00-start` first to initi
 Ask the user (AskUserQuestion) — these are the only questions needed:
 
 1. **Team setup:**
-   > "Is this a solo project or a microsquad (2–3 people)?"
-   > If microsquad: "Who is the Product Lead (owns requirements, personas, journeys) and who is the Tech Lead (owns data model, architecture, SRE)?"
+   > "Is this a solo project or a microsquad?"
+   > If microsquad: "How many engineers? (typically 1 Tech Lead + 1–2 engineers) and is there a BA / Product Lead separate from the engineers?"
+   > If 1 BA + 2 engineers: generate parallel thread view (BA thread: phases 1–4, 9, 13; Eng thread: phases 5–8, 11–12) and note that after Phase 3 both threads can run simultaneously.
    > If solo: note that all phases belong to one person and sync points become personal checkpoints.
 
 2. **Session availability:**

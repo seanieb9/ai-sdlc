@@ -142,19 +142,28 @@ Common risks:
 *Last Updated: [date]*
 
 ## Active (Current Phase)
-- [ ] TASK-001: [description] | M | depends: none
-- [ ] TASK-002: [description] | S | depends: TASK-001
-- [~] TASK-003: [description] | L | IN PROGRESS
+- [ ] TASK-001: [description] | M | @eng1 | depends: none
+- [ ] TASK-002: [description] | S | @eng2 | depends: TASK-001
+- [~] TASK-003: [description] | L | @eng1 | IN PROGRESS — push [~] immediately on pickup
 
 ## Upcoming (Next Phase)
-- [ ] TASK-004: [description] | M | depends: TASK-002
+- [ ] TASK-004: [description] | M | @unassigned | depends: TASK-002
 
 ## Blocked
-- [ ] TASK-005: [description] | waiting for: [external dependency]
+- [ ] TASK-005: [description] | @eng2 | waiting for: [external dependency]
 
 ## Done
-- [x] TASK-000: [description] | completed: [date]
+- [x] TASK-000: [description] | @eng1 | completed: [date]
 ```
+
+**Task assignment rules (microsquad with 2 engineers):**
+- Assign every task to `@eng1`, `@eng2`, or `@unassigned` during planning
+- Balance load: roughly equal total effort (S/M/L) per engineer across phases
+- Assign lower-layer tasks (domain, application) first — they unblock upper layers
+- Dependencies determine ordering — never assign a task before its dependencies are assigned to someone who will complete them first
+- `@unassigned` tasks: first engineer to change `[ ]` → `[~]` and push owns it
+
+**For solo developer:** omit the `@assignee` field entirely — not needed.
 
 ## Step 7: Update State
 

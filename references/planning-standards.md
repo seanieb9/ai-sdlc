@@ -147,7 +147,133 @@ These are **human effort** estimates. AI execution time is additive but not a pl
 
 ---
 
-## What NOT to Plan
+## Microsquad Collaboration Protocol (1 BA + 2 Engineers)
+
+### The sync mechanism: Git
+
+All `.sdlc/` and `docs/` files live in the git repository. Git is the only sync layer needed — no external project management tool required.
+
+**Three rules:**
+1. `git pull` before every session
+2. `git push` after every phase verification passes
+3. Never edit a file that another person is actively working on this session
+
+---
+
+### Phase threading: BA and engineers can work in parallel
+
+Design phases are single-owner. But after Phase 3 (Product Spec) completes, the BA thread and engineering thread write to **different files** and can run simultaneously:
+
+```
+Phase 3: Product Spec  (BA — completes, pushes)
+    │
+    ├── BA thread (continues):
+    │     Phase 3b: Personas      → PERSONAS.md
+    │     Phase 4:  Journey       → CUSTOMER_JOURNEY.md
+    │     (free during Phase 8)
+    │     Phase 9:  Test Cases    → TEST_CASES.md (review)
+    │     Phase 13: Review        → REVIEW_REPORT.md
+    │
+    └── Engineering thread (starts after Phase 3 push):
+          Phase 5:  Data Model    → DATA_MODEL.md, DATA_DICTIONARY.md
+          Phase 6:  Tech Arch     → TECH_ARCHITECTURE.md, API_SPEC.md, SOLUTION_DESIGN.md
+          Phase 7:  Plan          → PLAN.md, TODO.md (assigns tasks to both engineers)
+          Phase 8:  Code          → source code (both engineers, task-assigned)
+          Phase 11: Observability → OBSERVABILITY.md
+          Phase 12: SRE           → RUNBOOKS.md, SLO.md
+```
+
+No file conflicts during parallel operation — each thread owns distinct documents.
+
+---
+
+### Handoff protocol
+
+A handoff is: **verify passes → commit → push → notify → other person pulls**.
+
+| Handoff | After | Who → Who | Signal |
+|---------|-------|----------|--------|
+| H1 | Phase 2 (Synthesize) | BA → Eng (awareness) | Push SYNTHESIS.md — engineers read before Phase 5 |
+| H2 | Phase 3 (Product Spec) | BA → Eng (unblocks) | Push PRODUCT_SPEC.md — engineers can start Phase 5 |
+| H3 | Phase 6 (Tech Arch) | Eng → BA (rejoins) | Push arch docs — BA reviews before Phase 9 |
+| H4 | Phase 7 (Plan) | Tech Lead → Both engineers | Push PLAN.md + TODO.md — code phase begins |
+| H5 | Phase 8 (Code) | Both engineers → verify | All TODO [x] — run verify, BA rejoins |
+| H6 | Phase 13 (Review) | Both | Final sign-off, push REVIEW_REPORT.md |
+
+Notification is a message (Slack, chat, in-person): *"Phase N verified and pushed. Pull when ready."*
+
+---
+
+### TODO.md task assignment for two engineers
+
+During Phase 7 (Plan), the Tech Lead assigns every code task to one of the two engineers in `TODO.md`.
+
+**Task format with assignee:**
+```
+- [ ] TASK-NNN: [description] | [S/M/L] | @[assignee] | depends: [TASK-IDs or none]
+```
+
+**Assignee values:**
+- `@eng1`, `@eng2` — assigned to a specific engineer
+- `@unassigned` — either engineer can pick it up
+
+**Rules:**
+- Only pick up tasks assigned to you or `@unassigned`
+- When you start a task: change `[ ]` to `[~]` and push **immediately** — this is a live lock
+- When done: change `[~]` to `[x]` and push
+- Never work on the same TASK-ID as the other engineer simultaneously
+
+**Layer ordering as the primary conflict-prevention mechanism:**
+The clean architecture layer sequence (data → domain → application → infrastructure → delivery) means lower layers are prerequisites for upper layers. Both engineers can parallelize within the same layer only if their tasks touch different files.
+
+---
+
+### The in-progress flag `[~]`
+
+```
+[ ]  = not started
+[~]  = I am working on this right now — push this change immediately on pickup
+[x]  = done
+```
+
+The `[~]` flag is a **live signal**, not just a status. The protocol:
+1. Pick up a task → immediately change `[ ]` to `[~]` in TODO.md → `git push`
+2. The other engineer sees `[~]` when they pull → skips that task → picks the next available
+3. Complete → change `[~]` to `[x]` → `git push`
+
+If two engineers accidentally pick up the same task (both see `[ ]` before either pushes): the second engineer to push resolves by picking a different task. No lost work — both implementations should be reviewed, the better one kept.
+
+---
+
+### BA role during Phase 8 (Code)
+
+Phase 8 is AI-autonomous. The BA has no blocking tasks. Recommended use of this window:
+
+| Activity | Benefit |
+|----------|---------|
+| Prepare test scenario inputs for Phase 9 | Reduces Phase 9 Design session time |
+| Review committed code (non-blocking) | Catches requirement mismatches early |
+| Answer requirement questions from engineers | Unblocks faster than async back-and-forth |
+| Draft acceptance criteria for Phase 13 | Pre-work for final review |
+
+The BA is **available** during Phase 8, not idle. Engineers can pull the BA into a quick session if a requirement is ambiguous — this is far cheaper than discovering the misunderstanding at Phase 13.
+
+---
+
+### Tech Lead vs second engineer responsibilities
+
+| Responsibility | Tech Lead | Second Engineer |
+|---------------|-----------|----------------|
+| Phase 5 (Data Model) | Leads — drives decisions | Reviews, challenges |
+| Phase 6 (Tech Arch) | Leads — writes ADRs | Reviews, raises concerns |
+| Phase 7 (Plan) | Owns — creates PLAN.md + assigns tasks | Reviews task breakdown |
+| Phase 8 (Code) | Works assigned tasks | Works assigned tasks |
+| Phase 11 (Observability) | Leads | Reviews |
+| Phase 12 (SRE) | Leads | Reviews |
+
+Both engineers run `/sdlc:verify` after their respective phases. Both have equal authority to raise blockers at any phase gate.
+
+---
 
 - **Don't estimate AI execution time** — it's not a bottleneck
 - **Don't assign story points to code tasks** — the tasks exist for tracking, not for estimating
