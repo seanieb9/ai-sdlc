@@ -48,6 +48,7 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/product-spec.md
+@/Users/seanlew/.claude/sdlc/references/product-standards.md
 @/Users/seanlew/.claude/sdlc/references/testing-standards.md
 @/Users/seanlew/.claude/sdlc/templates/product-spec.md
 </execution_context>

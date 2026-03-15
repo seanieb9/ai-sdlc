@@ -43,5 +43,6 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/customer-journey.md
+@/Users/seanlew/.claude/sdlc/references/product-standards.md
 </execution_context>
 

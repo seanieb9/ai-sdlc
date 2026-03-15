@@ -59,5 +59,5 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/personas.md
-@/Users/seanlew/.claude/sdlc/references/data-standards.md
+@/Users/seanlew/.claude/sdlc/references/product-standards.md
 </execution_context>

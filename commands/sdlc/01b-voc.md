@@ -55,5 +55,4 @@ Flags:
 
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/voc.md
-@/Users/seanlew/.claude/sdlc/references/data-standards.md
 </execution_context>
