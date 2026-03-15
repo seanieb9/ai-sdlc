@@ -10,6 +10,8 @@ Display the SDLC system guide. If a specific command was provided in $ARGUMENTS,
 ╠══════════════════════════════════════════════════════════════════╣
 ║  ENTRY POINT                                                     ║
 ║  /sdlc:00-start <idea>    Orchestrator — always start here       ║
+║  /sdlc:sod                Start of day — orient, plan, brief     ║
+║  /sdlc:eod                End of day — commit, checkpoint, wrap  ║
 ║  /sdlc:checkpoint         Save session state before /clear       ║
 ║  /sdlc:resume             Resume instantly after /clear          ║
 ║  /sdlc:verify [--phase N] Quality gate — run after every phase   ║
