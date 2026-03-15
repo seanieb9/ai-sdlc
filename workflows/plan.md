@@ -1,0 +1,178 @@
+# Plan Workflow
+
+Create a precise, dependency-ordered execution plan before any code is written. No vibe. No improvised coding. Always plan first.
+
+## Step 1: Pre-Flight
+
+Read in parallel:
+- `docs/data/DATA_MODEL.md` — understand entities to implement
+- `docs/architecture/TECH_ARCHITECTURE.md` — understand components to build
+- `docs/product/PRODUCT_SPEC.md` — understand requirements to fulfill
+- `docs/architecture/API_SPEC.md` — understand contracts to implement
+- `.sdlc/PLAN.md` — existing plan (if any — update, don't replace)
+- `.sdlc/TODO.md` — existing todos (if any)
+- `.sdlc/STATE.md` — project context
+
+If DATA_MODEL.md missing: STOP. Cannot plan without data model.
+If TECH_ARCHITECTURE.md missing: WARN. Recommend running /sdlc:06-tech-arch first, but allow continuation.
+
+If existing PLAN.md: read fully. Add new phases/tasks rather than replacing.
+
+## Step 2: Work Breakdown Structure
+
+Decompose the work following clean architecture layers:
+
+**Layer ordering (strict — never deviate):**
+1. Data layer (migrations, schema changes)
+2. Domain layer (entities, value objects, domain services)
+3. Application layer (use cases, command/query handlers, port interfaces)
+4. Infrastructure layer (repository implementations, external adapters)
+5. Delivery layer (API controllers, serializers, validators)
+6. Cross-cutting (observability, config, error handling)
+7. Tests (unit, integration, contract, E2E)
+
+**For each task, define:**
+- Task ID: TASK-[NNN] (sequential, never reuse)
+- Title: "[verb] [what]" (e.g., "Implement OrderRepository", "Add CreateOrder use case")
+- Layer: [data|domain|application|infrastructure|delivery|crosscutting|test]
+- Phase: which delivery phase this belongs to
+- Dependencies: [TASK-XXX, TASK-YYY] — what must be done first
+- Done Criteria: specific, verifiable outcome ("All unit tests pass", "API returns 201 with order ID")
+- Effort: S (< 1hr) | M (1-4hrs) | L (4-8hrs) | XL (> 1 day — should be split)
+- Risk: LOW | MEDIUM | HIGH
+
+**XL tasks must be split** — no task should span more than one session.
+
+## Step 3: Dependency Graph
+
+Build the dependency graph:
+
+```
+TASK-001: Create DB migration for orders table
+    ↓
+TASK-002: Implement Order entity (domain)
+    ↓
+TASK-003: Implement OrderRepository interface (port)
+    ↓                                    ↓
+TASK-004: PostgresOrderRepository     TASK-005: CreateOrder use case
+    ↓                                    ↓ (depends on 003, 004)
+TASK-006: POST /orders controller (depends on 005)
+    ↓
+TASK-007: Unit tests for Order entity
+TASK-008: Integration tests for OrderRepository
+TASK-009: E2E test for POST /orders
+```
+
+Identify parallelizable tasks (no dependencies between them — can be done in same session or by different people).
+
+## Step 4: Phase Planning
+
+Group tasks into delivery phases:
+
+**Phase 1: Foundation** — data model, domain entities, port interfaces
+**Phase 2: Application** — use cases, application services
+**Phase 3: Infrastructure** — repository implementations, external adapters
+**Phase 4: Delivery** — API controllers, middleware, validators
+**Phase 5: Quality** — tests, observability, documentation
+
+Each phase should be independently releasable to a dev environment.
+
+## Step 5: Risk Identification
+
+For each risk area:
+```
+RISK                          | LIKELIHOOD | IMPACT | MITIGATION
+[Risk description]            | H/M/L      | H/M/L  | [How to address]
+```
+
+Common risks:
+- Data migration risks (existing data transformation)
+- External service integration (API changes, availability)
+- Performance (query plans on new tables)
+- Security (auth changes, data exposure)
+- Breaking changes to existing functionality
+
+## Step 6: Write Output Files
+
+**Write/update .sdlc/PLAN.md:**
+
+```markdown
+# Execution Plan: [Feature/Project Name]
+*Created: [date] | Last Updated: [date]*
+
+## Goal
+[What this plan achieves — 2-3 sentences]
+
+## Prerequisites
+- [ ] DATA_MODEL.md approved
+- [ ] TECH_ARCHITECTURE.md reviewed
+- [ ] PRODUCT_SPEC.md complete
+
+## Phases
+
+### Phase 1: Foundation
+[Task list with IDs, descriptions, effort]
+
+### Phase 2: Application
+[Task list]
+
+### Phase 3: Infrastructure
+[Task list]
+
+### Phase 4: Delivery
+[Task list]
+
+### Phase 5: Quality
+[Task list]
+
+## Dependency Graph
+[Mermaid flowchart]
+
+## Risk Register
+[Risk table]
+
+## Definition of Done
+[How we know the whole plan is complete]
+```
+
+**Write/update .sdlc/TODO.md:**
+
+```markdown
+# TODO
+*Last Updated: [date]*
+
+## Active (Current Phase)
+- [ ] TASK-001: [description] | M | depends: none
+- [ ] TASK-002: [description] | S | depends: TASK-001
+- [~] TASK-003: [description] | L | IN PROGRESS
+
+## Upcoming (Next Phase)
+- [ ] TASK-004: [description] | M | depends: TASK-002
+
+## Blocked
+- [ ] TASK-005: [description] | waiting for: [external dependency]
+
+## Done
+- [x] TASK-000: [description] | completed: [date]
+```
+
+## Step 7: Update State
+
+Mark Phase 7 (Plan) complete in STATE.md.
+
+Output:
+```
+✅ Plan Complete
+
+Phases: [N]
+Tasks: [N total] ([N] this session, [N] upcoming)
+Parallelizable: [N tasks]
+Highest Risk: [top risk]
+
+Files:
+• .sdlc/PLAN.md
+• .sdlc/TODO.md
+
+⚠️  GATE UNLOCKED: /sdlc:08-code can now proceed.
+Recommended Next: /sdlc:08-code --task TASK-001
+```
