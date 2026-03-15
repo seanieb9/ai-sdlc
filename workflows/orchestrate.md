@@ -9,6 +9,11 @@ Run these reads in parallel:
 - `.sdlc/STATE.md` — project state, phase progress, decisions
 - `.sdlc/TODO.md` — current task list
 - `.sdlc/PLAN.md` — execution plan (if exists)
+- `.sdlc/CODEBASE_MAP.md` — brownfield codebase index (if exists)
+
+If `.sdlc/CODEBASE_MAP.md` exists: this is a brownfield project. Load the map's "Architecture Pattern" and "Domain Concepts" sections to inform routing and gate decisions. Reference the map when surfacing context to the user.
+
+If `.sdlc/STATE.md` exists but `.sdlc/CODEBASE_MAP.md` does not, and the project type is `feature | bug_fix | improvement` (i.e. not a new project from scratch): recommend running `/sdlc:map` before the first phase to build a baseline understanding of the existing codebase. This is a soft recommendation — the user can proceed without it.
 
 If `NEXT_ACTION.md` exists: display its "Exact Next Action" prominently before the dashboard. This means the user just resumed and wants to know immediately what to do next.
 

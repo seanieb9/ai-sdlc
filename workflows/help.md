@@ -44,6 +44,10 @@ Display the SDLC system guide. If a specific command was provided in $ARGUMENTS,
 ║  /sdlc:11-observability   Logging, tracing, metrics, config         ║
 ║  /sdlc:12-sre             SLOs, runbooks, incident response         ║
 ╠══════════════════════════════════════════════════════════════════╣
+║  BROWNFIELD (existing codebases)                                 ║
+║  /sdlc:map             Map the codebase → .sdlc/CODEBASE_MAP.md ║
+║  /sdlc:explore <q>     Answer codebase questions from the map    ║
+╠══════════════════════════════════════════════════════════════════╣
 ║  MAINTENANCE                                                     ║
 ║  /sdlc:docs            Document audit and management             ║
 ╚══════════════════════════════════════════════════════════════════╝
@@ -62,12 +66,13 @@ DOCUMENT REGISTRY (these are the ONLY docs created):
   docs/qa/            TEST_CASES.md, TEST_AUTOMATION.md
   docs/sre/           OBSERVABILITY.md, RUNBOOKS.md, SLO.md
   docs/review/        REVIEW_REPORT.md
-  .sdlc/              STATE.md, TODO.md, PLAN.md, DECISIONS.md
+  .sdlc/              STATE.md, TODO.md, PLAN.md, DECISIONS.md, CODEBASE_MAP.md, NEXT_ACTION.md
 
 QUICK START:
-  New project:  /sdlc:00-start "describe your idea here"
-  Status check: /sdlc:status
-  Help:         /sdlc:help <command-name>
+  New project:    /sdlc:00-start "describe your idea here"
+  Brownfield:     /sdlc:map  (then /sdlc:00-start)
+  Status check:   /sdlc:status
+  Help:           /sdlc:help <command-name>
 ```
 
 ## If $ARGUMENTS has a command name — Show Command Detail:

@@ -66,6 +66,28 @@ Generates: clean architecture skeleton, multi-stage Dockerfile (non-root user, l
 ```
 Verification goes beyond "does the file exist?" — it checks completeness (no placeholders, all required sections), internal consistency (every entity has timestamps and invariants), and cross-phase consistency (every NFR in the spec has an architectural decision that addresses it, every API endpoint has a contract test).
 
+### Brownfield codebase understanding without heavy tooling
+
+Industrial solutions for navigating existing codebases — code indexers, dependency graphs, knowledge graphs, semantic search — are powerful but heavy. They need setup, maintenance, and compute. AI-SDLC takes a different approach: a persistent, version-controlled index that lives right in the repo.
+
+```bash
+/sdlc:map      # analyse the codebase, write .sdlc/CODEBASE_MAP.md
+```
+
+The map contains everything needed for intelligent navigation: tech stack, architecture pattern, annotated directory tree, domain concept → file mappings, all API routes, data access patterns, cross-cutting concerns (auth, logging, error handling), dependency hotspots, test structure, tech debt notes, and project-specific grep recipes. It takes minutes to generate and lives in `.sdlc/` alongside STATE.md.
+
+Once the map exists, `/sdlc:explore` answers codebase questions with a read-the-map-first strategy:
+
+```bash
+/sdlc:explore "where is payment processing handled?"
+/sdlc:explore "what calls OrderService?"
+/sdlc:explore "if I change the user_id field, what breaks?"
+/sdlc:explore "show me all API endpoints"
+/sdlc:explore "how are errors handled here?"
+```
+
+The map is also consumed automatically by `/sdlc:02-synthesize` (no re-scanning the whole codebase) and by the orchestrator on startup (context-aware routing from the first command). When `/sdlc:explore` discovers something the map missed, it updates the map — so it gets better over time.
+
 ### Context management that actually works across sessions
 One of the hardest problems with AI-assisted development is losing context — mid-session when Claude auto-compacts, or the next morning when you start fresh. AI-SDLC solves this with a structured daily loop:
 
@@ -202,6 +224,12 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | OTel distributed tracing, structured logging, Prometheus RED metrics |
 | `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, resilience pattern implementation |
 
+### Brownfield
+| Command | Flags | Description |
+|---------|-------|-------------|
+| `/sdlc:map` | `--refresh` `--focus <area>` | Map the existing codebase into `.sdlc/CODEBASE_MAP.md` — tech stack, architecture, domain concepts, API routes, hotspots, search recipes |
+| `/sdlc:explore <question>` | | Answer codebase questions: location, callers, dependencies, conventions, change impact. Updates the map when new knowledge is found |
+
 ### Maintenance
 | Command | Flags | Description |
 |---------|-------|-------------|
@@ -252,6 +280,8 @@ docs/
   STATE.md                   Phase progress, document index, decisions, verification log
   TODO.md                    Active task list with priority and phase
   PLAN.md                    Execution plan: phases, tasks, dependencies, risk register
+  CODEBASE_MAP.md            Brownfield codebase index: tech stack, architecture, domain concepts, search recipes
+  NEXT_ACTION.md             Session checkpoint: exact next action, open decisions, do-not-lose context
 ```
 
 ---

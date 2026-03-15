@@ -8,26 +8,39 @@ Read in parallel:
 - `docs/research/RESEARCH.md`
 - `docs/research/GAP_ANALYSIS.md`
 - `.sdlc/STATE.md` (project context)
+- `.sdlc/CODEBASE_MAP.md` (if exists — brownfield codebase index)
 
 If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:01-research` first.
 
 ## Step 2: Codebase Analysis
 
-Unless `--research-only` flag is set, perform deep codebase scan:
+Unless `--research-only` flag is set, perform codebase analysis:
 
-**Structure mapping:**
+**If `.sdlc/CODEBASE_MAP.md` exists (brownfield):**
+Use the map as the primary source of codebase knowledge. Extract from it:
+- Tech stack and architectural pattern
+- Domain concepts and services relevant to the research topic
+- Existing API endpoints related to the topic
+- Data access patterns and existing models
+- Known tech debt and hotspot files
+- Cross-cutting concerns (auth, logging, error handling)
+
+Avoid re-scanning the entire codebase. Use `/sdlc:explore` queries for specific detail gaps not covered by the map. Only read individual files when the map points to a specific file that needs deeper analysis.
+
+**If no CODEBASE_MAP.md exists (greenfield or map not yet run):**
+Perform a targeted scan:
 - Glob for top-level directories and key files
 - Identify the tech stack (package.json, requirements.txt, go.mod, pom.xml, etc.)
 - Identify architectural patterns in use (MVC, hexagonal, layered, etc.)
-
-**Relevant code analysis:**
 - Find existing code related to the research topic
 - Identify existing data models/schemas
 - Find existing API endpoints related to the topic
 - Note existing test patterns and coverage
 - Identify configuration and environment patterns
 
-**What to capture:**
+Recommend running `/sdlc:map` after synthesis to build a persistent map for future sessions.
+
+**What to capture (regardless of source):**
 - Existing capabilities that overlap with research findings (reuse opportunities)
 - Existing patterns to follow (consistency matters)
 - Technical debt or limitations that affect the proposed feature
