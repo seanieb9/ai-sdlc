@@ -59,6 +59,28 @@ Structured JSON logging with mandatory `trace_id` and `span_id` fields. OpenTele
 ```
 Generates: clean architecture skeleton, multi-stage Dockerfile (non-root user, layer caching), docker-compose local dev stack, Kubernetes manifests (Deployment, Service, ConfigMap, HPA, PDB), Kustomize overlays for staging/production, GitHub Actions CI/CD pipeline with Trivy CVE scanning, graceful shutdown handler, all three health probes.
 
+### A planning construct built for agentic development
+
+Story points measure coding effort. In agentic development, coding is largely automated — the scarce resource is **human judgment and attention**. AI-SDLC uses a different planning unit: the **Human Session**.
+
+```bash
+/sdlc:roadmap   # generates .sdlc/ROADMAP.md
+```
+
+Three session types map to where humans are actually needed:
+
+| Type | Symbol | When |
+|------|--------|------|
+| **Design (D)** | ✍ | Human drives — product spec, data model, architecture, review. Judgment-heavy. |
+| **Review (R)** | 👁 | AI ran, human validates — research output, test cases, plan. Async-friendly. |
+| **Sync (S)** | 👥 | Microsquad alignment — phase handoffs, gate decisions. 30 min. |
+
+Every phase gets an **AI autonomy level** — from 🤖 Autonomous (code, test automation: human not needed) to ✍ Collaborative (product spec, data model: human must drive). This tells a microsquad who needs to be present and when.
+
+The roadmap surfaces the critical path clearly: **Product Spec → Data Model → Tech Architecture → Code**. The data model is the highest-risk gate — extra design sessions here pay for themselves many times over. The code phase is fully autonomous.
+
+For a typical new service: **~16 Design Sessions + ~3 Review Sessions** of human effort. The rest is AI. Optional for individual developers — skip it and work phase by phase if you prefer.
+
 ### Decisions captured automatically — never lost to context
 
 Every architectural and product decision made in conversation is silently recorded to `.sdlc/STATE.md` by an always-on background skill. No command to run. No reminder needed. The moment you say "we'll use Postgres", "JWT not sessions", or "dropping bulk import from v1" — it's written down with the reason and a flag for any downstream documents that may now be stale.
@@ -197,6 +219,11 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:decide` | **Always-on.** Silently records decisions to STATE.md and flags downstream impact. Never needs to be called. |
 | `/sdlc:help [command]` | System guide, or detailed help for a specific command |
 
+### Planning (optional)
+| Command | Flags | Description |
+|---------|-------|-------------|
+| `/sdlc:roadmap` | `--update` `--skip-voc` `--solo` `--simple` `--thorough` | Human session roadmap — Design/Review/Sync plan, ownership, critical path, calendar estimate. **Auto-triggers** on "how long will this take?" or "how should we plan this?" |
+
 ### Discovery
 | Command | Flags | Description |
 |---------|-------|-------------|
@@ -295,6 +322,7 @@ docs/
   PLAN.md                    Execution plan: phases, tasks, dependencies, risk register
   CODEBASE_MAP.md            Brownfield codebase index: tech stack, architecture, domain concepts, search recipes
   NEXT_ACTION.md             Session checkpoint: exact next action, open decisions, do-not-lose context
+  ROADMAP.md                 Human session plan: phase ownership, Design/Review/Sync estimates, critical path
 ```
 
 ---

@@ -51,6 +51,15 @@ Create `.sdlc/` directory and initialize:
 - `.sdlc/STATE.md` — using state template (see Step 6)
 - `.sdlc/TODO.md` — empty task list
 
+If the project type is (a) new project or (b) new feature, offer roadmap planning:
+```
+Optional: Would you like a human-effort roadmap before we start?
+/sdlc:roadmap maps out Design Sessions, Review Sessions, and ownership
+across the lifecycle — useful for microsquads or anyone wanting to
+plan their human time. Individual developers can skip this entirely.
+```
+Do not block on this — if the user wants to proceed directly, route to Phase 1.
+
 Then proceed to Step 3 with intent = NEW_PROJECT.
 
 ## Step 2b: Parse Intent from Input

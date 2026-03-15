@@ -44,6 +44,9 @@ Display the SDLC system guide. If a specific command was provided in $ARGUMENTS,
 ║  /sdlc:11-observability   Logging, tracing, metrics, config         ║
 ║  /sdlc:12-sre             SLOs, runbooks, incident response         ║
 ╠══════════════════════════════════════════════════════════════════╣
+║  PLANNING (optional — microsquad or solo)                        ║
+║  /sdlc:roadmap         Human session plan — Design, Review, Sync ║
+╠══════════════════════════════════════════════════════════════════╣
 ║  BROWNFIELD (existing codebases)                                 ║
 ║  /sdlc:map             Map the codebase → .sdlc/CODEBASE_MAP.md ║
 ║  /sdlc:explore <q>     Answer codebase questions from the map    ║
