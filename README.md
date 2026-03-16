@@ -44,6 +44,30 @@ The canonical data model is designed before architecture and code. Everything de
 ### Clean architecture that stays clean
 Code is implemented in strict layer order: domain → application → infrastructure → delivery. The dependency rule (no infrastructure imports in domain or application layers) is enforced. Every external integration goes through a port interface. No God objects, no magic numbers, no spaghetti.
 
+### Cross-platform screens generated from journey maps
+
+When a project includes a front-end, one command turns the customer journey into a complete screen specification:
+
+```bash
+/sdlc:fe-setup   # after Phase 6 — configures tokens, derives SCREEN_SPEC.md
+/sdlc:fe-screen LoginScreen   # during Phase 8 — generates the screen
+```
+
+**`/sdlc:fe-setup`** asks one question (design system level: none / brand color / full ingest), then:
+- Builds a full design token set — 12-step color palette, semantic colors, typography scale, spacing, shadow, motion
+- Configures the component library (Tamagui by default for cross-platform performance)
+- Walks the customer journey and derives a screen inventory: every interactive step becomes a screen, each assigned a template type, API endpoints mapped, and all four states documented (loading → skeleton, empty, error + retry, success)
+
+**`/sdlc:fe-screen`** generates a single screen from that spec:
+- Reads the screen's data requirements and wires API calls as typed TanStack Query hooks
+- Applies tokens via the component library — no hardcoded colors, no magic numbers
+- Implements all four states and extracts any component that appears in 2+ screens to `components/ui/`
+- Enforces WCAG 2.1 AA: 44×44pt touch targets, contrast ratios, screen reader labels, focus management
+
+The stack is Expo + React Native + Expo Router v3 — one codebase for iOS, Android, and Web. Clean architecture applies to the FE layer too: business logic stays in hooks and services, screens are pure view layer.
+
+The `[fe]` task tag in `TODO.md` is the discriminator — Phase 8 (`/sdlc:08-code`) detects it and switches to the FE workflow automatically. The rest of the BE path is unchanged.
+
 ### Tests anchored to requirements, not vibes
 Test cases are derived from every source: requirements, API spec, data model invariants, architecture decisions, observability commitments. Eight test layers — unit, integration, contract, E2E, performance, resilience, observability, security — all with TC-IDs that trace back to a source document. No orphaned tests. No uncovered requirements. Coverage gates fail the CI build.
 
@@ -92,30 +116,6 @@ Every document produced by AI-SDLC follows a strict writing standard that serves
 The **50-line rule**: every document's first 50 lines contain a TL;DR and a contents index — so Claude can orient and jump to the relevant section without loading the whole file. **Tables over prose**: structured data (requirements, fields, decisions, error codes) always in tables at ~40% fewer tokens. **IDs at line start**: every REQ-ID, BR-ID, TC-ID, ADR-ID begins its line so any reference is a single grep away. **Complexity budgets**: hard limits per document type that trigger sharding before a file becomes a monolith Claude loads in full every time.
 
 The result: as your project grows to dozens of documents, token cost stays flat because Claude loads what it needs — not everything.
-
-### Cross-platform screens generated from journey maps
-
-When a project includes a front-end, one command turns the customer journey into a complete screen specification:
-
-```bash
-/sdlc:fe-setup   # after Phase 6 — configures tokens, derives SCREEN_SPEC.md
-/sdlc:fe-screen LoginScreen   # during Phase 8 — generates the screen
-```
-
-**`/sdlc:fe-setup`** asks one question (design system level: none / brand color / full ingest), then:
-- Builds a full design token set — 12-step color palette, semantic colors, typography scale, spacing, shadow, motion
-- Configures the component library (Tamagui by default for cross-platform performance)
-- Walks the customer journey and derives a screen inventory: every interactive step becomes a screen, each assigned a template type, API endpoints mapped, and all four states documented (loading → skeleton, empty, error + retry, success)
-
-**`/sdlc:fe-screen`** generates a single screen from that spec:
-- Reads the screen's data requirements and wires API calls as typed TanStack Query hooks
-- Applies tokens via the component library — no hardcoded colors, no magic numbers
-- Implements all four states and extracts any component that appears in 2+ screens to `components/ui/`
-- Enforces WCAG 2.1 AA: 44×44pt touch targets, contrast ratios, screen reader labels, focus management
-
-The stack is Expo + React Native + Expo Router v3 — one codebase for iOS, Android, and Web. Clean architecture applies to the FE layer too: business logic stays in hooks and services, screens are pure view layer.
-
-The `[fe]` task tag in `TODO.md` is the discriminator — Phase 8 (`/sdlc:08-code`) detects it and switches to the FE workflow automatically. The rest of the BE path is unchanged.
 
 ### An independent quality gate between every phase
 ```bash
@@ -269,6 +269,12 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:05-data-model <domain>` | `--review` `--impact-analysis` `--new-domain` | DDD canonical data model — aggregates, ERDs, invariants, industry standards |
 | `/sdlc:06-tech-arch <system>` | `--c4` `--api-spec` `--solution-design` `--patterns` | C4 architecture, clean layers, security, resilience design, ADRs |
 
+### Front-end *(optional — when project includes a front-end)*
+| Command | Flags | Description |
+|---------|-------|-------------|
+| `/sdlc:fe-setup` | `--level none\|brand\|full` `--base tamagui\|nativewind` | Configure design tokens, set up component library, derive `SCREEN_SPEC.md` from the customer journey. Run after Phase 6. |
+| `/sdlc:fe-screen <screen-name-or-route>` | | Generate a screen from `SCREEN_SPEC.md`: design tokens applied, TanStack Query hooks wired to API spec, all 4 states implemented, WCAG 2.1 AA enforced, shared components extracted. Run during Phase 8 for each `[fe]` task. |
+
 ### Execution
 | Command | Flags | Description |
 |---------|-------|-------------|
@@ -288,12 +294,6 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 |---------|-------|-------------|
 | `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | OTel distributed tracing, structured logging, Prometheus RED metrics |
 | `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, resilience pattern implementation |
-
-### Front-end
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:fe-setup` | `--level none\|brand\|full` `--base tamagui\|nativewind` | Configure design tokens, set up component library, derive `SCREEN_SPEC.md` from the customer journey. Run after Phase 6 when the project has a front-end. |
-| `/sdlc:fe-screen <screen-name-or-route>` | | Generate a screen from `SCREEN_SPEC.md`: design tokens applied, TanStack Query hooks wired to API spec, all 4 states implemented, WCAG 2.1 AA enforced, shared components extracted. Run during Phase 8 for each `[fe]` task. |
 
 ### Brownfield
 | Command | Flags | Description |
