@@ -154,13 +154,13 @@ Each phase must be verified with `/sdlc:verify` before the next begins. Hard gat
 | 1b | **Voice of Customer** | `/sdlc:01b-voc` | Synthesizes interviews, support tickets, NPS data into prioritized, evidence-backed pain points | `VOC.md` |
 | 2 | **Synthesize** | `/sdlc:02-synthesize` | Merges research findings with existing codebase analysis into a unified strategic picture | `SYNTHESIS.md` |
 | 3 | **Product Spec** | `/sdlc:03-product-spec` | Defines REQ-IDs, BR-IDs, numeric NFRs, BDD scenarios, error handling table, acceptance criteria | `PRODUCT_SPEC.md` |
-| 3b | **Personas** | `/sdlc:03b-personas` | Rigorous persona definitions using Jobs-to-be-Done, empathy maps, and anti-personas | `PERSONAS.md` |
+| 3b | **Personas** | `/sdlc:03b-personas` | Rigorous persona definitions using Jobs-to-be-Done, empathy maps, and anti-personas. Optional — if skipped, Phase 4 creates a minimal `PERSONAS.md` from inline definitions so downstream phases always have it. | `PERSONAS.md` |
 | 4 | **Customer Journey** | `/sdlc:04-customer-journey` | Journey maps for every persona — happy paths, failure paths, emotional states, screen flows | `CUSTOMER_JOURNEY.md` |
 | 5 | **Data Model** ⚠️ | `/sdlc:05-data-model` | Canonical DDD data model — bounded contexts, aggregates, ERDs, invariants, data dictionary. Everything downstream derives from this. | `DATA_MODEL.md`, `DATA_DICTIONARY.md` |
 | 6 | **Tech Architecture** ⚠️ | `/sdlc:06-tech-arch` | C4 diagrams, clean architecture layers, security design, dependency classification, resilience strategy, ADRs | `TECH_ARCHITECTURE.md`, `API_SPEC.md`, `SOLUTION_DESIGN.md` |
 | 7 | **Plan** | `/sdlc:07-plan` | Breaks work into atomic tasks ordered by clean architecture layer: domain → application → infrastructure → delivery | `PLAN.md`, `TODO.md` |
 | 8 | **Code** | `/sdlc:08-code` | Implements tasks following strict clean architecture — no shortcuts, no vibe coding | Source code |
-| 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 8 layers, anchored to every source document with full traceability | `TEST_CASES.md` |
+| 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 8 layers, anchored to every source document with full traceability. **Runs twice:** first pass after Phase 8 covers 6 layers; re-run after Phase 12 adds Observability and Resilience layers once those specs exist. | `TEST_CASES.md` |
 | 10 | **Test Automation** | `/sdlc:10-test-automation` | Automation scripts with 1:1 TC-ID mapping, coverage gate enforcement, and drift detection | `TEST_AUTOMATION.md`, test files |
 | 11 | **Observability** | `/sdlc:11-observability` | Structured logging spec, OpenTelemetry tracing, Prometheus RED metrics — designed in, not bolted on | `OBSERVABILITY.md` |
 | 12 | **SRE** | `/sdlc:12-sre` | SLOs, operational runbooks per critical failure scenario, incident response, resilience pattern verification | `RUNBOOKS.md`, `SLO.md` |
@@ -350,6 +350,8 @@ This system encodes industry standards so you don't have to look them up or reme
 **Data model first.** Architecture, API shapes, and code all derive from the canonical data model — not the other way around. Any change to an existing entity triggers automatic impact analysis showing exactly what breaks downstream.
 
 **No code without a plan.** Tasks are atomic, layered (domain → application → infrastructure → delivery), and independently verifiable. The clean architecture dependency rule is enforced — domain code has zero infrastructure dependencies.
+
+**Phase scope boundaries are explicit.** Phase 8 implements business logic and application-layer error handling — nothing more. Resilience patterns (circuit breakers, bulkheads, timeouts, graceful degradation) are Phase 12 work. Observability spec is Phase 11 work. This keeps each phase focused and prevents developers from guessing what belongs where.
 
 **Tests from requirements, not from code.** Test cases are derived from every source document: requirements, API spec, data model invariants, architecture decisions, observability contracts. Eight test layers ensure nothing is missed. Every TC-ID traces to a source.
 
