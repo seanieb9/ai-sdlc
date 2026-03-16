@@ -9,12 +9,15 @@ Read in parallel:
 - `docs/architecture/TECH_ARCHITECTURE.md` — understand components to build
 - `docs/product/PRODUCT_SPEC.md` — understand requirements to fulfill
 - `docs/architecture/API_SPEC.md` — understand contracts to implement
+- `docs/frontend/SCREEN_SPEC.md` — if exists: screens to build as [fe] tasks
+- `docs/frontend/DESIGN_TOKENS.md` — if exists: confirms FE setup complete
 - `.sdlc/PLAN.md` — existing plan (if any — update, don't replace)
 - `.sdlc/TODO.md` — existing todos (if any)
 - `.sdlc/STATE.md` — project context
 
 If DATA_MODEL.md missing: STOP. Cannot plan without data model.
 If TECH_ARCHITECTURE.md missing: WARN. Recommend running /sdlc:06-tech-arch first, but allow continuation.
+If TECH_ARCHITECTURE.md has a ## Frontend Architecture section but SCREEN_SPEC.md missing: WARN. Recommend running /sdlc:fe-setup first — FE tasks cannot be generated without SCREEN_SPEC.md.
 
 If existing PLAN.md: read fully. Add new phases/tasks rather than replacing.
 
@@ -22,7 +25,7 @@ If existing PLAN.md: read fully. Add new phases/tasks rather than replacing.
 
 Decompose the work following clean architecture layers:
 
-**Layer ordering (strict — never deviate):**
+**Backend layer ordering (strict — never deviate):**
 1. Data layer (migrations, schema changes)
 2. Domain layer (entities, value objects, domain services)
 3. Application layer (use cases, command/query handlers, port interfaces)
@@ -30,6 +33,14 @@ Decompose the work following clean architecture layers:
 5. Delivery layer (API controllers, serializers, validators)
 6. Cross-cutting (observability, config, error handling)
 7. Tests (unit, integration, contract, E2E)
+
+**Frontend layer ordering (when SCREEN_SPEC.md exists — tag all FE tasks with `[fe]`):**
+1. Design tokens + Tamagui config (`tamagui.config.ts`, token setup)
+2. Shared component primitives (`components/ui/` — from SCREEN_SPEC.md shared component registry)
+3. TanStack Query hooks (`hooks/use-[resource].ts` — one per API resource)
+4. Screen implementations (`app/(scope)/screen.tsx` — one task per screen)
+5. Navigation wiring (Expo Router layout files, tab/stack configuration)
+6. FE tests (RNTL component tests, Maestro E2E flows)
 
 **For each task, define:**
 - Task ID: TASK-[NNN] (sequential, never reuse)
@@ -155,6 +166,11 @@ Common risks:
 ## Done
 - [x] TASK-000: [description] | @eng1 | completed: [date]
 ```
+
+**Task tagging:**
+- Backend tasks: no tag (default)
+- Frontend tasks: add `[fe]` tag — this triggers the FE code workflow in Phase 8
+- Example: `- [ ] TASK-021: Implement LoginScreen | M | @eng2 | [fe] | depends: TASK-001`
 
 **Task assignment rules (microsquad with 2 engineers):**
 - Assign every task to `@eng1`, `@eng2`, or `@unassigned` during planning

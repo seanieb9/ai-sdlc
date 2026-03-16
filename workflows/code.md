@@ -24,6 +24,11 @@ In Phase 8, adapters may implement basic retry + backoff for transient errors (t
 
 Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified, show the next available task from TODO.md and ask for confirmation before proceeding.
 
+**FE task detection:** If the identified task is tagged `[fe]`, switch to the FE screen workflow immediately:
+- Read `docs/frontend/SCREEN_SPEC.md`, `docs/frontend/DESIGN_TOKENS.md`, `docs/frontend/COMPONENT_LIBRARY.md`
+- Follow `/sdlc:fe-screen` workflow for this task — do not follow the BE clean architecture steps below
+- The BE layer ordering (domain → application → infrastructure → delivery) does NOT apply to FE tasks
+
 ---
 
 ## Step 2: Task Orientation

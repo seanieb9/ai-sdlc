@@ -321,6 +321,73 @@ Then   Log at INFO level emitted with fields: trace_id, action="create_order", o
   And  Span "order-service.usecase.create_order" created with attribute outcome="success"
 ```
 
+### Frontend Tests (only when SCREEN_SPEC.md exists)
+
+Skip this section entirely if the project has no front-end.
+
+#### Component Tests (Jest + RNTL)
+
+```
+TC-[NNN]: Component: [ComponentName] [scenario]
+Layer:        Frontend-Component
+Priority:     P1
+Requirement:  SCREEN_SPEC.md: [screen] → components
+
+Given  [Component rendered with props X]
+When   [User interaction / prop change]
+Then   [Expected rendered output]
+  And  [Accessibility tree correct — roles, labels, states]
+  And  [testID present on interactive elements]
+Does NOT: [fetch data, contain business logic]
+```
+
+Cover per shared component:
+- Renders correctly with required props
+- Renders all visual variants
+- Handles missing/null optional props gracefully
+- All interactive elements have correct accessibilityRole and accessibilityLabel
+- Disabled state renders and blocks interaction
+
+#### Accessibility Tests (jest-axe + manual)
+
+```
+TC-[NNN]: A11y: [screen] passes WCAG 2.1 AA
+Layer:        Frontend-A11y
+Priority:     P1
+Requirement:  frontend-standards.md WCAG 2.1 AA baseline
+
+Given  [Screen rendered in test environment]
+When   [jest-axe runs axe analysis]
+Then   No WCAG violations at AA level
+  And  All touch targets ≥ 44×44pt
+  And  All interactive elements have accessibilityLabel
+  And  Color contrast ≥ 4.5:1 for normal text
+```
+
+#### E2E Tests (Maestro)
+
+```
+TC-[NNN]: E2E Flow: [Persona] — [Journey Name] on [platform]
+Layer:        Frontend-E2E
+Priority:     P0 (happy path) | P1 (failure path)
+Requirement:  SCREEN_SPEC.md + CUSTOMER_JOURNEY.md
+
+Given  [App launched, user in state X]
+When   [Journey step 1 — tap / type / swipe]
+  And  [Journey step N]
+Then   [Final screen shown]
+  And  [Expected API call made (verified via mock or real)]
+  And  [Correct data displayed]
+```
+
+Cover per Maestro flow:
+- Happy path for every P0 journey in SCREEN_SPEC.md
+- Primary failure path (network error → error state shown → retry works)
+- Loading state shown before data arrives
+- Empty state shown when API returns empty list
+
+---
+
 ### Security Tests
 
 Targets: auth/authz rules, input validation, injection prevention

@@ -42,6 +42,9 @@
 - [ ] docs/architecture/SOLUTION_DESIGN.md
 - [ ] docs/qa/TEST_CASES.md
 - [ ] docs/qa/TEST_AUTOMATION.md
+- [ ] docs/frontend/DESIGN_TOKENS.md         ← Phase 6b (only if project has FE)
+- [ ] docs/frontend/COMPONENT_LIBRARY.md    ← Phase 6b (only if project has FE)
+- [ ] docs/frontend/SCREEN_SPEC.md          ← Phase 6b (only if project has FE)
 - [ ] docs/sre/OBSERVABILITY.md
 - [ ] docs/sre/RUNBOOKS.md
 - [ ] docs/sre/SLO.md

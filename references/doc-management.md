@@ -39,6 +39,12 @@ docs/
     SLO.md                   ← Service Level Objectives, error budgets
     INCIDENT_RESPONSE.md     ← Severity classification, response process, post-mortem template
 
+  frontend/
+    DESIGN_TOKENS.md         ← color, typography, spacing, radius, shadow, motion tokens + platform config
+    COMPONENT_LIBRARY.md     ← component base, token mapping, available components, custom components
+    SCREEN_SPEC.md           ← screen inventory derived from customer journey; data requirements; navigation; states
+    ← Only present when project includes a front-end (created by /sdlc:fe-setup)
+
   review/
     REVIEW_REPORT.md         ← Cross-cutting quality review findings
 

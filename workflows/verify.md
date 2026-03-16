@@ -248,6 +248,34 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ---
 
+### Phase 6b: FE Setup (only if TECH_ARCHITECTURE.md has a ## Frontend Architecture section)
+
+**Read:** `docs/frontend/DESIGN_TOKENS.md`, `docs/frontend/COMPONENT_LIBRARY.md`, `docs/frontend/SCREEN_SPEC.md`
+
+If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silent pass).
+
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| 1 | DESIGN_TOKENS.md exists | CRITICAL |
+| 2 | All token categories present: color, typography, spacing, radius, shadow, motion | HIGH |
+| 3 | Primary palette has 12 steps defined | HIGH |
+| 4 | Semantic colors defined (success/warning/error/info) | HIGH |
+| 5 | Interactive base color contrast ≥ 4.5:1 on background | HIGH |
+| 6 | Component base library documented with version | HIGH |
+| 7 | SCREEN_SPEC.md exists | CRITICAL |
+| 8 | Screen inventory table present with ≥ 1 screen | HIGH |
+| 9 | Every screen in inventory has a corresponding screen section | HIGH |
+| 10 | Every screen section defines all 4 states (loading/empty/error/success) | MEDIUM |
+| 11 | Every screen section has data requirements mapped to API_SPEC.md endpoints | HIGH |
+| 12 | Shared component registry present | MEDIUM |
+
+**Cross-checks (SCREEN_SPEC.md → CUSTOMER_JOURNEY.md):**
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| 13 | Every journey step that involves user interaction maps to ≥ 1 screen in SCREEN_SPEC.md | HIGH |
+
+---
+
 ### Phase 10: Test Automation
 
 **Read:** `docs/qa/TEST_AUTOMATION.md`, `docs/qa/TEST_CASES.md`, test files in `tests/`

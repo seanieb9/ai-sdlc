@@ -598,12 +598,40 @@ Cutover plan: [how traffic is shifted — feature flag / DNS / load balancer wei
 ## Technology Decisions
 [Stack choices via evaluation framework]
 
+## Frontend Architecture
+[Only present when project includes a front-end — see Step 16b]
+
 ## NFR Coverage
 [Each NFR → architectural decision that meets it]
 
 ## Migration Strategy
 [Brownfield only]
 ```
+
+**Step 16b: Frontend Architecture section (include only if project has a front-end)**
+
+When the project includes a front-end component, add a `## Frontend Architecture` section to TECH_ARCHITECTURE.md:
+
+```markdown
+## Frontend Architecture
+
+| Dimension | Decision | Rationale |
+|-----------|---------|-----------|
+| Platform targets | iOS / Android / Web | [why cross-platform] |
+| Framework | Expo SDK [version] + React Native | [rationale] |
+| Navigation | Expo Router v3 | File-based, works cross-platform |
+| Component base | Tamagui [version] | Design tokens first-class, cross-platform performance |
+| Server state | TanStack Query v5 | [rationale] |
+| Client state | Zustand | UI state only |
+| Build / OTA | EAS Build + EAS Update | [rationale] |
+| Design system level | [None / Brand / Full] | [what exists] |
+| Testing (unit) | Jest + RNTL | |
+| Testing (E2E) | Maestro | Cross-platform, simpler than Detox |
+```
+
+After Phase 6 verify passes, if a Frontend Architecture section is present: output this note:
+
+> **Frontend stack detected.** Run `/sdlc:fe-setup` before Phase 7 to configure design tokens and derive SCREEN_SPEC.md from the customer journey. Phase 7 planning requires SCREEN_SPEC.md to generate FE tasks.
 
 **Update docs/architecture/API_SPEC.md:**
 Full OpenAPI 3.x specification.
