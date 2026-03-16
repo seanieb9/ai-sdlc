@@ -16,6 +16,7 @@
 - [ ] 3. Product Spec
 - [ ] 3b. Personas
 - [ ] 4. Customer Journey
+- [ ] 4b. Business Process (optional)
 - [ ] 5. Data Model ⚠️ CRITICAL GATE
 - [ ] 6. Tech Architecture
 - [ ] 7. Plan
@@ -34,7 +35,7 @@
 - [ ] docs/product/PRODUCT_SPEC.md
 - [ ] docs/product/CUSTOMER_JOURNEY.md
 - [ ] docs/product/PERSONAS.md              ← optional (Phase 3b; auto-created by Phase 4 if 3b skipped)
-- [ ] docs/product/BUSINESS_PROCESS.md
+- [ ] docs/product/BUSINESS_PROCESS.md       ← optional (Phase 4b)
 - [ ] docs/data/DATA_MODEL.md
 - [ ] docs/data/DATA_DICTIONARY.md
 - [ ] docs/architecture/TECH_ARCHITECTURE.md

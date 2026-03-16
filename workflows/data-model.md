@@ -9,7 +9,10 @@ Read in parallel:
 - `docs/data/DATA_MODEL.md` — existing model (if any)
 - `docs/data/DATA_DICTIONARY.md` — existing dictionary (if any)
 - `docs/research/SYNTHESIS.md` — for context (if exists)
+- `docs/product/BUSINESS_PROCESS.md` — if exists, read `## Data Model Implications Summary` section; these flags are direct inputs to this phase
 - `.sdlc/STATE.md` — project context
+
+If BUSINESS_PROCESS.md exists: before domain analysis, review its `## Data Model Implications Summary` table. Every flagged entity/field must be addressed during modelling — either incorporated or explicitly decided against with a reason recorded.
 
 If PRODUCT_SPEC.md does not exist: STOP. Inform the user that the product spec must be defined first. Suggest `/sdlc:03-product-spec`.
 

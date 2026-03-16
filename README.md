@@ -180,6 +180,7 @@ Each phase must be verified with `/sdlc:verify` before the next begins. Hard gat
 | 3 | **Product Spec** | `/sdlc:03-product-spec` | Defines REQ-IDs, BR-IDs, numeric NFRs, BDD scenarios, error handling table, acceptance criteria | `PRODUCT_SPEC.md` |
 | 3b | **Personas** | `/sdlc:03b-personas` | Rigorous persona definitions using Jobs-to-be-Done, empathy maps, and anti-personas. Optional — if skipped, Phase 4 creates a minimal `PERSONAS.md` from inline definitions so downstream phases always have it. | `PERSONAS.md` |
 | 4 | **Customer Journey** | `/sdlc:04-customer-journey` | Journey maps for every persona — happy paths, failure paths, emotional states, screen flows | `CUSTOMER_JOURNEY.md` |
+| 4b | **Business Process** *(optional)* | `/sdlc:04b-business-process` | Map back-office and operational processes — approvals, fulfillment, exception handling, compliance, escalation paths. Produces BP-IDs, swimlane diagrams, RACI, SLAs. Flags new entities and state machines for the data model. | `BUSINESS_PROCESS.md` |
 | 5 | **Data Model** ⚠️ | `/sdlc:05-data-model` | Canonical DDD data model — bounded contexts, aggregates, ERDs, invariants, data dictionary. Everything downstream derives from this. | `DATA_MODEL.md`, `DATA_DICTIONARY.md` |
 | 6 | **Tech Architecture** ⚠️ | `/sdlc:06-tech-arch` | C4 diagrams, clean architecture layers, security design, dependency classification, resilience strategy, ADRs | `TECH_ARCHITECTURE.md`, `API_SPEC.md`, `SOLUTION_DESIGN.md` |
 | 6b | **FE Setup** *(optional)* | `/sdlc:fe-setup` | Configure design tokens (3 levels), set up component library, derive `SCREEN_SPEC.md` from customer journey. Run when the project has a front-end. | `DESIGN_TOKENS.md`, `COMPONENT_LIBRARY.md`, `SCREEN_SPEC.md` |
@@ -262,6 +263,7 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:03-product-spec <feature>` | `--new-section` `--update <section>` | Requirements, BDD scenarios, business rules, NFRs, error handling |
 | `/sdlc:03b-personas [name]` | `--new` `--update` `--validate` `--anti-persona` | JTBD personas, empathy maps, anti-personas |
 | `/sdlc:04-customer-journey <persona>` | `--new-persona` `--update-flow` | Journey maps, failure paths, screen flows, emotional states |
+| `/sdlc:04b-business-process [area]` | `--new` `--update <BP-ID>` `--inventory-only` | Back-office process maps — swimlane diagrams, RACI, SLA breakdowns, exception paths, data model flags |
 
 ### Design
 | Command | Flags | Description |
@@ -324,6 +326,7 @@ docs/
     PERSONAS.md              JTBD personas, empathy maps, anti-personas
     PRODUCT_SPEC.md          REQ-IDs, BR-IDs, NFRs, BDD scenarios, error codes, acceptance criteria
     CUSTOMER_JOURNEY.md      Journey maps, failure paths, emotional states, screen flows
+    BUSINESS_PROCESS.md      BP-IDs, swimlane diagrams, RACI, SLA breakdowns, exception paths, data model flags
 
   data/
     DATA_MODEL.md            ⚠️  Canonical: bounded contexts, aggregates, ERDs, domain events, invariants

@@ -111,6 +111,37 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ---
 
+### Phase 4b: Business Process (only if BUSINESS_PROCESS.md exists)
+
+**Read:** `docs/product/BUSINESS_PROCESS.md`, `docs/product/CUSTOMER_JOURNEY.md`, `docs/product/PRODUCT_SPEC.md`
+
+If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check entirely (silent pass).
+
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| 1 | BUSINESS_PROCESS.md exists and is not empty | CRITICAL |
+| 2 | Process inventory table present with BP-IDs | HIGH |
+| 3 | ≥ 1 process has a swimlane/sequence diagram or step list | HIGH |
+| 4 | Every process defines a Process Owner | HIGH |
+| 5 | Every process defines an SLA | HIGH |
+| 6 | Every human-in-loop process has an SLA breach action | HIGH |
+| 7 | Every process has ≥ 1 exception path documented | HIGH |
+| 8 | Every exception path states who is notified | MEDIUM |
+| 9 | `## Data Model Implications Summary` section present | HIGH |
+| 10 | No `{{placeholder}}` or `[TBD]` strings | MEDIUM |
+
+**Cross-checks (BUSINESS_PROCESS.md → CUSTOMER_JOURNEY.md):**
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| 11 | Every process named in CUSTOMER_JOURNEY.md `## Business Processes` section has a BP-ID in BUSINESS_PROCESS.md | HIGH |
+
+**Cross-checks (BUSINESS_PROCESS.md → PRODUCT_SPEC.md):**
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| 12 | Every BR-ID that implies a multi-step approval or compliance process is linked to a BP-ID | MEDIUM |
+
+---
+
 ### Phase 5: Data Model
 
 **Read:** `docs/data/DATA_MODEL.md`, `docs/data/DATA_DICTIONARY.md`, `docs/product/PRODUCT_SPEC.md`

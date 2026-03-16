@@ -156,5 +156,6 @@ Business processes: [N]
 
 File: docs/product/CUSTOMER_JOURNEY.md
 
-Recommended Next: /sdlc:05-data-model ⚠️ (Critical Gate)
+Recommended Next: /sdlc:04b-business-process (if any business processes were identified)
+  → Then: /sdlc:05-data-model ⚠️ (Critical Gate)
 ```
