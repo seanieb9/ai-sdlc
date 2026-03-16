@@ -93,6 +93,30 @@ The **50-line rule**: every document's first 50 lines contain a TL;DR and a cont
 
 The result: as your project grows to dozens of documents, token cost stays flat because Claude loads what it needs — not everything.
 
+### Cross-platform screens generated from journey maps
+
+When a project includes a front-end, one command turns the customer journey into a complete screen specification:
+
+```bash
+/sdlc:fe-setup   # after Phase 6 — configures tokens, derives SCREEN_SPEC.md
+/sdlc:fe-screen LoginScreen   # during Phase 8 — generates the screen
+```
+
+**`/sdlc:fe-setup`** asks one question (design system level: none / brand color / full ingest), then:
+- Builds a full design token set — 12-step color palette, semantic colors, typography scale, spacing, shadow, motion
+- Configures the component library (Tamagui by default for cross-platform performance)
+- Walks the customer journey and derives a screen inventory: every interactive step becomes a screen, each assigned a template type, API endpoints mapped, and all four states documented (loading → skeleton, empty, error + retry, success)
+
+**`/sdlc:fe-screen`** generates a single screen from that spec:
+- Reads the screen's data requirements and wires API calls as typed TanStack Query hooks
+- Applies tokens via the component library — no hardcoded colors, no magic numbers
+- Implements all four states and extracts any component that appears in 2+ screens to `components/ui/`
+- Enforces WCAG 2.1 AA: 44×44pt touch targets, contrast ratios, screen reader labels, focus management
+
+The stack is Expo + React Native + Expo Router v3 — one codebase for iOS, Android, and Web. Clean architecture applies to the FE layer too: business logic stays in hooks and services, screens are pure view layer.
+
+The `[fe]` task tag in `TODO.md` is the discriminator — Phase 8 (`/sdlc:08-code`) detects it and switches to the FE workflow automatically. The rest of the BE path is unchanged.
+
 ### An independent quality gate between every phase
 ```bash
 /sdlc:verify --phase 5   # after data model
@@ -158,6 +182,7 @@ Each phase must be verified with `/sdlc:verify` before the next begins. Hard gat
 | 4 | **Customer Journey** | `/sdlc:04-customer-journey` | Journey maps for every persona — happy paths, failure paths, emotional states, screen flows | `CUSTOMER_JOURNEY.md` |
 | 5 | **Data Model** ⚠️ | `/sdlc:05-data-model` | Canonical DDD data model — bounded contexts, aggregates, ERDs, invariants, data dictionary. Everything downstream derives from this. | `DATA_MODEL.md`, `DATA_DICTIONARY.md` |
 | 6 | **Tech Architecture** ⚠️ | `/sdlc:06-tech-arch` | C4 diagrams, clean architecture layers, security design, dependency classification, resilience strategy, ADRs | `TECH_ARCHITECTURE.md`, `API_SPEC.md`, `SOLUTION_DESIGN.md` |
+| 6b | **FE Setup** *(optional)* | `/sdlc:fe-setup` | Configure design tokens (3 levels), set up component library, derive `SCREEN_SPEC.md` from customer journey. Run when the project has a front-end. | `DESIGN_TOKENS.md`, `COMPONENT_LIBRARY.md`, `SCREEN_SPEC.md` |
 | 7 | **Plan** | `/sdlc:07-plan` | Breaks work into atomic tasks ordered by clean architecture layer: domain → application → infrastructure → delivery | `PLAN.md`, `TODO.md` |
 | 8 | **Code** | `/sdlc:08-code` | Implements tasks following strict clean architecture — no shortcuts, no vibe coding | Source code |
 | 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 8 layers, anchored to every source document with full traceability. **Runs twice:** first pass after Phase 8 covers 6 layers; re-run after Phase 12 adds Observability and Resilience layers once those specs exist. | `TEST_CASES.md` |
@@ -264,6 +289,12 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 | `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | OTel distributed tracing, structured logging, Prometheus RED metrics |
 | `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, resilience pattern implementation |
 
+### Front-end
+| Command | Flags | Description |
+|---------|-------|-------------|
+| `/sdlc:fe-setup` | `--level none\|brand\|full` `--base tamagui\|nativewind` | Configure design tokens, set up component library, derive `SCREEN_SPEC.md` from the customer journey. Run after Phase 6 when the project has a front-end. |
+| `/sdlc:fe-screen <screen-name-or-route>` | | Generate a screen from `SCREEN_SPEC.md`: design tokens applied, TanStack Query hooks wired to API spec, all 4 states implemented, WCAG 2.1 AA enforced, shared components extracted. Run during Phase 8 for each `[fe]` task. |
+
 ### Brownfield
 | Command | Flags | Description |
 |---------|-------|-------------|
@@ -307,6 +338,11 @@ docs/
     TEST_CASES.md            MECE Given/When/Then across 8 layers with full coverage matrix
     TEST_AUTOMATION.md       TC-ID to file map, coverage gates, automation completeness audit
 
+  frontend/                  ← only when project includes a front-end (created by /sdlc:fe-setup)
+    DESIGN_TOKENS.md         Color (12-step palette + semantic), typography, spacing, radius, shadow, motion + platform config
+    COMPONENT_LIBRARY.md     Component base, token mapping, available components, custom components
+    SCREEN_SPEC.md           Screen inventory from customer journey — data requirements, navigation, 4 states per screen
+
   sre/
     OBSERVABILITY.md         Structured log spec (OBS-IDs), trace propagation, metrics catalog
     RUNBOOKS.md              Runbook per critical failure scenario
@@ -341,6 +377,7 @@ This system encodes industry standards so you don't have to look them up or reme
 | Resilience | Circuit Breaker, Retry + Full Jitter Backoff, Bulkhead, Graceful Degradation, Load Shedding, Chaos Testing |
 | API design | REST conventions, versioning strategy, cursor pagination, idempotency keys, OWASP API Top 10 |
 | Deployment | Multi-stage Dockerfile, non-root containers, K8s resource limits/probes/HPA/PDB, graceful shutdown |
+| Frontend | Expo SDK, React Native, Expo Router v3 (cross-platform: iOS/Android/Web), Tamagui design tokens, TanStack Query v5, Zustand, WCAG 2.1 AA, Maestro E2E |
 | Documentation | 50-line rule, tables over prose, ID-first formatting, complexity budgets, shard-for-partial-loading |
 
 ---
