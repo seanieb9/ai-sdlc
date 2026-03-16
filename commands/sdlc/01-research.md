@@ -43,5 +43,10 @@ Flags:
 <execution_context>
 @/Users/seanlew/.claude/sdlc/workflows/research.md
 @/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
+@/Users/seanlew/.claude/sdlc/workflows/verify.md
 </execution_context>
+
+<auto_verify>
+When all workflow steps above are complete, immediately run the Phase 1 verification checklist from the verify workflow — without waiting for user instruction. Do not ask. Output the full verification result before finishing.
+</auto_verify>
 

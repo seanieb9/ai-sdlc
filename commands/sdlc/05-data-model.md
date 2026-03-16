@@ -56,5 +56,10 @@ Flags:
 @/Users/seanlew/.claude/sdlc/references/data-standards.md
 @/Users/seanlew/.claude/sdlc/templates/data-model.md
 @/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
+@/Users/seanlew/.claude/sdlc/workflows/verify.md
 </execution_context>
+
+<auto_verify>
+When all workflow steps above are complete, immediately run the Phase 5 verification checklist from the verify workflow — without waiting for user instruction. Do not ask. Output the full verification result before finishing.
+</auto_verify>
 
