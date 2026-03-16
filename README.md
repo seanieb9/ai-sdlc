@@ -41,6 +41,14 @@ Every requirement gets a `REQ-ID`. Every business rule gets a `BR-ID`. Every NFR
 ### A data model that's the single source of truth
 The canonical data model is designed before architecture and code. Everything derives from it — API shapes, domain entities, test factories, database migrations. Change a field in the data model and automatic impact analysis tells you exactly what breaks downstream before you touch a line of code.
 
+### Operational processes mapped before the data model locks in
+
+For projects with back-office operations, `/sdlc:04b-business-process` maps every operational process between customer journeys and the data model — not after the fact, when changing the model is expensive.
+
+Every process gets a **BP-ID** and is documented with: a Mermaid swimlane sequence diagram showing actor interactions and branching; a **RACI table** per step; **SLA breakdowns** with breach actions; and full **exception paths** (what fails, who is notified, how recovery works).
+
+The key output is `## Data Model Implications Summary` — a consolidated table of every new entity, state machine field, and relationship the processes require. Phase 5 reads this table before modelling begins, so entities like `ApprovalRecord`, `EscalationLog`, and `JobExecution` are designed in rather than bolted on. Process-driven fields like `status`, `assigned_to`, and `sla_deadline` are first-class model citizens, not afterthoughts.
+
 ### Clean architecture that stays clean
 Code is implemented in strict layer order: domain → application → infrastructure → delivery. The dependency rule (no infrastructure imports in domain or application layers) is enforced. Every external integration goes through a port interface. No God objects, no magic numbers, no spaghetti.
 
