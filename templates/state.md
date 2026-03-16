@@ -29,11 +29,11 @@
 ## Document Index
 - [ ] docs/research/RESEARCH.md
 - [ ] docs/research/GAP_ANALYSIS.md
-- [ ] docs/research/VOC.md
 - [ ] docs/research/SYNTHESIS.md
-- [ ] docs/product/PERSONAS.md
+- [ ] docs/research/VOC.md              ← optional (Phase 1b)
 - [ ] docs/product/PRODUCT_SPEC.md
 - [ ] docs/product/CUSTOMER_JOURNEY.md
+- [ ] docs/product/PERSONAS.md              ← optional (Phase 3b; auto-created by Phase 4 if 3b skipped)
 - [ ] docs/product/BUSINESS_PROCESS.md
 - [ ] docs/data/DATA_MODEL.md
 - [ ] docs/data/DATA_DICTIONARY.md
@@ -45,6 +45,7 @@
 - [ ] docs/sre/OBSERVABILITY.md
 - [ ] docs/sre/RUNBOOKS.md
 - [ ] docs/sre/SLO.md
+- [ ] docs/sre/INCIDENT_RESPONSE.md
 - [ ] docs/review/REVIEW_REPORT.md
 
 ## Decisions

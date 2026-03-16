@@ -16,8 +16,12 @@ Read ALL of the following in parallel — do not skip any source:
 **Architecture and design sources (required — these generate tests too):**
 - `docs/architecture/TECH_ARCHITECTURE.md` — service boundaries, patterns chosen (circuit breaker → test it trips), infrastructure contracts
 - `docs/architecture/SOLUTION_DESIGN.md` — ADRs: every architectural decision is an implementation commitment that needs a test
-- `docs/sre/OBSERVABILITY.md` — every structured log, metric, and span commitment needs a test asserting it's emitted
-- `docs/sre/RUNBOOKS.md` — resilience behaviours documented here need corresponding tests
+
+**Phase-dependent sources (read if available — skip the corresponding test layer if not yet created):**
+- `docs/sre/OBSERVABILITY.md` — every structured log, metric, and span commitment needs a test asserting it's emitted. **Created in Phase 11, which runs after Phase 8.** If not yet created: skip the Observability test layer (mark as DEFERRED in coverage matrix), then re-run `/sdlc:09-test-cases` after Phase 11 completes.
+- `docs/sre/RUNBOOKS.md` — resilience behaviours documented here need corresponding tests. **Created in Phase 12, which runs after Phase 8.** If not yet created: skip the Resilience test layer detail (mark as DEFERRED), then re-run `/sdlc:09-test-cases` after Phase 12 completes.
+
+> **Two-pass pattern:** It is normal and correct to run Phase 9 twice — once after Phase 8 (covering Unit, Integration, Contract, E2E, Performance, Security) and once after Phases 11 and 12 (adding Observability and Resilience layers). The Phase 9 completion gate requires all 8 layers; the first pass covers 6.
 
 **Implementation source:**
 - Relevant source code — read the actual implementation to find behaviour not in specs and verify spec alignment
@@ -354,8 +358,8 @@ Before finalising, perform the full MECE check:
 - [ ] Every happy path journey → P0 E2E test
 - [ ] Every P0 failure journey → P1 E2E test
 - [ ] Every NFR → performance test
-- [ ] Every ADR circuit breaker / retry / bulkhead / degradation → resilience test
-- [ ] Every observability commitment → observability test
+- [ ] Every ADR circuit breaker / retry / bulkhead / degradation → resilience test *(defer if RUNBOOKS.md not yet created)*
+- [ ] Every observability commitment → observability test *(defer if OBSERVABILITY.md not yet created)*
 - [ ] Every auth/authz rule → security test
 
 **Mutually exclusive (no overlaps):**

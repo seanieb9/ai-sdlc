@@ -46,7 +46,7 @@ docs/
   STATE.md                   ← Project state, phase progress, document index
   TODO.md                    ← Active task list with statuses
   PLAN.md                    ← Execution plan with phases and dependencies
-  DECISIONS.md               ← Architecture decision records (overflow from STATE.md)
+  DECISIONS.md               ← Decision overflow: create only when STATE.md ## Decisions exceeds 25 entries. Link from STATE.md: "→ see .sdlc/DECISIONS.md for full log"
 ```
 
 ---

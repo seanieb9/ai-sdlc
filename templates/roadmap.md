@@ -113,19 +113,21 @@ AI execution runs in parallel — not a calendar constraint.
 
 ## Phase Log
 
+*Status key: ⬜ Not started | 🔄 In Progress | ✅ Complete | N/A Skipped*
+
 | Phase | Status | Sessions Used | Completed | Notes |
 |-------|--------|--------------|-----------|-------|
 | 1. Research | ⬜ Not started | — | — | |
-| 1b. VoC | ⬜ Not started | — | — | |
+| 1b. VoC | ⬜ Not started | — | — | Optional — use N/A Skipped if not applicable |
 | 2. Synthesize | ⬜ Not started | — | — | |
 | 3. Product Spec | ⬜ Not started | — | — | |
-| 3b. Personas | ⬜ Not started | — | — | |
+| 3b. Personas | ⬜ Not started | — | — | Optional — use N/A Skipped if not applicable |
 | 4. Customer Journey | ⬜ Not started | — | — | |
 | 5. Data Model | ⬜ Not started | — | — | |
 | 6. Tech Architecture | ⬜ Not started | — | — | |
 | 7. Plan | ⬜ Not started | — | — | |
 | 8. Code | ⬜ Not started | — | — | |
-| 9. Test Cases | ⬜ Not started | — | — | |
+| 9. Test Cases | ⬜ Not started | — | — | Run twice: after Phase 8, then again after Phase 12 |
 | 10. Test Automation | ⬜ Not started | — | — | |
 | 11. Observability | ⬜ Not started | — | — | |
 | 12. SRE | ⬜ Not started | — | — | |

@@ -8,7 +8,15 @@ Read:
 - `docs/product/PRODUCT_SPEC.md` — personas section, requirements
 - `docs/research/GAP_ANALYSIS.md` — customer pain points, frustrations
 - `docs/product/CUSTOMER_JOURNEY.md` — existing journeys (if any — update, don't replace)
+- `docs/product/PERSONAS.md` — if exists (from Phase 3b); personas defined here take precedence over inline definitions
 - `.sdlc/STATE.md` — project context
+
+**PERSONAS.md gate check:**
+If `docs/product/PERSONAS.md` does NOT exist (Phase 3b was skipped):
+- Define personas inline during Step 2 as usual
+- After Step 2 completes, write a minimal `docs/product/PERSONAS.md` from those definitions
+- This ensures downstream phases (data model, test cases, tech arch) always have a PERSONAS.md to reference
+- Mark `docs/product/PERSONAS.md` in STATE.md document index as created
 
 ## Step 2: Define Personas
 

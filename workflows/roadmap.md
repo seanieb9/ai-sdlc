@@ -95,7 +95,8 @@ Fill in:
 - Critical path with project-specific risk note
 - Sync points with dates if target completion date was provided
 - Effort summary with calendar projection
-- Phase log initialised to all ⬜ Not started
+- Phase log initialised to ⬜ Not started for all included phases
+- Skipped phases (via flags like `--skip-voc`): mark as `N/A Skipped` in the Phase Log, not ⬜
 
 If ROADMAP.md already exists (update mode):
 - Preserve Phase Log entries

@@ -17,6 +17,11 @@ Read in parallel (ALL required):
 If PLAN.md missing: STOP. Run `/sdlc:07-plan` first.
 If TODO.md missing or empty: STOP. No tasks to work on.
 
+**Phase 8 scope boundary:**
+Phase 8 implements business logic and application-layer error handling.
+**Defer to Phase 12 (SRE):** circuit breakers, bulkheads, timeouts on outbound calls, graceful degradation, load shedding, SIGTERM drain, and the resilience checklist.
+In Phase 8, adapters may implement basic retry + backoff for transient errors (this is correct — it belongs in the adapter, not the use case). Circuit breakers and dependency classification are Phase 12 concerns.
+
 Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified, show the next available task from TODO.md and ask for confirmation before proceeding.
 
 ---
