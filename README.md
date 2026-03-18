@@ -35,6 +35,24 @@ The orchestrator reads your project state, figures out where you are, enforces w
 
 ## What You Get
 
+### Two modes — interactive guidance or full YOLO
+
+At project start, choose how the system works with you:
+
+**INTERACTIVE (default):** After each phase's analysis is complete — but before any document is written — the system pauses. It presents what it found, what it's about to write, and the key decisions it's making. One question: "confirm or redirect?" On confirmation, all documents for that phase are written without interruption.
+
+**YOLO:** Fully autonomous. Each phase runs end-to-end without stopping. At the end, the system outputs every assumption it made so you can spot anything that went sideways.
+
+Both modes enforce the same non-negotiables: breaking changes always require confirmation; the data model gate always requires explicit sign-off; verify runs automatically after every phase regardless.
+
+Set at project start, or override any single phase:
+```bash
+/sdlc:00-start "my project"    # asks: INTERACTIVE or YOLO?
+/sdlc:05-data-model --yolo     # override for this phase only
+```
+
+To change mid-project: edit `Mode:` in `.sdlc/STATE.md`.
+
 ### Requirements that actually drive the work
 Every requirement gets a `REQ-ID`. Every business rule gets a `BR-ID`. Every NFR gets a **numeric threshold** — not "fast" but "p95 < 200ms at 1000 RPS". These IDs flow all the way through to test cases and automation. When a requirement changes, you know exactly what breaks.
 
@@ -243,7 +261,7 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 ### Orchestration
 | Command | Description |
 |---------|-------------|
-| `/sdlc:00-start <idea>` | **Always start here.** Reads state, enforces gates, routes to the right phase |
+| `/sdlc:00-start <idea> [--yolo]` | **Always start here.** Reads state, enforces gates, routes to the right phase. Sets execution mode (INTERACTIVE/YOLO) on new projects. |
 | `/sdlc:sod` | **Start of day.** Reads yesterday's checkpoint, surfaces blockers, plans today's session, delivers a brief — waits for "go" before executing |
 | `/sdlc:eod` | **End of day.** Reaches a clean stopping point, commits work, saves checkpoint, prints tomorrow's first action |
 | `/sdlc:checkpoint` | **Mid-session save.** Writes phase/step, next action, open decisions, and verbal context to `.sdlc/NEXT_ACTION.md`. Use with `/loop 15m /sdlc:checkpoint` |
@@ -364,7 +382,7 @@ docs/
     REVIEW_REPORT.md         Findings by severity across all 12 review dimensions + remediation tasks
 
 .sdlc/
-  STATE.md                   Phase progress, document index, decisions, verification log
+  STATE.md                   Phase progress, execution mode (INTERACTIVE/YOLO), document index, decisions, verification log
   TODO.md                    Active task list with priority and phase
   PLAN.md                    Execution plan: phases, tasks, dependencies, risk register
   CODEBASE_MAP.md            Brownfield codebase index: tech stack, architecture, domain concepts, search recipes
