@@ -46,6 +46,7 @@ Ask the user (AskUserQuestion):
 2. "In 2-3 sentences, what is the core idea and who does it serve?"
 3. "Is this a: (a) brand new project, (b) new feature on existing codebase, (c) bug fix, (d) improvement/refactor?"
 4. "Do you have any constraints I should know about? (tech stack, timeline, regulations, integrations)"
+5. "Execution mode: INTERACTIVE (I'll confirm direction before each document is written) or YOLO (fully autonomous, I'll list assumptions at the end)? [default: INTERACTIVE]"
 
 Create `.sdlc/` directory and initialize:
 - `.sdlc/STATE.md` — using state template (see Step 6)
@@ -69,6 +70,7 @@ Input: `$ARGUMENTS`
 Classify intent:
 - `--status` flag → Go to Step 4 (display dashboard only, no execution)
 - `--force <phase>` flag → skip gate check for named phase, document reason in STATE.md
+- `--yolo` flag → set mode to YOLO for this session (does not change STATE.md)
 - Empty or description → classify as: NEW_FEATURE | BUG_FIX | IMPROVEMENT | QUERY
 
 Intent classification logic:
@@ -210,6 +212,7 @@ When initializing `.sdlc/STATE.md`:
 - **Last Updated:** [ISO date]
 - **Description:** [2-3 sentence description]
 - **Constraints:** [tech, timeline, regulatory constraints]
+- **Mode:** [INTERACTIVE | YOLO]
 
 ## Phase Progress
 - [ ] 1. Research

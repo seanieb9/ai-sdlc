@@ -8,6 +8,7 @@
 - **Status:** {{CURRENT_PHASE}}
 - **Description:** {{2-3 SENTENCE DESCRIPTION}}
 - **Constraints:** {{TECH_STACK, TIMELINE, REGULATORY, INTEGRATION CONSTRAINTS}}
+- **Mode:** {{INTERACTIVE | YOLO}}
 
 ## Phase Progress
 - [ ] 1. Research
