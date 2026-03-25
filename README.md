@@ -95,7 +95,7 @@ The stack is Expo + React Native + Expo Router v3 — one codebase for iOS, Andr
 The `[fe]` task tag in `TODO.md` is the discriminator — Phase 8 (`/sdlc:08-code`) detects it and switches to the FE workflow automatically. The rest of the BE path is unchanged.
 
 ### Tests anchored to requirements, not vibes
-Test cases are derived from every source: requirements, API spec, data model invariants, architecture decisions, observability commitments. Eight test layers — unit, integration, contract, E2E, performance, resilience, observability, security — all with TC-IDs that trace back to a source document. No orphaned tests. No uncovered requirements. Coverage gates fail the CI build.
+Test cases are derived from every source: requirements, API spec, data model invariants, architecture decisions, observability commitments. Nine test layers — unit, integration, contract, E2E, performance, scalability, resilience, observability, security, plus smoke/synthetic monitoring — all with TC-IDs that trace back to a source document. NFR-IDs trace forward through ADRs to TC-IDs to SLOs, closing the full traceability chain. No orphaned tests. No uncovered requirements. Coverage gates fail the CI build.
 
 ### Resilience built in, not bolted on
 Every external dependency is classified (CRITICAL / DEGRADABLE / OPTIONAL) with explicit timeouts, circuit breakers, fallbacks, and retry logic. The system checks that your CRITICAL dependencies have circuit breakers, your DEGRADABLE dependencies have fallbacks, and every client has explicit connect and read timeouts. Chaos tests verify it all actually works.
@@ -172,6 +172,41 @@ Once the map exists, `/sdlc:explore` answers codebase questions with a read-the-
 
 The map is also consumed automatically by `/sdlc:02-synthesize` (no re-scanning the whole codebase) and by the orchestrator on startup (context-aware routing from the first command). When `/sdlc:explore` discovers something the map missed, it updates the map — so it gets better over time.
 
+### Iterative development — keep adding features without starting over
+
+The initial lifecycle gets you to a production-ready v1. Everything after that flows through the **iteration model**:
+
+```bash
+/sdlc:iterate "add multi-currency support"
+/sdlc:iterate "loyalty points module"
+/sdlc:iterate --type enhancement "improve checkout performance"
+/sdlc:iterate --voc  # customer feedback triggered a spec change
+```
+
+Each iteration is a **scoped mini-lifecycle**. Instead of re-running all 13 phases, `/sdlc:iterate` determines which phases are actually affected by the change and executes only those — in the correct order, with impact propagation between them.
+
+Every iteration gets a stable ID (`ITER-001`, `ITER-002`, ...) and a scope manifest at `.sdlc/ITERATIONS/ITER-NNN.md` that tracks:
+- Which phases are in scope and their status
+- Which sections of each document were changed
+- Every new ID introduced (REQ, BR, TC, ADR, NFR) — continuing the existing sequence, never restarting
+- Breaking changes (require explicit confirmation before proceeding)
+- Propagation flags (e.g. "new NFR added → Phase 6 needs ADR, Phase 11 needs SLO")
+
+**Six iteration types** cover every kind of change:
+
+| Type | Command | Phases touched |
+|------|---------|---------------|
+| New feature/module | `/sdlc:iterate "feature name"` | 3 → 5 → 6 → 7 → 8 → 9 → 10 |
+| Extend existing feature | `/sdlc:iterate --type enhancement "..."` | 3 → 5? → 6? → 7 → 8 → 9 → 10 |
+| New NFR/SLA target | `/sdlc:iterate --type nfr "..."` | 3 → 6 → 9 → 11 → 12 |
+| Schema-only change | `/sdlc:iterate --type data "..."` | 5 → 6 → 7 → 8 → 9 → 10 |
+| UX/journey update | `/sdlc:iterate --type ux "..."` | 4 → 6b? → 7 → 8 → 9 → 10 |
+| Customer feedback gap | `/sdlc:iterate --voc` | 1b → 3 → then per impact |
+
+**Upstream documents stay continuously fresh** — VOC, research, and personas can be updated standalone at any time. When they surface a product gap, they recommend an iteration. When they confirm existing requirements, no iteration is needed.
+
+The orchestrator (`/sdlc:00-start`) is iteration-aware: it surfaces any active in-progress iteration at startup and recommends `/sdlc:iterate` rather than re-running phases when an established project is detected.
+
 ### Context management that actually works across sessions
 One of the hardest problems with AI-assisted development is losing context — mid-session when Claude auto-compacts, or the next morning when you start fresh. AI-SDLC solves this with a structured daily loop:
 
@@ -212,7 +247,7 @@ Each phase must be verified with `/sdlc:verify` before the next begins. Hard gat
 | 6b | **FE Setup** *(optional)* | `/sdlc:fe-setup` | Configure design tokens (3 levels), set up component library, derive `SCREEN_SPEC.md` from customer journey. Run when the project has a front-end. | `DESIGN_TOKENS.md`, `COMPONENT_LIBRARY.md`, `SCREEN_SPEC.md` |
 | 7 | **Plan** | `/sdlc:07-plan` | Breaks work into atomic tasks ordered by clean architecture layer: domain → application → infrastructure → delivery | `PLAN.md`, `TODO.md` |
 | 8 | **Code** | `/sdlc:08-code` | Implements tasks following strict clean architecture — no shortcuts, no vibe coding | Source code |
-| 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 8 layers, anchored to every source document with full traceability. **Runs twice:** first pass after Phase 8 covers 6 layers; re-run after Phase 12 adds Observability and Resilience layers once those specs exist. | `TEST_CASES.md` |
+| 9 | **Test Cases** | `/sdlc:09-test-cases` | MECE Given/When/Then test cases across 9 layers (Unit, Integration, Contract, E2E, Performance, Scalability, Resilience, Observability, Security) + Smoke/Synthetic, anchored to every source document with full traceability. **Runs twice:** first pass after Phase 8 covers 7 layers; re-run after Phase 12 adds Observability and Resilience layers. | `TEST_CASES.md` |
 | 10 | **Test Automation** | `/sdlc:10-test-automation` | Automation scripts with 1:1 TC-ID mapping, coverage gate enforcement, and drift detection | `TEST_AUTOMATION.md`, test files |
 | 11 | **Observability** | `/sdlc:11-observability` | Structured logging spec, OpenTelemetry tracing, Prometheus RED metrics — designed in, not bolted on | `OBSERVABILITY.md` |
 | 12 | **SRE** | `/sdlc:12-sre` | SLOs, operational runbooks per critical failure scenario, incident response, resilience pattern verification | `RUNBOOKS.md`, `SLO.md` |
@@ -250,7 +285,7 @@ cp -r ai-sdlc/commands/sdlc ~/.claude/commands/
 cp -r ai-sdlc/workflows ai-sdlc/references ai-sdlc/templates ~/.claude/sdlc/
 ```
 
-That's it. Open any project in Claude Code and run `/sdlc:00-start`.
+That's it. Open any project in Claude Code and run `/sdlc:00-start "your idea"` to start a new project, or `/sdlc:00-start` (no args) to see the status of an existing one.
 
 > **Note:** The `@file` references inside each command point to `~/.claude/sdlc/`. If you install to a different path, update the `<execution_context>` blocks in `commands/sdlc/*.md`.
 
@@ -258,81 +293,90 @@ That's it. Open any project in Claude Code and run `/sdlc:00-start`.
 
 ## Commands
 
-### Orchestration
-| Command | Description |
+These are the commands you need to know. Everything else runs internally.
+
+### The main interface
+
+| Command | What it does |
 |---------|-------------|
-| `/sdlc:00-start <idea> [--yolo]` | **Always start here.** Reads state, enforces gates, routes to the right phase. Sets execution mode (INTERACTIVE/YOLO) on new projects. |
-| `/sdlc:sod` | **Start of day.** Reads yesterday's checkpoint, surfaces blockers, plans today's session, delivers a brief — waits for "go" before executing |
-| `/sdlc:eod` | **End of day.** Reaches a clean stopping point, commits work, saves checkpoint, prints tomorrow's first action |
-| `/sdlc:checkpoint` | **Mid-session save.** Writes phase/step, next action, open decisions, and verbal context to `.sdlc/NEXT_ACTION.md`. Use with `/loop 15m /sdlc:checkpoint` |
-| `/sdlc:resume` | **Resume after `/clear`.** Reads checkpoint, delivers brief, waits for confirmation |
-| `/sdlc:verify [--phase N\|--last\|--all]` | **Run after every phase.** Independent quality gate with per-phase checklists |
-| `/sdlc:status` | Live dashboard — phases, todos, doc health, recommended next action. **Auto-triggers** when you ask "what's next?" or "where are we?" |
-| `/sdlc:decide` | **Always-on.** Silently records decisions to STATE.md and flags downstream impact. Never needs to be called. |
-| `/sdlc:help [command]` | System guide, or detailed help for a specific command |
+| `/sdlc:00-start [idea]` | **Universal entry point.** New project, status check, daily brief, resume — handles everything. Also accepts natural language: `morning`, `done`, `save`, `roadmap`, `verify`, `help`. |
+| `/sdlc:iterate <feature>` | **Add or evolve features.** Scoped mini-lifecycle — updates only the docs and phases the change actually touches. Use for: new features, enhancements, NFR changes, data model evolution, UX updates, VOC-driven changes. |
+| `/sdlc:fix <what's broken>` | **Fix things.** Bug fixes (default), hotfixes (`--hotfix` for production incidents), maintenance (`--maintenance` for debt/upgrades). Lighter path — no spec update unless a design gap is discovered. |
+| `/sdlc:release [version]` | **Ship work.** Groups completed ITER-NNN + FIX-NNN into a versioned release. Generates CHANGELOG.md entry, release summary, git tag recommendation. |
+| `/sdlc:review [area]` | **Quality audit.** 12-dimension cross-cutting review: requirements, data, arch, tests, resilience, deployment, security. |
 
-### Planning (optional)
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:roadmap` | `--update` `--skip-voc` `--solo` `--simple` `--thorough` | Human session roadmap — Design/Review/Sync plan, ownership, critical path, calendar estimate. **Auto-triggers** on "how long will this take?" or "how should we plan this?" |
+### Codebase navigation
 
-### Discovery
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:01-research <topic>` | `--deep` `--competitive-only` `--customer-only` | Market landscape, competitive SWOT, best practices, emerging trends |
-| `/sdlc:01b-voc [topic]` | `--interviews` `--tickets` `--nps` `--guided` | Synthesize raw customer data into prioritized, evidence-backed pain points |
-| `/sdlc:02-synthesize [area]` | `--codebase-only` `--research-only` | Merge research + existing codebase into a unified strategic picture |
+| Command | What it does |
+|---------|-------------|
+| `/sdlc:explore <question>` | Answer codebase questions: "where is X?", "what calls Y?", "how are errors handled?". **Auto-triggers** on location/caller/convention questions. |
+| `/sdlc:map` | Brownfield setup — analyse existing codebase into `.sdlc/CODEBASE_MAP.md`. Run once on an existing project before anything else. |
 
-### Specification
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:03-product-spec <feature>` | `--new-section` `--update <section>` | Requirements, BDD scenarios, business rules, NFRs, error handling |
-| `/sdlc:03b-personas [name]` | `--new` `--update` `--validate` `--anti-persona` | JTBD personas, empathy maps, anti-personas |
-| `/sdlc:04-customer-journey <persona>` | `--new-persona` `--update-flow` | Journey maps, failure paths, screen flows, emotional states |
-| `/sdlc:04b-business-process [area]` | `--new` `--update <BP-ID>` `--inventory-only` | Back-office process maps — swimlane diagrams, RACI, SLA breakdowns, exception paths, data model flags |
+---
 
-### Design
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:05-data-model <domain>` | `--review` `--impact-analysis` `--new-domain` | DDD canonical data model — aggregates, ERDs, invariants, industry standards |
-| `/sdlc:06-tech-arch <system>` | `--c4` `--api-spec` `--solution-design` `--patterns` | C4 architecture, clean layers, security, resilience design, ADRs |
+### Daily workflow cheatsheet
 
-### Front-end *(optional — when project includes a front-end)*
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:fe-setup` | `--level none\|brand\|full` `--base tamagui\|nativewind` | Configure design tokens, set up component library, derive `SCREEN_SPEC.md` from the customer journey. Run after Phase 6. |
-| `/sdlc:fe-screen <screen-name-or-route>` | | Generate a screen from `SCREEN_SPEC.md`: design tokens applied, TanStack Query hooks wired to API spec, all 4 states implemented, WCAG 2.1 AA enforced, shared components extracted. Run during Phase 8 for each `[fe]` task. |
+```
+Morning:    /sdlc:00-start morning
+Afternoon:  /sdlc:iterate "add loyalty points"   ← new feature
+            /sdlc:fix "cart total wrong"          ← bug
+Evening:    /sdlc:00-start done                  ← saves checkpoint, commits WIP
 
-### Execution
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:07-plan <feature>` | `--breakdown` `--estimate` `--dependencies` | Layered execution plan + TODO list |
-| `/sdlc:08-code <task>` | `--task <id>` `--layer <layer>` `--dry-run` | Implement tasks following strict clean architecture |
-| `/sdlc:microservices <service>` | `--scaffold-only` `--k8s-only` `--ci-only` | Full production service scaffold: code + Docker + K8s + CI/CD |
+Ready to ship:  /sdlc:release --minor
+Quality check:  /sdlc:review
 
-### Quality
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:09-test-cases <feature>` | `--layer` `--coverage-check` `--mece-check` | 8-layer MECE test cases anchored to every source document |
-| `/sdlc:10-test-automation <feature>` | `--framework` `--layer` `--update-only` | Automation scripts with TC-ID mapping, drift detection, coverage gates |
-| `/sdlc:13-review [area]` | `--full` `--arch` `--data` `--test` `--obs` `--code` | 12-dimension quality audit: requirements, data, arch, tests, resilience, deployment |
+Production fire:  /sdlc:fix --hotfix "payment gateway down"
+```
 
-### Reliability
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:11-observability <service>` | `--logging` `--tracing` `--metrics` `--config` `--audit` | OTel distributed tracing, structured logging, Prometheus RED metrics |
-| `/sdlc:12-sre <service>` | `--runbook` `--slo` `--incident` `--reliability-review` | SLOs, runbooks, incident response, resilience pattern implementation |
+---
 
-### Brownfield
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:map` | `--refresh` `--focus <area>` | Map the existing codebase into `.sdlc/CODEBASE_MAP.md` — tech stack, architecture, domain concepts, API routes, hotspots, search recipes |
-| `/sdlc:explore <question>` | | Answer codebase questions: location, callers, dependencies, conventions, change impact. **Auto-triggers** on "where is X?", "what calls X?", "how does X work?". Updates the map when new knowledge is found |
+### Advanced / direct phase access
 
-### Maintenance
-| Command | Flags | Description |
-|---------|-------|-------------|
-| `/sdlc:docs` | `--audit` `--index` `--clean` `--status` | Document health audit, stale doc detection, index rebuild |
+The commands below are invoked automatically by the workflows above. You don't need to call them directly — but they're available if you need to jump to a specific phase.
+
+<details>
+<summary>Show all phase commands</summary>
+
+**Discovery**
+- `/sdlc:01-research <topic>` — market research, competitive SWOT, best practices
+- `/sdlc:01b-voc [topic]` — synthesize customer feedback into prioritized pain points
+- `/sdlc:02-synthesize` — merge research + codebase into unified strategic picture
+
+**Specification**
+- `/sdlc:03-product-spec <feature>` — requirements, BDD, NFRs, error handling
+- `/sdlc:03b-personas` — JTBD personas, empathy maps, anti-personas
+- `/sdlc:04-customer-journey <persona>` — journey maps, failure paths, screen flows
+- `/sdlc:04b-business-process` — back-office processes, swimlanes, RACI, SLAs
+
+**Design**
+- `/sdlc:05-data-model <domain>` — DDD canonical data model, ERDs, invariants
+- `/sdlc:06-tech-arch <system>` — C4 architecture, API spec, ADRs, resilience design
+
+**Front-end** *(when project includes a front-end)*
+- `/sdlc:fe-setup` — design tokens, component library, derive SCREEN_SPEC.md
+- `/sdlc:fe-screen <screen>` — generate a screen from SCREEN_SPEC.md
+
+**Execution**
+- `/sdlc:07-plan <feature>` — layered execution plan + TODO list
+- `/sdlc:08-code <task>` — implement tasks following clean architecture
+- `/sdlc:microservices <service>` — scaffold full production service (Docker + K8s + CI/CD)
+
+**Quality**
+- `/sdlc:09-test-cases <feature>` — 9-layer MECE test cases
+- `/sdlc:10-test-automation <feature>` — automation scripts with TC-ID mapping
+
+**Reliability**
+- `/sdlc:11-observability <service>` — structured logging, OTel tracing, Prometheus metrics
+- `/sdlc:12-sre <service>` — SLOs, runbooks, incident response, resilience pattern implementation
+
+**Session / admin** *(handled by `/sdlc:00-start` but also directly invokable)*
+- `/sdlc:sod` / `/sdlc:eod` / `/sdlc:checkpoint` / `/sdlc:resume` — daily session management
+- `/sdlc:verify [--phase N]` — quality gate for a completed phase
+- `/sdlc:docs` — document health audit
+- `/sdlc:status` — live dashboard
+- `/sdlc:roadmap` — human-effort planning (Design/Review/Sync sessions)
+
+</details>
 
 ---
 
@@ -388,6 +432,9 @@ docs/
   CODEBASE_MAP.md            Brownfield codebase index: tech stack, architecture, domain concepts, search recipes
   NEXT_ACTION.md             Session checkpoint: exact next action, open decisions, do-not-lose context
   ROADMAP.md                 Human session plan: phase ownership, Design/Review/Sync estimates, critical path
+  ITERATIONS/
+    ITER-001.md              Iteration manifest: scope, phase map, ID continuity, breaking changes, propagation flags
+    ITER-002.md              ...
 ```
 
 ---
@@ -399,14 +446,17 @@ This system encodes industry standards so you don't have to look them up or reme
 | Area | Standards Applied |
 |------|------------------|
 | Data modeling | DDD (bounded contexts, aggregates, entities, value objects), ISO 4217, ISO 8601, RFC 4122, E.164, domain-specific (ISO 20022, FHIR, GS1, etc.) |
-| Architecture | Clean Architecture, Ports & Adapters, C4 Model, OpenAPI 3.x, CQRS, Saga, Outbox Pattern |
+| Architecture | Clean Architecture, Ports & Adapters, C4 Model, OpenAPI 3.x, CQRS, Saga, Outbox Pattern, Event Sourcing, Multi-tenancy patterns (RLS/schema/silo) |
 | Product | SMART NFRs, MoSCoW prioritisation (≤40% Must), JTBD (functional/emotional/social), BDD completeness, anti-personas |
-| Testing | MECE, Given/When/Then (BDD), Testing Pyramid, Contract Testing (Pact), 8-layer coverage model |
-| Observability | OpenTelemetry, W3C TraceContext, Prometheus/OpenMetrics, structured JSON logging, RED metrics |
-| Resilience | Circuit Breaker, Retry + Full Jitter Backoff, Bulkhead, Graceful Degradation, Load Shedding, Chaos Testing |
-| API design | REST conventions, versioning strategy, cursor pagination, idempotency keys, OWASP API Top 10 |
-| Deployment | Multi-stage Dockerfile, non-root containers, K8s resource limits/probes/HPA/PDB, graceful shutdown |
-| Frontend | Expo SDK, React Native, Expo Router v3 (cross-platform: iOS/Android/Web), Tamagui design tokens, TanStack Query v5, Zustand, WCAG 2.1 AA, Maestro E2E |
+| Testing | MECE, Given/When/Then (BDD), Testing Pyramid, Consumer-Driven Contract Testing (Pact), Property-Based Testing, 9-layer coverage model (Unit, Integration, Contract, E2E, Performance, Scalability, Resilience, Observability, Security) + Smoke/Synthetic |
+| Observability | OpenTelemetry, W3C TraceContext, Prometheus/OpenMetrics, structured JSON logging, RED metrics, Audit logging (compliance trail), NFR→SLO reconciliation |
+| Resilience | Circuit Breaker (NFR-derived thresholds), Retry + Full Jitter Backoff, Bulkhead, Graceful Degradation, Load Shedding, Idempotency Keys, Chaos Testing |
+| API design | REST conventions, URI versioning, RFC 8594 Sunset headers, RFC 9745 Deprecation headers, cursor pagination, idempotency keys, OWASP API Top 10 |
+| Deployment | Multi-stage Dockerfile, non-root containers, K8s resource limits/probes/HPA/PDB, graceful shutdown, Blue-Green/Canary/Feature-flag strategies, Argo Rollouts |
+| Security | STRIDE threat modeling, secret rotation lifecycle (dual-credential pattern), dependency vulnerability scanning (SBOM/Trivy), zero-downtime credential rotation |
+| Data operations | Zero-downtime migration patterns (expand/contract, dual-write, CONCURRENTLY), database indexing strategy (B-tree/partial/covering), caching strategy (cache-aside/write-through/invalidation/stampede prevention) |
+| Developer experience | Conventional Commits, Keep a Changelog, contribution guidelines, PR review SLA, background job patterns (outbox, DLQ, effectively-once), testID naming convention for E2E |
+| Frontend | Expo SDK, React Native, Expo Router v3 (cross-platform: iOS/Android/Web), Tamagui design tokens, TanStack Query v5, Zustand, WCAG 2.1 AA, Maestro E2E, testID manifest |
 | Documentation | 50-line rule, tables over prose, ID-first formatting, complexity budgets, shard-for-partial-loading |
 
 ---
