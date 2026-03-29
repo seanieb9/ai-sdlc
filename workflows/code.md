@@ -1785,20 +1785,6 @@ Reviewers must check:
 - [ ] Tests test behavior, not implementation details
 - [ ] No obvious missing edge case tests
 
-### Code Review SLA
-
-| Priority | First Response | Decision | Applies To |
-|----------|--------------|---------|------------|
-| P0 — Security / Critical Bug | 4 hours | 8 hours | Security fix, data loss bug, SEV1 mitigation |
-| P1 — Feature / Significant Change | 24 hours | 48 hours | New features, architecture changes |
-| P2 — Maintenance / Docs / Refactor | 48 hours | 72 hours | Cleanup, documentation, minor refactors |
-
-SLA is measured from when the PR is marked "Ready for Review" (not from when it was opened).
-
-If SLA is missed: author follows up in team channel, not email.
-
-**For solo developers:** self-review after a 24-hour break. Read the code as if someone else wrote it.
-
 ### What Not to Block On
 
 Reviewers must not block PRs for:

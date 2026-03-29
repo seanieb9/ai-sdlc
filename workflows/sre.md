@@ -243,38 +243,6 @@ Maintain an incident log: `$ARTIFACTS/sre/incident-log.md`
 
 Review open post-mortems weekly. Close only when all P1 items are verified complete.
 
-## Toil Measurement + Reduction
-
-Toil is manual, repetitive work that keeps the service running but doesn't improve it. It scales with traffic, not automation.
-
-Definition of toil:
-- Manual deployment steps (not fully automated)
-- Runbook-following without decision-making
-- Responding to alerts that don't require human judgment
-- Ticket triage that could be automated
-- Manual database queries to answer routine questions
-
-**Monthly toil tracking:**
-
-| Toil Activity | Hours/Month | Automatable? | Priority |
-|--------------|------------|--------------|---------|
-| [e.g., Manual deploys] | [N] | Yes | High |
-| [e.g., Restart service on OOM] | [N] | Yes | High |
-| [e.g., DB query for support tickets] | [N] | Yes | Medium |
-
-Target: toil < 30% of operational time. If > 50%: escalate to engineering lead. Automation required.
-
-Toil reduction rule: Every time you do something manually more than 3 times → automate it.
-
-**Quarterly review:**
-- Calculate total toil hours for the quarter
-- Calculate toil as % of engineering time
-- Identify top 3 toil sources
-- Set specific automation goals for next quarter
-- Measure improvement
-
----
-
 ## Step 5: Resilience Implementation
 
 This step implements resilient code. Do not skip it and do not treat it as a review checklist — write the code here or verify it exists with the correct implementation.

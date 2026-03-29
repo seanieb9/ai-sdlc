@@ -1,8 +1,8 @@
 # Production Readiness Review (PRR)
 
-Mandatory gate before production deployment. No exceptions. A service is not production-ready until every section below is signed off.
+AI-run pre-deployment review. Before any production deployment, run through these checks to confirm the service is safe, observable, operable, and recoverable. The AI performs each check, surfaces findings, and asks the user to confirm before proceeding.
 
-This is NOT a code review. It is an operational review — confirming the service is safe, observable, operable, and recoverable in production.
+This is NOT a code review. It is an operational review — verifying that what is about to be deployed is genuinely ready for real users.
 
 ---
 
@@ -29,10 +29,9 @@ Read in parallel:
 - `$ARTIFACTS/design/threat-model.md` — threat model (required if system handles auth or PII).
 - `$STATE` — projectAssumptions (team size, compliance, accessibility).
 
-Read projectAssumptions.teamSize from $STATE:
-- `solo-developer`: PRR is self-review — all sign-offs are self-certified. Still complete every item.
-- `small-team-no-oncall`: Team lead + deployer must sign off.
-- `team-with-oncall` or `enterprise-sre`: On-call SRE lead + Security reviewer + Eng Lead required.
+Read projectAssumptions.teamSize from $STATE. Adapt depth:
+- `solo-developer`: AI runs every check, presents a clear PASS / NEEDS ATTENTION / BLOCKED summary. User decides whether to proceed.
+- `small-team-no-oncall` or larger: same AI-run review, but flag any items the user should discuss with their team before deploying.
 
 If verification-report.md does not exist OR has open CRITICALs: STOP. PRR cannot begin.
 
@@ -161,68 +160,73 @@ If "not-applicable": skip this section.
 
 ---
 
-## Step 10: PRR Decision
+## Step 10: PRR Summary and User Decision
 
-Compile findings across all sections:
+Compile all findings and present a clear summary to the user. The AI makes a recommendation; the user makes the final call.
 
-**BLOCKING items**: Any check marked BLOCKING must be resolved before PRR can pass. List each:
+**BLOCKING items** — things that make the deployment unsafe right now. List each with what specifically needs to be fixed:
 ```
-BLOCKING: [check description] — [what needs to be done to resolve]
-```
-
-**WARNING items**: Should be addressed but won't block deployment. List each:
-```
-WARNING: [check description] — [recommended action, timeframe]
+BLOCKED: [check] — [exactly what to do to resolve this]
 ```
 
-**PRR Outcome:**
-- `APPROVED`: All blocking items cleared. Ready for production deployment.
-- `APPROVED WITH CONDITIONS`: No blocking items, but warnings present. Deploy with monitoring.
-- `REJECTED`: One or more blocking items unresolved. Cannot deploy to production.
+**NEEDS ATTENTION** — things that should be addressed but won't cause an immediate incident. The user may choose to deploy anyway and fix these post-deploy:
+```
+NEEDS ATTENTION: [check] — [recommended action, suggested timeframe]
+```
+
+Present the recommendation to the user:
+
+```
+PRR Review Complete
+══════════════════════════════════════════
+Deployment: [branch] → [environment]
+Blocking issues:      [N]
+Needs attention:      [N]
+
+Recommendation: [READY TO DEPLOY / FIX BEFORE DEPLOYING / NEEDS ATTENTION]
+
+[If blocking issues exist: list them here with fix instructions]
+[If needs-attention items exist: list them here]
+
+→ How would you like to proceed?
+  1. Fix the blocking issues now (I'll help)
+  2. Proceed anyway — I understand the risks  [only valid if no BLOCKING items]
+  3. Cancel this deployment
+```
+
+Wait for user's response before writing the artifact or updating state.
 
 ---
 
 ## Step 11: Write PRR Artifact
 
-Write `$ARTIFACTS/prr/prr-report.md`:
+After the user confirms how to proceed, write `$ARTIFACTS/prr/prr-report.md`:
 
 ```markdown
-# Production Readiness Review Report
+# Production Readiness Review
 *Date: [ISO date]*
-*Branch: [branch]*
-*Reviewer(s): [names or "self-review — solo developer"]*
-*Outcome: APPROVED | APPROVED WITH CONDITIONS | REJECTED*
+*Branch: [branch] → [environment]*
+*Decision: READY / DEPLOYED WITH KNOWN RISKS / BLOCKED*
 
 ## Blocking Issues
 [list or "None"]
 
-## Warnings
+## Needs Attention
 [list or "None"]
-
-## Sign-off
-
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Eng Lead / Deployer | [name] | [date] | ✅ Approved / ❌ Rejected |
-| On-call SRE | [name or "N/A — solo dev"] | [date] | ✅ / ❌ / N/A |
-| Security Reviewer | [name or "N/A"] | [date] | ✅ / ❌ / N/A |
-
----
 
 ## Checklist Summary
 
-### Runbooks: [✅ Complete / ⚠️ N warnings / ❌ N blocking]
-### Observability: [✅ / ⚠️ / ❌]
-### Resilience: [✅ / ⚠️ / ❌]
-### Security: [✅ / ⚠️ / ❌]
-### Scalability: [✅ / ⚠️ / ❌]
-### Team Readiness: [✅ / ⚠️ / ❌]
-### Data/Compliance: [✅ / ⚠️ / ❌]
-### Accessibility: [✅ / ⚠️ / N/A]
+| Area | Status | Notes |
+|------|--------|-------|
+| Runbooks | ✅ / ⚠️ / ❌ | |
+| Observability | ✅ / ⚠️ / ❌ | |
+| Resilience | ✅ / ⚠️ / ❌ | |
+| Security | ✅ / ⚠️ / ❌ | |
+| Scalability | ✅ / ⚠️ / ❌ | |
+| Data/Compliance | ✅ / ⚠️ / N/A | |
+| Accessibility | ✅ / ⚠️ / N/A | |
 
----
-
-*PRR passed on [date]. Deployment to [environment] authorized.*
+*Reviewed by AI. User decision: [proceed / fix first / cancelled]*
 ```
 
 ---

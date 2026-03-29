@@ -669,49 +669,51 @@ If any answer suggests over-engineering: simplify, update the ADR, document the 
 
 ---
 
-## Step 17b: Architecture Design Review Gate
+## Step 17b: Architecture Self-Critique
 
-Before advancing to the plan/build phases, the architecture must be reviewed by at least one other engineer (or self-reviewed after a 24-hour pause for solo developers).
+Before moving to planning and building, the AI re-reads the completed architecture with a critical eye and surfaces any concerns to the user. The user then decides whether to proceed, adjust, or rethink.
 
-**Review process:**
+**AI critique checklist — re-read `tech-architecture.md` and `solution-design.md` and honestly answer:**
 
-1. Share `$ARTIFACTS/design/tech-architecture.md` and `$ARTIFACTS/design/solution-design.md` with reviewer(s)
+1. **Over-engineering check**: Is every service, pattern, and abstraction actually needed for the current stated scale? Name anything that is there "just in case" rather than because a real requirement demands it.
 
-2. Reviewer(s) must explicitly sign off on:
-   - [ ] Service boundary decisions are justified (monolith/microservices/hybrid)
-   - [ ] Security architecture is appropriate for the threat model
-   - [ ] NFRs (performance, availability, scalability) are achievable with this design
-   - [ ] Dependency failure modes are handled (timeouts, circuit breakers, fallbacks)
-   - [ ] Data model aligns with architecture (no impedance mismatch)
-   - [ ] All significant decisions have ADRs
-   - [ ] Design is not over-engineered for current scale
+2. **NFR achievability**: For each NFR (latency, availability, throughput), does the design actually deliver it — or does it just assume it will? Flag any NFR where the design lacks a concrete mechanism.
 
-3. Record approval in `$ARTIFACTS/design/solution-design.md` header:
-   ```markdown
-   ## Architecture Review Sign-off
-   Reviewed by: [reviewer name(s)]
-   Date: [ISO date]
-   Status: APPROVED | APPROVED WITH CHANGES | NEEDS REWORK
-   Notes: [any conditions or required changes]
-   ```
+3. **Single point of failure**: Is there any component where its failure would take down the whole system, with no fallback? If yes, is that acceptable given the availability SLO?
 
-4. Update state.json:
-   ```json
-   { "phases.design.reviewedBy": ["name"], "phases.design.reviewedAt": "ISO", "phases.design.reviewApproved": true }
-   ```
+4. **Security blind spots**: Does the threat model cover every external entry point? Is there any data flow where sensitive data could be exposed that the threat model didn't catch?
 
-**If reviewer requests changes:**
-- Make the requested changes
-- Update the relevant ADRs to reflect the decision
-- Apply stale cascade to any downstream phases that were already started
-- Return to reviewer for sign-off
+5. **Data model alignment**: Does the API surface match the data model cleanly, or are there awkward translations that signal a design mismatch?
 
-**Solo developer rule:**
-Write self-review notes in the sign-off section. Common questions to ask yourself:
-- "Would a new engineer understand this design in 30 minutes?"
-- "Is there a simpler design that meets all the NFRs?"
-- "What would be the most expensive mistake I could make with this design?"
-- "Am I choosing this because it's the right tool, or because it's familiar?"
+6. **Operational burden**: How hard will this be to operate at 2am? Are runbooks possible for the most likely failure modes?
+
+7. **Reversibility**: Which decisions will be hardest to undo if they turn out to be wrong? Flag those — they deserve the most scrutiny.
+
+**Present findings to the user:**
+
+```
+Architecture Review
+════════════════════════════════════════
+[For each concern found, present it clearly:]
+
+⚠️  [concern title]
+    [1-2 sentence description of the risk]
+    Options:
+      a) [how to address this now]
+      b) [how to address this later / accept the risk]
+
+[If no concerns:]
+✅  Architecture looks solid for the stated requirements.
+    Significant decisions: [N ADRs]
+    Potential future pressure points: [list if any]
+
+→ Do you want to adjust anything before we start planning and building?
+  (Type your changes or "proceed" to continue)
+```
+
+If the user wants to adjust: make the changes, update the relevant ADRs, apply stale cascade to downstream phases, then re-run the critique.
+
+If the user proceeds: update state.json `phases.design.critiqueComplete = true` and continue.
 
 ---
 
