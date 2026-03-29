@@ -1,17 +1,30 @@
 # Research Workflow
 
-Conduct deep market, competitive, industry, and customer research. Output to docs/research/ — always update existing files, never recreate.
+Conduct deep market, competitive, industry, and customer research. Output to the branch-scoped artifacts directory — always update existing files, never recreate.
+
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
 
 ## Step 1: Pre-Flight
 
 Read existing research (if any):
-- `docs/research/RESEARCH.md` — note existing sections to update vs add
-- `docs/research/GAP_ANALYSIS.md` — note existing gaps to enrich
-- `.sdlc/STATE.md` — understand project context, domain, constraints
+- `$ARTIFACTS/research/research.md` — note existing sections to update vs add
+- `$ARTIFACTS/research/gap-analysis.md` — note existing gaps to enrich
+- `$STATE` — understand project context, domain, constraints (read and parse JSON)
 
 If no prior research: create `docs/research/` directory and initialize files with headers only.
 
-Note the topic from `$ARGUMENTS`. If not provided, derive from STATE.md project description.
+Note the topic from `$ARGUMENTS`. If not provided, derive from state.json project description.
 
 Check flags:
 - `--deep` → run all research dimensions at maximum depth
@@ -205,7 +218,7 @@ Consolidate into five structured sections:
 
 ## Step 10: Write Output Documents
 
-**Update docs/research/RESEARCH.md:**
+**Update $ARTIFACTS/research/research.md:**
 
 ```markdown
 # Research: [Topic]
@@ -253,7 +266,7 @@ Consolidate into five structured sections:
 [numbered source list with dates accessed]
 ```
 
-**Update docs/research/GAP_ANALYSIS.md:**
+**Update $ARTIFACTS/research/gap-analysis.md:**
 
 ```markdown
 # Gap Analysis: [Topic]
@@ -285,10 +298,10 @@ For both files: add/update sections. Never delete existing content without notin
 
 ## Step 11: Update State
 
-Update `.sdlc/STATE.md`:
-- Mark Phase 1 (Research) as complete: `[x] 1. Research`
+Update `$STATE` (state.json):
+- Set phase 1 (Research) status to "complete"
 - Update document index
-- Add key finding to Decisions section: `[date] RESEARCH: [top finding]`
+- Add key finding to decisions array: `{"date": "[date]", "type": "RESEARCH", "note": "[top finding]"}`
 
 ## Step 12: Output Summary
 
@@ -314,10 +327,10 @@ Emerging Signals:
 • [Top 2-year signal]
 
 Files Updated:
-• docs/research/RESEARCH.md
-• docs/research/GAP_ANALYSIS.md
+• $ARTIFACTS/research/research.md
+• $ARTIFACTS/research/gap-analysis.md
 
 Recommended Next:
-• Deep customer data → /sdlc:01b-voc
-• Or proceed to → /sdlc:02-synthesize
+• Deep customer data → /sdlc:voc
+• Or proceed to → /sdlc:synthesize
 ```

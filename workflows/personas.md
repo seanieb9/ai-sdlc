@@ -2,20 +2,33 @@
 
 Build evidence-grounded personas using Jobs-to-be-Done, empathy maps, and anti-personas. These feed every downstream phase — data model, product spec, test cases, and journeys.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight — Gather Evidence
 
 Read ALL of the following (personas without evidence are fiction):
-- `docs/research/VOC.md` — primary customer evidence ← most important input
-- `docs/research/GAP_ANALYSIS.md` — customer pain points and gaps
-- `docs/research/RESEARCH.md` — market segments and competitive landscape
-- `docs/research/SYNTHESIS.md` — synthesized findings (if exists)
-- `docs/product/PERSONAS.md` — existing personas (update, don't replace)
-- `.sdlc/STATE.md` — project context, constraints
+- `$ARTIFACTS/research/voc.md` — primary customer evidence ← most important input
+- `$ARTIFACTS/research/gap-analysis.md` — customer pain points and gaps
+- `$ARTIFACTS/research/research.md` — market segments and competitive landscape
+- `$ARTIFACTS/research/synthesis.md` — synthesized findings (if exists)
+- `$ARTIFACTS/personas/personas.md` — existing personas (update, don't replace)
+- `$STATE` — project context, constraints (read and parse JSON)
 
 Assess evidence quality:
-- VOC.md exists with real data → STRONG (proceed)
-- Only GAP_ANALYSIS.md (inferred from research) → MODERATE (note evidence is secondary)
-- No research at all → WEAK (run /sdlc:01-research and /sdlc:01b-voc first)
+- voc.md exists with real data → STRONG (proceed)
+- Only gap-analysis.md (inferred from research) → MODERATE (note evidence is secondary)
+- No research at all → WEAK (run /sdlc:research and /sdlc:voc first)
 
 Warn the user if evidence is weak. Proceed with explicit caveat.
 
@@ -216,7 +229,7 @@ Conflict resolution rule:
 
 ## Step 6: Write Output Document
 
-**Create/update docs/product/PERSONAS.md:**
+**Create/update $ARTIFACTS/personas/personas.md:**
 
 ```markdown
 # Personas
@@ -277,15 +290,15 @@ Conflict resolution rule:
 
 ## Step 7: Update Downstream References
 
-After creating/updating PERSONAS.md:
+After creating/updating personas.md:
 
-1. Update `docs/product/CUSTOMER_JOURNEY.md` — reference PERSONAS.md instead of re-defining personas
-2. Update `docs/product/PRODUCT_SPEC.md` if it exists — persona section should reference PERSONAS.md
-3. Update `.sdlc/STATE.md` — mark Phase 3b complete, update document index
+1. Update `$ARTIFACTS/journey/customer-journey.md` — reference personas.md instead of re-defining personas
+2. Update `$ARTIFACTS/idea/prd.md` if it exists — persona section should reference personas.md
+3. Update `$STATE` — mark Phase 3b complete, update document index
 
 ## Step 8: Update State
 
-Mark Personas phase complete.
+Mark Personas phase complete in $STATE.
 
 Output:
 ```
@@ -297,8 +310,8 @@ Evidence confidence: HIGH/MEDIUM/LOW
 Unvalidated assumptions: [N] (flagged in doc)
 
 Files:
-• docs/product/PERSONAS.md
+• $ARTIFACTS/personas/personas.md
 
-Recommended Next: /sdlc:04-customer-journey
+Recommended Next: /sdlc:journey
 (Personas are now the authoritative input — customer-journey will reference them)
 ```

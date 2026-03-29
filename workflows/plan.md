@@ -2,24 +2,36 @@
 
 Create a precise, dependency-ordered execution plan before any code is written. No vibe. No improvised coding. Always plan first.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight
 
 Read in parallel:
-- `docs/data/DATA_MODEL.md` — understand entities to implement
-- `docs/architecture/TECH_ARCHITECTURE.md` — understand components to build
-- `docs/product/PRODUCT_SPEC.md` — understand requirements to fulfill
-- `docs/architecture/API_SPEC.md` — understand contracts to implement
+- `$ARTIFACTS/data-model/data-model.md` — understand entities to implement
+- `$ARTIFACTS/design/tech-architecture.md` — understand components to build
+- `$ARTIFACTS/idea/prd.md` — understand requirements to fulfill
+- `$ARTIFACTS/design/api-spec.md` — understand contracts to implement
 - `docs/frontend/SCREEN_SPEC.md` — if exists: screens to build as [fe] tasks
 - `docs/frontend/DESIGN_TOKENS.md` — if exists: confirms FE setup complete
-- `.sdlc/PLAN.md` — existing plan (if any — update, don't replace)
-- `.sdlc/TODO.md` — existing todos (if any)
-- `.sdlc/STATE.md` — project context
+- `$ARTIFACTS/plan/implementation-plan.md` — existing plan (if any — update, don't replace)
+- `$STATE` — project context (includes todos/tasks — read and parse JSON)
 
-If DATA_MODEL.md missing: STOP. Cannot plan without data model.
-If TECH_ARCHITECTURE.md missing: WARN. Recommend running /sdlc:06-tech-arch first, but allow continuation.
-If TECH_ARCHITECTURE.md has a ## Frontend Architecture section but SCREEN_SPEC.md missing: WARN. Recommend running /sdlc:fe-setup first — FE tasks cannot be generated without SCREEN_SPEC.md.
+If data-model.md missing: STOP. Cannot plan without data model.
+If tech-architecture.md missing: WARN. Recommend running /sdlc:design first, but allow continuation.
+If tech-architecture.md has a ## Frontend Architecture section but SCREEN_SPEC.md missing: WARN. Recommend running /sdlc:fe-setup first — FE tasks cannot be generated without SCREEN_SPEC.md.
 
-If existing PLAN.md: read fully. Add new phases/tasks rather than replacing.
+If existing implementation-plan.md: read fully. Add new phases/tasks rather than replacing.
 
 ## Step 2: Work Breakdown Structure
 
@@ -105,7 +117,7 @@ Common risks:
 
 ## Step 6: Write Output Files
 
-**Write/update .sdlc/PLAN.md:**
+**Write/update $ARTIFACTS/plan/implementation-plan.md:**
 
 ```markdown
 # Execution Plan: [Feature/Project Name]
@@ -146,26 +158,23 @@ Common risks:
 [How we know the whole plan is complete]
 ```
 
-**Write/update .sdlc/TODO.md:**
+**Write/update tasks into $STATE (state.json) under a "tasks" key:**
 
-```markdown
-# TODO
-*Last Updated: [date]*
-
-## Active (Current Phase)
-- [ ] TASK-001: [description] | M | @eng1 | depends: none
-- [ ] TASK-002: [description] | S | @eng2 | depends: TASK-001
-- [~] TASK-003: [description] | L | @eng1 | IN PROGRESS — push [~] immediately on pickup
-
-## Upcoming (Next Phase)
-- [ ] TASK-004: [description] | M | @unassigned | depends: TASK-002
-
-## Blocked
-- [ ] TASK-005: [description] | @eng2 | waiting for: [external dependency]
-
-## Done
-- [x] TASK-000: [description] | @eng1 | completed: [date]
+Tasks are stored as a JSON array in state.json. Each task object:
+```json
+{
+  "id": "TASK-001",
+  "description": "[description]",
+  "effort": "M",
+  "assignee": "@eng1",
+  "depends": [],
+  "status": "pending",
+  "layer": "domain",
+  "phase": 1,
+  "tags": []
+}
 ```
+Status values: "pending" | "in_progress" | "blocked" | "done"
 
 **Task tagging:**
 - Backend tasks: no tag (default)
@@ -183,7 +192,7 @@ Common risks:
 
 ## Step 7: Update State
 
-Mark Phase 7 (Plan) complete in STATE.md.
+Mark Phase 7 (Plan) complete in $STATE.
 
 Output:
 ```
@@ -195,9 +204,9 @@ Parallelizable: [N tasks]
 Highest Risk: [top risk]
 
 Files:
-• .sdlc/PLAN.md
-• .sdlc/TODO.md
+• $ARTIFACTS/plan/implementation-plan.md
+• $STATE (tasks array updated)
 
-⚠️  GATE UNLOCKED: /sdlc:08-code can now proceed.
-Recommended Next: /sdlc:08-code --task TASK-001
+⚠️  GATE UNLOCKED: /sdlc:build can now proceed.
+Recommended Next: /sdlc:build --task TASK-001
 ```

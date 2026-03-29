@@ -8,7 +8,7 @@ Strategy: **read the map first, grep second, read files last and minimally.** Th
 
 ## Step 1: Read the Map
 
-Read `.sdlc/CODEBASE_MAP.md` in full.
+Read `.claude/ai-sdlc/codebase/architecture.md` in full.
 
 If it does not exist: stop and tell the user to run `/sdlc:map` first. The explore command requires the map.
 
@@ -118,8 +118,8 @@ Related:
 
 ## Step 6: Update Map if New Knowledge Found
 
-If the exploration revealed something not in the CODEBASE_MAP.md (e.g. a pattern, a hidden dependency, a convention):
+If the exploration revealed something not in `.claude/ai-sdlc/codebase/architecture.md` (e.g. a pattern, a hidden dependency, a convention):
 
-Add it to the relevant section of `.sdlc/CODEBASE_MAP.md` immediately so it's there for next time.
+Add it to the relevant section of `.claude/ai-sdlc/codebase/architecture.md` immediately so it's there for next time.
 
 Example: if you found that auth is actually checked in 3 different places, not 1, update the Cross-Cutting Concerns section.

@@ -2,21 +2,34 @@
 
 Map who uses the system, why they use it, and exactly how. These journeys are the basis for E2E test design and business process documentation.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight
 
 Read:
-- `docs/product/PRODUCT_SPEC.md` — personas section, requirements
-- `docs/research/GAP_ANALYSIS.md` — customer pain points, frustrations
-- `docs/product/CUSTOMER_JOURNEY.md` — existing journeys (if any — update, don't replace)
-- `docs/product/PERSONAS.md` — if exists (from Phase 3b); personas defined here take precedence over inline definitions
-- `.sdlc/STATE.md` — project context
+- `$ARTIFACTS/idea/prd.md` — personas section, requirements
+- `$ARTIFACTS/research/gap-analysis.md` — customer pain points, frustrations
+- `$ARTIFACTS/journey/customer-journey.md` — existing journeys (if any — update, don't replace)
+- `$ARTIFACTS/personas/personas.md` — if exists (from Phase 3b); personas defined here take precedence over inline definitions
+- `$STATE` — project context (read and parse JSON)
 
-**PERSONAS.md gate check:**
-If `docs/product/PERSONAS.md` does NOT exist (Phase 3b was skipped):
+**personas.md gate check:**
+If `$ARTIFACTS/personas/personas.md` does NOT exist (Phase 3b was skipped):
 - Define personas inline during Step 2 as usual
-- After Step 2 completes, write a minimal `docs/product/PERSONAS.md` from those definitions
-- This ensures downstream phases (data model, test cases, tech arch) always have a PERSONAS.md to reference
-- Mark `docs/product/PERSONAS.md` in STATE.md document index as created
+- After Step 2 completes, write a minimal `$ARTIFACTS/personas/personas.md` from those definitions
+- This ensures downstream phases (data model, test cases, tech arch) always have a personas.md to reference
+- Mark the file in $STATE document index as created
 
 ## Step 2: Define Personas
 
@@ -116,7 +129,7 @@ Error states: EH-[NNN] (invalid input), EH-[NNN] (system error)
 
 ## Step 6: Write Output Document
 
-**Update docs/product/CUSTOMER_JOURNEY.md:**
+**Update $ARTIFACTS/journey/customer-journey.md:**
 
 ```markdown
 # Customer Journeys
@@ -144,7 +157,7 @@ Error states: EH-[NNN] (invalid input), EH-[NNN] (system error)
 
 ## Step 7: Update State
 
-Mark Phase 4 (Customer Journey) complete.
+Mark Phase 4 (Customer Journey) complete in $STATE.
 
 Output:
 ```
@@ -154,8 +167,8 @@ Personas: [N]
 Journeys mapped: [N]
 Business processes: [N]
 
-File: docs/product/CUSTOMER_JOURNEY.md
+File: $ARTIFACTS/journey/customer-journey.md
 
-Recommended Next: /sdlc:04b-business-process (if any business processes were identified)
-  → Then: /sdlc:05-data-model ⚠️ (Critical Gate)
+Recommended Next: /sdlc:business-process (if any business processes were identified)
+  → Then: /sdlc:data-model ⚠️ (Critical Gate)
 ```

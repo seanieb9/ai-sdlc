@@ -1,21 +1,34 @@
 # Test Automation Workflow
 
-Generate and maintain automated test scripts strictly from TEST_CASES.md. Test cases are the specification — scripts implement them, not the other way around. Every TC-ID must map to exactly one automated test. No TC-ID without automation. No automation without a TC-ID.
+Generate and maintain automated test scripts strictly from test-cases.md. Test cases are the specification — scripts implement them, not the other way around. Every TC-ID must map to exactly one automated test. No TC-ID without automation. No automation without a TC-ID.
 
 ---
+
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
 
 ## Step 1: Gate Check
 
 Read in parallel — ALL required:
-- `docs/qa/TEST_CASES.md` — REQUIRED. Cannot automate without defined test cases.
-- `docs/qa/TEST_AUTOMATION.md` — existing automation index (update, don't recreate)
-- `docs/architecture/API_SPEC.md` — for contract test assertions
-- `docs/sre/OBSERVABILITY.md` — for log/metric/span assertions in observability tests
-- `docs/architecture/TECH_ARCHITECTURE.md` — for resilience pattern config (timeout values, circuit breaker thresholds)
+- `$ARTIFACTS/test-cases/test-cases.md` — REQUIRED. Cannot automate without defined test cases.
+- `$ARTIFACTS/test-gen/test-automation.md` — existing automation index (update, don't recreate)
+- `$ARTIFACTS/design/api-spec.md` — for contract test assertions
+- `$ARTIFACTS/observability/observability.md` — for log/metric/span assertions in observability tests
+- `$ARTIFACTS/design/tech-architecture.md` — for resilience pattern config (timeout values, circuit breaker thresholds)
 - Existing test files (Glob `**/*.test.*`, `**/*.spec.*`, `**/test_*.py`, etc.)
 
-If TEST_CASES.md missing: STOP. Run `/sdlc:09-test-cases` first.
-If TEST_CASES.md has untreated staleness findings: STOP. Resolve staleness before automating.
+If test-cases.md missing: STOP. Run `/sdlc:test-cases` first.
+If test-cases.md has untreated staleness findings: STOP. Resolve staleness before automating.
 
 ---
 
@@ -588,7 +601,7 @@ Run drift detection on every `/sdlc:10-test-automation` run, not just the first 
 
 ## Step 15: Write Automation Index
 
-**Update docs/qa/TEST_AUTOMATION.md:**
+**Update $ARTIFACTS/test-gen/test-automation.md:**
 
 ```markdown
 # Test Automation
@@ -651,7 +664,7 @@ npm test -- --coverage
 
 ## Step 16: Update State
 
-Mark Phase 10 (Test Automation) complete.
+Mark Phase 10 (Test Automation) complete in $STATE.
 
 Output:
 ```
@@ -665,14 +678,14 @@ TC-ID coverage: [N]/[N] ([%])
 Coverage: [N]% line / [N]% branch
 All coverage gates: [PASS / FAIL — list failing gates]
 
-Automation gaps: [N] (added to TODO.md if > 0)
+Automation gaps: [N] (added to $STATE tasks if > 0)
 Orphaned tests: [N] (resolved)
 Drift findings: [N] (resolved)
 
 Files:
-• docs/qa/TEST_AUTOMATION.md
+• $ARTIFACTS/test-gen/test-automation.md
 • [test files created/updated]
 
 Recommended Next: /sdlc:verify --phase 10   ← run this before proceeding
-Then:           /sdlc:11-observability
+Then:           /sdlc:observability
 ```

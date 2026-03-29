@@ -2,21 +2,34 @@
 
 Synthesize research findings with deep codebase analysis to produce a unified readiness picture before specs are written.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Gather All Inputs
 
 Read in parallel:
-- `docs/research/RESEARCH.md`
-- `docs/research/GAP_ANALYSIS.md`
-- `.sdlc/STATE.md` (project context)
-- `.sdlc/CODEBASE_MAP.md` (if exists — brownfield codebase index)
+- `$ARTIFACTS/research/research.md`
+- `$ARTIFACTS/research/gap-analysis.md`
+- `$STATE` (project context — read and parse JSON)
+- `.claude/ai-sdlc/codebase/architecture.md` (if exists — brownfield codebase index)
 
-If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:01-research` first.
+If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:research` first.
 
 ## Step 2: Codebase Analysis
 
 Unless `--research-only` flag is set, perform codebase analysis:
 
-**If `.sdlc/CODEBASE_MAP.md` exists (brownfield):**
+**If `.claude/ai-sdlc/codebase/architecture.md` exists (brownfield):**
 Use the map as the primary source of codebase knowledge. Extract from it:
 - Tech stack and architectural pattern
 - Domain concepts and services relevant to the research topic
@@ -27,7 +40,7 @@ Use the map as the primary source of codebase knowledge. Extract from it:
 
 Avoid re-scanning the entire codebase. Use `/sdlc:explore` queries for specific detail gaps not covered by the map. Only read individual files when the map points to a specific file that needs deeper analysis.
 
-**If no CODEBASE_MAP.md exists (greenfield or map not yet run):**
+**If no architecture.md exists (greenfield or map not yet run):**
 Perform a targeted scan:
 - Glob for top-level directories and key files
 - Identify the tech stack (package.json, requirements.txt, go.mod, pom.xml, etc.)
@@ -38,7 +51,7 @@ Perform a targeted scan:
 - Note existing test patterns and coverage
 - Identify configuration and environment patterns
 
-Recommend running `/sdlc:map` after synthesis to build a persistent map for future sessions.
+Recommend running `/sdlc:map` after synthesis to build a persistent map at `.claude/ai-sdlc/codebase/architecture.md` for future sessions.
 
 **What to capture (regardless of source):**
 - Existing capabilities that overlap with research findings (reuse opportunities)
@@ -69,7 +82,7 @@ Cross-reference research vs codebase:
 
 ## Step 4: Write Synthesis Document
 
-**Create/update docs/research/SYNTHESIS.md:**
+**Create/update $ARTIFACTS/research/synthesis.md:**
 
 ```
 # Synthesis: [Topic]
@@ -105,7 +118,7 @@ Cross-reference research vs codebase:
 
 ## Step 5: Update State and Output
 
-Update `.sdlc/STATE.md` — mark Phase 2 complete.
+Update `$STATE` (state.json) — mark Phase 2 complete.
 
 Show user summary:
 ```
@@ -115,7 +128,7 @@ Reuse Opportunities: [N found]
 Risk Areas: [N identified]
 Recommended Approach: [1-line summary]
 
-File: docs/research/SYNTHESIS.md
+File: $ARTIFACTS/research/synthesis.md
 
-Recommended Next: /sdlc:03-product-spec
+Recommended Next: /sdlc:idea
 ```

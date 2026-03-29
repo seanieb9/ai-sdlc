@@ -2,15 +2,28 @@
 
 Define service reliability objectives, runbooks, and incident response. This makes operations predictable and reduces MTTR.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight
 
 Read:
-- `docs/sre/OBSERVABILITY.md` — metrics and alerting (must exist)
-- `docs/architecture/TECH_ARCHITECTURE.md` — services and dependencies
-- `docs/product/PRODUCT_SPEC.md` — NFRs (availability, latency targets)
-- `.sdlc/STATE.md` — constraints
+- `$ARTIFACTS/observability/observability.md` — metrics and alerting (must exist)
+- `$ARTIFACTS/design/tech-architecture.md` — services and dependencies
+- `$ARTIFACTS/idea/prd.md` — NFRs (availability, latency targets)
+- `$STATE` — constraints (read and parse JSON)
 
-If OBSERVABILITY.md missing: WARN — SRE is less meaningful without observability defined.
+If observability.md missing: WARN — SRE is less meaningful without observability defined.
 
 ## Step 2: Define Service Level Objectives
 
@@ -161,7 +174,7 @@ For each dependency in TECH_ARCHITECTURE.md:
   Timeout read:    [ms]
 ```
 
-Document this table in `docs/sre/RUNBOOKS.md` under "Dependency Registry".
+Document this table in `$ARTIFACTS/sre/runbooks.md` under "Dependency Registry".
 
 ### 5b: Implement timeouts on every outbound call
 
@@ -239,7 +252,7 @@ The SIGTERM handler must be implemented (see microservices reference):
 
 ### 5j: Run resilience checklist
 
-After implementing, run the per-service resilience checklist from `resilience-patterns.md`. Every item must be checked. Any unchecked item is a known reliability risk — document it as a TODO in `.sdlc/TODO.md` with risk level.
+After implementing, run the per-service resilience checklist from `resilience-patterns.md`. Every item must be checked. Any unchecked item is a known reliability risk — document it as a task in $STATE with risk level.
 
 ### 5k: Chaos test each failure mode
 
@@ -255,13 +268,13 @@ Add these as integration tests tagged `[resilience]` so they can be run in CI.
 
 ## Step 6: Write Output Documents
 
-**docs/sre/RUNBOOKS.md** — all runbooks
-**docs/sre/SLO.md** — SLO definitions, error budgets, monitoring queries
-**docs/sre/INCIDENT_RESPONSE.md** — severity guide, response process, post-mortem template
+**$ARTIFACTS/sre/runbooks.md** — all runbooks
+**$ARTIFACTS/sre/slo.md** — SLO definitions, error budgets, monitoring queries
+**$ARTIFACTS/sre/incident-response.md** — severity guide, response process, post-mortem template
 
 ## Step 7: Update State
 
-Mark Phase 12 (SRE) complete.
+Mark Phase 12 (SRE) complete in $STATE.
 
 Output:
 ```
@@ -272,9 +285,9 @@ Runbooks written: [N]
 Incident response: defined
 
 Files:
-• docs/sre/RUNBOOKS.md
-• docs/sre/SLO.md
-• docs/sre/INCIDENT_RESPONSE.md
+• $ARTIFACTS/sre/runbooks.md
+• $ARTIFACTS/sre/slo.md
+• $ARTIFACTS/sre/incident-response.md
 
-Recommended Next: /sdlc:13-review
+Recommended Next: /sdlc:review
 ```

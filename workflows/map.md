@@ -2,7 +2,7 @@
 
 Analyse the codebase and produce a persistent, structured index that lets Claude (and humans) understand the project instantly in any future session. Replaces the need for code indexing tools or semantic search — the map IS the index.
 
-The map lives at `.sdlc/CODEBASE_MAP.md`. It is committed with the code, survives `/clear`, and is read at the start of every session on a brownfield project.
+The map lives at `.claude/ai-sdlc/codebase/architecture.md`. It is committed with the code, survives `/clear`, and is read at the start of every session on a brownfield project.
 
 Run once on first encounter with a brownfield codebase. Re-run with `--refresh` when significant changes have been made. Run with `--module <path>` to re-map a specific area.
 
@@ -16,7 +16,7 @@ Read arguments:
 - `--refresh` → re-run full analysis and overwrite CODEBASE_MAP.md
 - `--depth <n>` → control directory depth (default: 3)
 
-Read any existing `.sdlc/CODEBASE_MAP.md` first — if it exists and `--refresh` is not set, do an incremental update (add new files/modules, flag changed patterns).
+Read any existing `.claude/ai-sdlc/codebase/architecture.md` first — if it exists and `--refresh` is not set, do an incremental update (add new files/modules, flag changed patterns).
 
 ---
 
@@ -286,10 +286,10 @@ Adjust patterns based on actual framework, language, and conventions found.
 
 ---
 
-## Step 12: Write `.sdlc/CODEBASE_MAP.md`
+## Step 12: Write `.claude/ai-sdlc/codebase/architecture.md`
 
 ```markdown
-# Codebase Map
+# Codebase Architecture Map
 *Generated: [date] | Refreshed: [date]*
 *Regenerate: /sdlc:map --refresh | Module update: /sdlc:map --module <path>*
 
@@ -454,16 +454,11 @@ src/
 
 ---
 
-## Step 13: Update `.sdlc/STATE.md`
+## Step 13: Update State
 
-Add to Document Index:
-```
-- [x] .sdlc/CODEBASE_MAP.md  (generated [date])
-```
-
-Add to Context:
-```
-[date] CODEBASE_MAP generated — [N] entities, [N] services, [N] API routes mapped. Architecture: [pattern].
+The map is stored at `.claude/ai-sdlc/codebase/architecture.md` — this is a shared codebase-level file, not branch-scoped. Note its existence in the branch $STATE if available:
+```json
+{"date": "[date]", "event": "CODEBASE_MAP", "note": "[N] entities, [N] services, [N] API routes mapped. Architecture: [pattern]."}
 ```
 
 ---
@@ -483,7 +478,7 @@ Hotspot files: [N] (>300 lines)
 Tech debt items: [N]
 Search recipes: [N]
 
-File: .sdlc/CODEBASE_MAP.md
+File: .claude/ai-sdlc/codebase/architecture.md
 
 To query the map: /sdlc:explore "<question>"
 To re-map a module: /sdlc:map --module <path>

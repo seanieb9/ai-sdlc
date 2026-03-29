@@ -2,14 +2,27 @@
 
 Implement enterprise-grade observability. This is not optional. Full E2E traceability is a requirement, not a nice-to-have.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Read Context
 
 Read in parallel:
-- `docs/architecture/TECH_ARCHITECTURE.md` — services, components, integration points
-- `docs/architecture/API_SPEC.md` — endpoints to instrument
-- `docs/data/DATA_MODEL.md` — entities and operations to track
-- `docs/sre/OBSERVABILITY.md` — existing standards (if any)
-- `.sdlc/STATE.md` — tech stack, constraints
+- `$ARTIFACTS/design/tech-architecture.md` — services, components, integration points
+- `$ARTIFACTS/design/api-spec.md` — endpoints to instrument
+- `$ARTIFACTS/data-model/data-model.md` — entities and operations to track
+- `$ARTIFACTS/observability/observability.md` — existing standards (if any)
+- `$STATE` — tech stack, constraints (read and parse JSON)
 
 Identify:
 - All services to instrument
@@ -211,7 +224,7 @@ Define base alerting rules (document in OBSERVABILITY.md):
 
 ## Step 8: Write Output Document
 
-**Create/update docs/sre/OBSERVABILITY.md:**
+**Create/update $ARTIFACTS/observability/observability.md:**
 
 ```markdown
 # Observability Standards
@@ -258,7 +271,7 @@ After writing the standards document, implement in the codebase:
 
 ## Step 10: Update State
 
-Mark Phase 11 (Observability) complete.
+Mark Phase 11 (Observability) complete in $STATE.
 
 Output:
 ```
@@ -270,8 +283,8 @@ Custom Spans: [N]
 Health Endpoints: implemented
 
 Files:
-• docs/sre/OBSERVABILITY.md
+• $ARTIFACTS/observability/observability.md
 • [implementation files]
 
-Recommended Next: /sdlc:12-sre
+Recommended Next: /sdlc:sre
 ```

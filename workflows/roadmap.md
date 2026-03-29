@@ -4,13 +4,26 @@ Generate a human-effort roadmap for an agentic development project. The planning
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Read Project Context
 
 Read in parallel:
-- `.sdlc/STATE.md` — project name, type, description, constraints
+- `$STATE` — project name, type, description, constraints (read and parse JSON)
 - `.sdlc/ROADMAP.md` — if exists, this is an update, not a fresh generation
 
-If STATE.md does not exist: tell the user to run `/sdlc:00-start` first to initialise the project before creating a roadmap.
+If $STATE does not exist: tell the user to run `/sdlc:start` first to initialise the project before creating a roadmap.
 
 ---
 
@@ -105,16 +118,19 @@ If ROADMAP.md already exists (update mode):
 
 ---
 
-## Step 7: Update STATE.md
+## Step 7: Update State
 
-Add to `.sdlc/STATE.md`:
-```
-## Roadmap
-- Team: [Solo | Microsquad — Product: X, Tech: Y]
-- Total sessions: [N]D + [N]R
-- Sessions/week: [N]
-- Target: [date or continuous]
-- Last updated: [date]
+Add to `$STATE`:
+```json
+{
+  "roadmap": {
+    "team": "[Solo | Microsquad — Product: X, Tech: Y]",
+    "total_sessions": "[N]D + [N]R",
+    "sessions_per_week": [N],
+    "target": "[date or continuous]",
+    "last_updated": "[date]"
+  }
+}
 ```
 
 ---

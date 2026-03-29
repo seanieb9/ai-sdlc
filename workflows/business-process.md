@@ -4,16 +4,29 @@ Map the operational processes that run behind user-facing journeys. This phase c
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight
 
 Read in parallel:
-- `docs/product/CUSTOMER_JOURNEY.md` — required; business processes derive from journey touchpoints
-- `docs/product/PRODUCT_SPEC.md` — for requirements context and business rules
-- `docs/product/PERSONAS.md` — to understand operational roles
-- `docs/product/BUSINESS_PROCESS.md` — existing document (if any — update, never recreate)
-- `.sdlc/STATE.md` — project context
+- `$ARTIFACTS/journey/customer-journey.md` — required; business processes derive from journey touchpoints
+- `$ARTIFACTS/idea/prd.md` — for requirements context and business rules
+- `$ARTIFACTS/personas/personas.md` — to understand operational roles
+- `$ARTIFACTS/business-process/business-process.md` — existing document (if any — update, never recreate)
+- `$STATE` — project context (read and parse JSON)
 
-If CUSTOMER_JOURNEY.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest `/sdlc:04-customer-journey`.
+If customer-journey.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest `/sdlc:journey`.
 
 ---
 
@@ -186,7 +199,7 @@ If gaps are found: document them as `⚠️ UNRESOLVED` items at the top of the 
 
 ## Step 5: Write Output Document
 
-**Update or create `docs/product/BUSINESS_PROCESS.md`:**
+**Update or create `$ARTIFACTS/business-process/business-process.md`:**
 
 ```markdown
 # Business Processes
@@ -236,10 +249,10 @@ Consolidated list of all ⚠️ flags from individual process sections. This is 
 
 ---
 
-## Step 6: Update STATE.md
+## Step 6: Update State
 
-Mark Phase 4b complete. Add to document index:
-- `[x] docs/product/BUSINESS_PROCESS.md`
+Mark Phase 4b complete in $STATE. Add to document index:
+- `$ARTIFACTS/business-process/business-process.md`
 
 ---
 
@@ -256,8 +269,8 @@ Processes mapped: [N]
 Data model flags:  [N] new entities / fields needed for Phase 5
 Open items:        [N]
 
-File: docs/product/BUSINESS_PROCESS.md
+File: $ARTIFACTS/business-process/business-process.md
 
-Recommended Next: /sdlc:05-data-model ⚠️ (Critical Gate)
-  → Read BUSINESS_PROCESS.md ## Data Model Implications Summary before modelling
+Recommended Next: /sdlc:data-model ⚠️ (Critical Gate)
+  → Read business-process.md ## Data Model Implications Summary before modelling
 ```

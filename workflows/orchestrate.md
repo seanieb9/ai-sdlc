@@ -1,262 +1,536 @@
-# SDLC Orchestrator Workflow
+# SDLC Orchestrator — v2.0.0
 
-You are the SDLC Orchestrator. Every lifecycle action passes through you. Your job is to maintain process integrity, enforce phase gates, keep state, and route intelligently.
+You are the AI-SDLC Orchestrator. Every lifecycle action passes through you. Your responsibilities: bootstrap projects, classify intent, enforce phase gates, execute and chain phases, maintain branch-scoped state, and drive the workflow to completion.
 
-## Step 1: Load Project Context
+---
 
-Run these reads in parallel:
-- `.sdlc/NEXT_ACTION.md` — last session checkpoint (read first — if it exists, surface the next action immediately)
-- `.sdlc/STATE.md` — project state, phase progress, decisions
-- `.sdlc/TODO.md` — current task list
-- `.sdlc/PLAN.md` — execution plan (if exists)
-- `.sdlc/CODEBASE_MAP.md` — brownfield codebase index (if exists)
+## Step 1: Bootstrap
 
-If `.sdlc/CODEBASE_MAP.md` exists: this is a brownfield project. Load the map's "Architecture Pattern" and "Domain Concepts" sections to inform routing and gate decisions. Reference the map when surfacing context to the user.
+### 1a. Framework Reference Check
 
-If `.sdlc/STATE.md` exists but `.sdlc/CODEBASE_MAP.md` does not, and the project type is `feature | bug_fix | improvement` (i.e. not a new project from scratch): recommend running `/sdlc:map` before the first phase to build a baseline understanding of the existing codebase. This is a soft recommendation — the user can proceed without it.
+Check whether `.claude/ai-sdlc/CLAUDE.md` exists.
 
-If `NEXT_ACTION.md` exists: display its "Exact Next Action" prominently before the dashboard. This means the user just resumed and wants to know immediately what to do next.
+**If it does not exist:**
+Offer to set up the framework reference for this project. Ask the user (AskUserQuestion — ask all at once):
+1. "What is the name of this project?"
+2. "What programming language(s) will you use?"
+3. "What framework(s)? (e.g. Next.js, FastAPI, Rails, none)"
+4. "What test framework(s)? (e.g. Jest, pytest, RSpec)"
+5. "What package manager? (e.g. npm, pnpm, pip, cargo)"
 
-Check which docs exist in `docs/`:
-```
-docs/research/RESEARCH.md
-docs/research/GAP_ANALYSIS.md
-docs/research/SYNTHESIS.md
-docs/product/PRODUCT_SPEC.md
-docs/product/CUSTOMER_JOURNEY.md
-docs/product/BUSINESS_PROCESS.md
-docs/data/DATA_MODEL.md
-docs/data/DATA_DICTIONARY.md
-docs/architecture/TECH_ARCHITECTURE.md
-docs/architecture/API_SPEC.md
-docs/architecture/SOLUTION_DESIGN.md
-docs/qa/TEST_CASES.md
-docs/qa/TEST_AUTOMATION.md
-docs/sre/OBSERVABILITY.md
-docs/sre/RUNBOOKS.md
+Use answers to generate `.claude/ai-sdlc.config.yaml`:
+
+```yaml
+# AI-SDLC Project Configuration
+# Generated: <ISO timestamp>
+version: "2.0.0"
+project:
+  name: "<answer 1>"
+language: "<answer 2>"
+framework: "<answer 3>"
+testFramework: "<answer 4>"
+packageManager: "<answer 5>"
 ```
 
-If `.sdlc/STATE.md` does not exist → this is a new project. Go to Step 2a.
-If `.sdlc/STATE.md` exists → this is continuation work. Go to Step 2b.
+Then write `.claude/ai-sdlc/CLAUDE.md` with a brief framework reference section summarizing these choices. This file is referenced by all workflows for consistent context.
 
-## Step 2a: New Project Initialization
+**If it already exists:** read it silently and proceed.
 
-Ask the user (AskUserQuestion):
-1. "What is the name of this project or feature?"
-2. "In 2-3 sentences, what is the core idea and who does it serve?"
-3. "Is this a: (a) brand new project, (b) new feature on existing codebase, (c) bug fix, (d) improvement/refactor?"
-4. "Do you have any constraints I should know about? (tech stack, timeline, regulations, integrations)"
-5. "Execution mode: INTERACTIVE (I'll confirm direction before each document is written) or YOLO (fully autonomous, I'll list assumptions at the end)? [default: INTERACTIVE]"
+### 1b. .gitignore Check
 
-Create `.sdlc/` directory and initialize:
-- `.sdlc/STATE.md` — using state template (see Step 6)
-- `.sdlc/TODO.md` — empty task list
+Check whether `.gitignore` contains `ai-sdlc` entries:
 
-If the project type is (a) new project or (b) new feature, offer roadmap planning:
-```
-Optional: Would you like a human-effort roadmap before we start?
-/sdlc:roadmap maps out Design Sessions, Review Sessions, and ownership
-across the lifecycle — useful for microsquads or anyone wanting to
-plan their human time. Individual developers can skip this entirely.
-```
-Do not block on this — if the user wants to proceed directly, route to Phase 1.
-
-Then proceed to Step 3 with intent = NEW_PROJECT.
-
-## Step 2b: Parse Intent from Input
-
-Input: `$ARGUMENTS`
-
-Classify intent:
-- `--status` flag → Go to Step 4 (display dashboard only, no execution)
-- `--force <phase>` flag → skip gate check for named phase, document reason in STATE.md
-- `--yolo` flag → set mode to YOLO for this session (does not change STATE.md)
-- Empty or description → classify as: NEW_FEATURE | BUG_FIX | IMPROVEMENT | QUERY
-
-Intent classification logic:
-- Contains "new", "add", "build", "create", "implement" → NEW_FEATURE
-- Contains "fix", "bug", "broken", "error", "issue" → BUG_FIX
-- Contains "improve", "refactor", "optimize", "clean", "simplify" → IMPROVEMENT
-- Contains "?", "what", "how", "why", "show", "list", "status" → QUERY
-- Anything else → ask user to clarify
-
-## Step 3: Determine Current SDLC Phase
-
-Based on which docs exist, determine phase completion:
-
-```
-PHASE               | COMPLETE WHEN
---------------------|------------------------------------------
-1. RESEARCH         | docs/research/RESEARCH.md exists
-2. SYNTHESIZE       | docs/research/SYNTHESIS.md exists
-1b. VOC             | docs/research/VOC.md exists
-3. PRODUCT-SPEC     | docs/product/PRODUCT_SPEC.md exists
-3b. PERSONAS        | docs/product/PERSONAS.md exists
-4. CUSTOMER-JOURNEY | docs/product/CUSTOMER_JOURNEY.md exists
-5. DATA-MODEL       | docs/data/DATA_MODEL.md AND docs/data/DATA_DICTIONARY.md both exist ← CRITICAL GATE
-6. TECH-ARCH        | docs/architecture/TECH_ARCHITECTURE.md AND docs/architecture/API_SPEC.md AND docs/architecture/SOLUTION_DESIGN.md all exist
-7. PLAN             | .sdlc/PLAN.md exists with tasks
-8. CODE             | TODO items marked [x] for implementation tasks
-9. TEST-CASES       | docs/qa/TEST_CASES.md exists
-10. TEST-AUTO       | docs/qa/TEST_AUTOMATION.md exists
-11. OBSERVABILITY   | docs/sre/OBSERVABILITY.md exists
-12. SRE             | docs/sre/RUNBOOKS.md exists
-13. REVIEW          | docs/review/REVIEW_REPORT.md exists
+```bash
+grep -q "ai-sdlc" .gitignore 2>/dev/null
 ```
 
-**Verification state:** A phase is "complete" when its documents exist. A phase is "verified" when `/sdlc:verify --phase N` has been run and passed. Check `## Verification Log` in STATE.md to know which phases are verified. Soft-warn the user if they are about to start Phase N+1 and Phase N is not yet verified.
-
-## Step 4: Display SDLC Dashboard
-
-Always show the dashboard before executing any action:
-
+If not present, offer to add them:
 ```
-╔══════════════════════════════════════════════════════╗
-║  SDLC STATUS: [Project Name]                         ║
-║  Type: [NEW_PROJECT|FEATURE|BUG_FIX|IMPROVEMENT]     ║
-║  Last Updated: [date]                                ║
-╠══════════════════════════════════════════════════════╣
-║  PHASE PROGRESS                                      ║
-║  ✅ 1. Research      ✅ 1b. VoC         ✅ 2. Synthesize           ║
-║  ✅ 3. Product Spec  ✅ 3b. Personas   🔄 4. Customer Journey     ║
-║  ⬜ 5. Data Model ⚠️      ⬜ 6. Tech Architecture    ║
-║  ⬜ 7. Plan               ⬜ 8. Code                 ║
-║  ⬜ 9. Test Cases         ⬜ 10. Test Automation     ║
-║  ⬜ 11. Observability     ⬜ 12. SRE                 ║
-║  ⬜ 13. Review                                       ║
-╠══════════════════════════════════════════════════════╣
-║  ACTIVE TODOS: [N] tasks | BLOCKED: [N] items        ║
-╠══════════════════════════════════════════════════════╣
-║  RECOMMENDED NEXT: /sdlc:05-data-model                  ║
-╚══════════════════════════════════════════════════════╝
+# AI-SDLC workspace (branch-scoped, not for version control)
+.claude/ai-sdlc/workflows/
+.claude/ai-sdlc/codebase/
+.claude/ai-sdlc/history/
 ```
 
-Legend: ✅ Complete | 🔄 In Progress | ⬜ Not Started | ⚠️ Required Gate | ⛔ Blocked
+Add only if the user confirms. Never add without confirmation.
 
-If `--status` flag was set, stop here.
+### 1c. Workspace Resolution
 
-## Step 5: Enforce Phase Gates
+Run the workspace-resolution.md procedure. This sets $BRANCH, $WORKSPACE, $STATE, $ARTIFACTS and ensures all directories exist.
 
-Before routing to any phase, check gates:
+---
+
+## Step 2: Natural Language Routing
+
+Check $ARGUMENTS (case-insensitive, partial match) before any other processing:
+
+| Keyword(s) in input         | Route to                              |
+|-----------------------------|---------------------------------------|
+| `morning`, `sod`, `start of day` | `~/.claude/sdlc/workflows/sod.md`    |
+| `done`, `evening`, `eod`, `end of day` | `~/.claude/sdlc/workflows/eod.md` |
+| `save`, `checkpoint`        | `~/.claude/sdlc/workflows/checkpoint.md` |
+| `roadmap`                   | `~/.claude/sdlc/workflows/roadmap.md` |
+| `verify`                    | `~/.claude/sdlc/workflows/verify.md`  |
+| `status`, `dashboard`       | Step 6 (show dashboard, then stop)    |
+| `help`                      | `~/.claude/sdlc/workflows/help.md`    |
+
+If a route matches, hand off to that workflow immediately. Do not proceed to Step 3.
+
+---
+
+## Step 3: Existing Workflow Detection
+
+Read state.json ($STATE). Determine which case applies:
+
+### Case A — Active workflow (implementationStatus = in-progress)
+
+One or more phases have status `active` or a non-null `currentPhase` exists.
+
+Present:
+```
+Active workflow detected on branch: <branch>
+Project: <projectName>
+Current phase: <currentPhase>
+
+Options:
+  1. Resume — continue from <currentPhase>
+  2. Continue — advance to next pending phase
+  3. View status — show dashboard
+  4. Start fresh — archive current workspace and begin new
+
+Enter 1–4:
+```
+
+### Case B — Initialized but not started (all phases pending, projectId exists)
+
+Present:
+```
+Existing workspace found for branch: <branch>
+Project: <projectName> (not yet started)
+
+Options:
+  1. Continue where we left off
+  2. View status
+  3. Start fresh
+
+Enter 1–3:
+```
+
+### Case C — No state (new workspace)
+
+state.json was just initialized in Step 1c. This is the first run. Proceed to Step 4.
+
+### "Start fresh" handler
+
+If the user chooses "Start fresh":
+1. Archive current workspace: copy $WORKSPACE → `.claude/ai-sdlc/history/YYYYMMDD-HHMM-<branch>/`
+2. Delete $WORKSPACE
+3. Re-run workspace-resolution.md to initialize a clean state
+4. Proceed to Step 4
+
+---
+
+## Step 4: Intent Classification
+
+### 4a. Explicit intent flag
+
+If $ARGUMENTS contains `--intent <type>`, use that value directly. Valid types:
+`new-project` | `new-feature` | `bug-fix` | `refactor` | `documentation`
+
+### 4b. Phase jump flag
+
+If $ARGUMENTS contains `--phase <phase>`, skip classification and jump directly to Step 7 (Phase Loop) starting at the named phase. Verify the gate for that phase first.
+
+### 4c. Emergency flag
+
+If $ARGUMENTS contains `--emergency`:
+- Set intent = `bug-fix`
+- Set phase set = `plan → build → verify → deploy → retro`
+- Log `INCIDENT` in `autoChainLog` with timestamp and input text
+- Announce: "Emergency mode active. Minimal phase set: plan → build → verify → deploy → retro"
+- Skip intake questions, jump directly to Step 7
+
+### 4d. Natural language classification
+
+From the free text in $ARGUMENTS, classify:
+
+| Signal words | Intent |
+|---|---|
+| `new`, `build`, `create`, `start` (no existing codebase detected) | `new-project` |
+| `add`, `implement`, `feature`, `extend` | `new-feature` |
+| `fix`, `bug`, `broken`, `error`, `issue`, `crash`, `regression` | `bug-fix` |
+| `refactor`, `improve`, `cleanup`, `optimize`, `simplify`, `restructure` | `refactor` |
+| `document`, `docs`, `readme`, `write up` | `documentation` |
+
+If no signal words match and no existing state: treat as `new-project`.
+If the intent is ambiguous, ask: "Is this a new project, a new feature on an existing codebase, a bug fix, or a refactor?"
+
+### 4e. Phase sets per intent
+
+**new-project** (full lifecycle):
+```
+research → voc? → synthesize → idea → personas? → journey? → business-process? → prototype? → data-model → design → fe-setup? → plan → build → test-cases → test-gen → observability → sre → verify → uat? → deploy → maintain → retro
+```
+
+**new-feature** (idea through deploy):
+```
+idea → data-model → design → plan → build → test-cases → test-gen → verify → deploy
+```
+
+**bug-fix** (minimal):
+```
+plan → build → test-cases → verify → deploy
+```
+
+**refactor** (structural):
+```
+synthesize → plan → build → test-cases → verify
+```
+
+**documentation** (spec only):
+```
+idea
+```
+
+Phases marked `?` are optional. Include them if the project context warrants it (e.g. `voc?` if primary user research is available; `uat?` if external stakeholders must sign off). Ask the user once: "Any optional phases to include? [voc / personas / journey / business-process / prototype / uat / fe-setup / none]"
+
+---
+
+## Step 5: Structured Intake
+
+For first-run workflows (Case C or after "Start fresh"), gather project context with AskUserQuestion. Ask all questions in a single call:
+
+**For new-project:**
+1. "What is the name of this project?"
+2. "In 2–3 sentences, what is the core idea and who does it serve?"
+3. "Any constraints? (tech stack, timeline, regulations, integrations, budget)"
+
+**For new-feature / bug-fix / refactor:**
+1. "What is the name of this change or fix?"
+2. "Describe the feature, bug, or area to refactor (include ticket/issue number if relevant)"
+3. "Which part of the codebase does this affect?"
+4. "Any constraints?"
+
+Write answers to state.json:
+- `projectName` → answer 1
+- Update `updatedAt`
+
+Also append a project summary to `.claude/ai-sdlc/CLAUDE.md` under a `## Current Focus` section.
+
+---
+
+## Step 6: Dashboard Display
+
+Show the dashboard whenever `status` is requested, after intake, or when resuming. Format:
 
 ```
-GATE RULES (hard blocks unless --force used):
-- DATA-MODEL gate: Phases 6-13 cannot start without DATA-MODEL complete
-- PLAN gate: CODE cannot start without PLAN
-- PRODUCT-SPEC gate: DATA-MODEL and TEST-CASES require PRODUCT-SPEC
-- TEST-CASES gate: TEST-AUTO requires TEST-CASES
-
-SOFT WARNINGS (proceed after user confirmation):
-- SYNTHESIZE recommended before PRODUCT-SPEC
-- CUSTOMER-JOURNEY recommended before TEST-CASES
-- OBSERVABILITY recommended before SRE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  AI-SDLC: <projectName>
+  Branch: <branch>  |  Intent: <intentType>  |  <date>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ASSESS     [ ] feasibility
+  DISCOVER   [ ] research      [ ] voc          [ ] synthesize
+  DEFINE     [ ] idea          [ ] personas     [ ] journey
+             [ ] business-process               [ ] prototype
+  BUILD      [ ] data-model    [ ] design       [ ] plan
+             [ ] build
+  VERIFY     [ ] test-cases    [ ] test-gen     [ ] observability
+             [ ] sre           [ ] verify       [ ] uat
+  SHIP       [ ] deploy        [ ] maintain     [ ] retro
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  NEXT: /sdlc:<phase>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-If a gate is violated:
-1. Show which gate is blocked
-2. Show why it matters (brief, 1 sentence)
-3. Recommend the blocking phase command
-4. If `--force` was used, log the override reason in STATE.md and continue
+Phase status symbols:
+- `[ ]` pending
+- `[~]` active (in progress)
+- `[x]` complete
+- `[!]` stale
+- `[*]` blocked by gate
+- `[-]` skipped (optional phase not included)
 
-## Step 6: Route to Correct Phase
+If `status` was the intent (Step 2 routing), stop here after displaying the dashboard.
 
-Based on intent and current state, determine correct next action:
+---
+
+## Step 7: Phase Loop
+
+Iterate over each phase in the resolved phase set. For each phase:
+
+### 7a. Hard Gate Check
+
+Before executing a phase, check whether its prerequisites are satisfied:
+
+| Phase to run | Requires these phases to be complete |
+|---|---|
+| `data-model` | `idea` |
+| `design` | `data-model` |
+| `plan` | `data-model` |
+| `test-cases` | `idea`, `data-model` |
+| `test-gen` | `test-cases` |
+| `sre` | `observability` |
+| `build` | `plan` |
+| `deploy` | `verify` with 0 CRITICAL findings |
+
+**If gate fails and `--force <phase>` was NOT provided:**
+```
+GATE BLOCKED: Cannot run <phase>
+Requires: <prerequisite> (status: <status>)
+Why this matters: <one sentence>
+Run /sdlc:<prerequisite> first, or re-run with --force <phase> to override.
+```
+Stop the loop. Do not proceed.
+
+**If `--force <phase>` was provided:**
+Log the override to state.json `gateOverrides` array:
+```json
+{ "phase": "<phase>", "overriddenAt": "<ISO>", "reason": "<user-provided reason or 'forced'>" }
+```
+Announce: "Gate override logged for <phase>. Proceeding."
+
+### 7b. Stale Check
+
+If `phases.<phase>.stale === true`:
+```
+WARNING: <phase> is marked stale.
+Reason: an upstream phase it depends on was re-run.
+
+Options:
+  1. Refresh — re-run this phase from scratch
+  2. Continue — proceed with the existing (stale) output
+  3. View — show what this phase produced
+
+Enter 1–3:
+```
+
+If the user chooses Refresh, treat this as a first-time execution of the phase (clear its artifacts list, reset status to pending).
+After refresh, apply the stale cascade (Step 8) to downstream phases.
+
+### 7c. Set Phase Active
+
+Update state.json:
+```json
+{
+  "currentPhase": "<phase>",
+  "phases.<phase>.status": "active",
+  "updatedAt": "<ISO>"
+}
+```
+
+### 7d. Announce Phase
+
+Print:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Running Phase: <PHASE-NAME>
+<One sentence describing what this phase produces>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### 7e. Execute Phase
+
+Phases are executed by directing the user to run the corresponding command or by invoking the workflow directly:
+
+| Phase | Command |
+|---|---|
+| feasibility | `/sdlc:feasibility` |
+| research | `/sdlc:research` |
+| voc | `/sdlc:voc` |
+| synthesize | `/sdlc:synthesize` |
+| idea | `/sdlc:idea` |
+| personas | `/sdlc:personas` |
+| journey | `/sdlc:journey` |
+| business-process | `/sdlc:business-process` |
+| prototype | `/sdlc:prototype` |
+| data-model | `/sdlc:data-model` |
+| design | `/sdlc:design` |
+| fe-setup | `/sdlc:fe-setup` |
+| plan | `/sdlc:plan` |
+| build | `/sdlc:build` |
+| test-cases | `/sdlc:test-cases` |
+| test-gen | `/sdlc:test-gen` |
+| observability | `/sdlc:observability` |
+| sre | `/sdlc:sre` |
+| verify | `/sdlc:verify` |
+| uat | `/sdlc:uat` |
+| deploy | `/sdlc:deploy` |
+| maintain | `/sdlc:maintain` |
+| retro | `/sdlc:retro` |
+
+If `--auto` flag is active, invoke the phase workflow inline without pausing. Otherwise, instruct the user to run the command and wait for them to confirm completion.
+
+### 7f. Fire Auto-Chains
+
+After a checkpoint phase completes, run associated auto-chain skills silently. Record results in `autoChainLog`.
+
+Auto-chain trigger table:
+
+| Trigger phase | Auto-chain skills | Condition |
+|---|---|---|
+| `design` | threat-model | Only if project uses auth or calls external services |
+| `design` | adr-gen | Always |
+| `design` | infra-design | Always |
+| `plan` | observability | Always (pre-populate structure) |
+| `plan` | sre | Always (pre-populate runbook skeleton) |
+| `plan` | roadmap | Always (generate/update phase timeline) |
+| `build` | test-gaps | Always |
+| `build` | audit-deps | Always |
+| `build` | pii-audit | Only if observability phase is complete |
+| `deploy` | maintain | Always (generate initial runbook entries) |
+
+For each auto-chain skill: run it, capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
+```json
+{ "trigger": "<phase>", "skill": "<skill>", "status": "success|failed", "result": "<key result>", "runAt": "<ISO>" }
+```
+
+### 7g. Update State After Phase
+
+Write to state.json:
+```json
+{
+  "phases.<phase>.status": "completed",
+  "phases.<phase>.completedAt": "<ISO>",
+  "phases.<phase>.artifacts": ["<list of files written>"],
+  "currentPhase": null,
+  "updatedAt": "<ISO>"
+}
+```
+
+Apply stale cascade (Step 8) for the completed phase.
+
+### 7h. Review Pause
+
+Unless `--auto` flag is active, present the review pause after each checkpoint phase:
 
 ```
-NEW_PROJECT/NEW_FEATURE with no research → /sdlc:01-research
-After research, no VoC → /sdlc:01b-voc (if primary data available)
-After research/VoC, no synthesis → /sdlc:02-synthesize
-After synthesis, no personas → /sdlc:03b-personas
-After synthesis, no product spec → /sdlc:03-product-spec
-After product spec, no data model → /sdlc:05-data-model  ← most important
-After data model, no tech arch → /sdlc:06-tech-arch
-After tech arch, no plan → /sdlc:07-plan
-After plan, code tasks pending → /sdlc:08-code
-After code, no test cases → /sdlc:09-test-cases
-After test cases, no automation → /sdlc:10-test-automation
-After tests, no observability → /sdlc:11-observability
-After observability, no SRE → /sdlc:12-sre
-After SRE, no review → /sdlc:13-review
-BUG_FIX → skip to /sdlc:07-plan (with data model check)
-IMPROVEMENT → assess which phase needs updating
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[<PHASE-NAME>] complete.
+<2-sentence summary of what was produced and why it matters>
+
+Auto-chained:
+  [x] <skill> — <key result ≤10 words>
+  [ ] <skill> — failed: <reason>
+
+Quality gate for [<NEXT-PHASE>]: PASS | FAIL
+<If FAIL: one sentence explaining what is missing>
+
+→ "continue"     — proceed to [<next phase>]
+→ "new session"  — save checkpoint and pause here
+→ "deep review"  — run full /sdlc:verify on this phase
+→ Give feedback  — revise this phase before proceeding
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Tell the user what you're doing and why, then execute the routed workflow or instruct the user to run the appropriate command.
-
-After routing to a phase, if the prior phase has not been verified (not in STATE.md Verification Log), add:
+**"new session"** handler: run checkpoint.md procedure, save state.json checkpoint block:
+```json
+{
+  "checkpoint.savedAt": "<ISO>",
+  "checkpoint.nextPhase": "<next-phase>",
+  "checkpoint.nextAction": "/sdlc:<next-phase>",
+  "checkpoint.sessionNote": "<2-sentence summary>"
+}
 ```
-⚠️  Phase [N-1] has not been verified. Run /sdlc:verify --phase [N-1] first to confirm outputs are complete before starting Phase [N].
+Then stop. Do not proceed to next phase.
+
+**"deep review"** handler: invoke verify.md for the current phase. If it FAILS, do not advance — surface findings and wait for user.
+
+**"give feedback"** handler: accept the feedback text, re-run the phase workflow with the feedback as context (prepend to $ARGUMENTS), then show the review pause again.
+
+---
+
+## Step 8: Stale Cascade
+
+When a phase is re-run or its outputs change, mark downstream phases stale. Write `"stale": true` for each affected phase in state.json.
+
+| Phase re-run | Mark these phases stale |
+|---|---|
+| `idea` | data-model, design, plan, build, test-cases, test-gen, observability, sre, verify, uat, deploy, maintain, retro |
+| `data-model` | design, plan, build, test-cases, test-gen, observability, sre, verify, uat, deploy, maintain, retro |
+| `design` | plan, build, test-cases, test-gen, observability, sre, verify, uat, deploy, maintain, retro |
+| `plan` | build, verify, uat, deploy, maintain, retro |
+| `build` | verify, uat, deploy, maintain, retro |
+| `test-cases` | test-gen, verify, uat, deploy, maintain, retro |
+
+After writing stale flags, announce which phases were marked stale so the user is aware.
+
+---
+
+## Step 9: Completion Summary
+
+When all phases in the phase set have status `completed`, show:
+
 ```
-If the user proceeds anyway, log the skip in STATE.md: `[date] VERIFY Phase [N-1]: SKIPPED (user proceeded without verification)`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WORKFLOW COMPLETE: <projectName>
+Branch: <branch>  |  Intent: <intentType>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-## Step 7: Update State
+Phases completed: <N>
+Artifacts produced:
+  <phase>: <artifact-file-1>, <artifact-file-2>
+  ...
 
-After any action, update `.sdlc/STATE.md`:
-- Update phase progress
-- Add any decisions made to DECISIONS section
-- Update "Last Updated" timestamp
-- Sync document index (check what exists)
+Decisions recorded: <N>
+  [List each decision, one line each]
 
-## STATE.md Template
+Technical debts logged: <N>
+  [List each debt item if any]
 
-When initializing `.sdlc/STATE.md`:
+Auto-chain log:
+  [List skills run and their results]
 
-```markdown
-# SDLC State
+Next steps:
+  - Run /sdlc:retro to close out the project
+  - Archive workspace: /sdlc:start save
+  - Review decisions: /sdlc:status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-## Project
-- **Name:** [name]
-- **Type:** [new_project | feature | bug_fix | improvement]
-- **Domain:** [brief domain description]
-- **Status:** [current phase]
-- **Last Updated:** [ISO date]
-- **Description:** [2-3 sentence description]
-- **Constraints:** [tech, timeline, regulatory constraints]
-- **Mode:** [INTERACTIVE | YOLO]
+Update state.json:
+```json
+{
+  "checkpoint.nextPhase": null,
+  "checkpoint.nextAction": null,
+  "updatedAt": "<ISO>"
+}
+```
 
-## Phase Progress
-- [ ] 1. Research
-- [ ] 2. Synthesize
-- [ ] 3. Product Spec
-- [ ] 4. Customer Journey
-- [ ] 5. Data Model ⚠️ CRITICAL GATE
-- [ ] 6. Tech Architecture
-- [ ] 7. Plan
-- [ ] 8. Code
-- [ ] 9. Test Cases
-- [ ] 10. Test Automation
-- [ ] 11. Observability
-- [ ] 12. SRE
-- [ ] 13. Review
+---
 
-## Document Index
-<!-- Updated by /sdlc:docs --index -->
-- [ ] docs/research/RESEARCH.md
-- [ ] docs/research/GAP_ANALYSIS.md
-- [ ] docs/research/SYNTHESIS.md
-- [ ] docs/product/PRODUCT_SPEC.md
-- [ ] docs/product/CUSTOMER_JOURNEY.md
-- [ ] docs/data/DATA_MODEL.md
-- [ ] docs/data/DATA_DICTIONARY.md
-- [ ] docs/architecture/TECH_ARCHITECTURE.md
-- [ ] docs/architecture/API_SPEC.md
-- [ ] docs/architecture/SOLUTION_DESIGN.md
-- [ ] docs/qa/TEST_CASES.md
-- [ ] docs/qa/TEST_AUTOMATION.md
-- [ ] docs/sre/OBSERVABILITY.md
-- [ ] docs/sre/RUNBOOKS.md
+## Step 10: Flags Reference
 
-## Decisions
-<!-- Format: [date] DECISION: [what] BECAUSE: [why] -->
+| Flag | Behavior |
+|---|---|
+| `--auto` | Skip all review pauses between phases; execute sequentially without stopping |
+| `--lightweight` | Remove `data-model` and `design` from phase set (for small, low-risk changes) |
+| `--emergency` | Override to minimal phase set: plan → build → verify → deploy → retro; log INCIDENT |
+| `--intent <type>` | Force intent classification to the given type, skip NL classification |
+| `--phase <phase>` | Jump directly to the named phase, gate-check first |
+| `--force <phase>` | Override gate check for the named phase; reason is logged to gateOverrides |
 
-## Verification Log
-<!-- Updated by /sdlc:verify after each phase -->
-<!-- Format: [date] VERIFY Phase N (name): PASS | PASS WITH WARNINGS | FAIL | SKIPPED -->
+Multiple flags can be combined. `--emergency` overrides `--intent` and `--lightweight`.
 
-## Checkpoint Log
-<!-- Updated by /sdlc:checkpoint -->
-<!-- Format: [date] CHECKPOINT: Phase N Step X — [status] → Next: [command] -->
+---
 
-## Context
-<!-- Important notes about this project that don't fit elsewhere -->
+## State Update Protocol
+
+After every meaningful action, write state.json. Never queue writes — flush immediately. The state.json is the source of truth. All workflows read it; none maintain their own parallel state.
+
+Minimum write on any phase state change:
+```json
+{
+  "currentPhase": "<phase or null>",
+  "phases.<phase>.status": "<pending|active|completed>",
+  "updatedAt": "<ISO>"
+}
+```
+
+Full write on phase completion (all fields above plus):
+```json
+{
+  "phases.<phase>.completedAt": "<ISO>",
+  "phases.<phase>.artifacts": ["<path1>", "<path2>"],
+  "phases.<phase>.stale": false
+}
 ```

@@ -2,21 +2,34 @@
 
 The canonical data model is the FOUNDATION. Everything downstream — architecture, APIs, code, tests — derives from it. Treat this as the most critical artifact in the system.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight Gate Check
 
 Read in parallel:
-- `docs/product/PRODUCT_SPEC.md` — required, must exist
-- `docs/data/DATA_MODEL.md` — existing model (if any)
-- `docs/data/DATA_DICTIONARY.md` — existing dictionary (if any)
-- `docs/research/SYNTHESIS.md` — for context (if exists)
-- `docs/product/BUSINESS_PROCESS.md` — if exists, read `## Data Model Implications Summary` section; these flags are direct inputs to this phase
-- `.sdlc/STATE.md` — project context
+- `$ARTIFACTS/idea/prd.md` — required, must exist
+- `$ARTIFACTS/data-model/data-model.md` — existing model (if any)
+- `$ARTIFACTS/data-model/data-dictionary.md` — existing dictionary (if any)
+- `$ARTIFACTS/research/synthesis.md` — for context (if exists)
+- `$ARTIFACTS/business-process/business-process.md` — if exists, read `## Data Model Implications Summary` section; these flags are direct inputs to this phase
+- `$STATE` — project context (read and parse JSON)
 
-If BUSINESS_PROCESS.md exists: before domain analysis, review its `## Data Model Implications Summary` table. Every flagged entity/field must be addressed during modelling — either incorporated or explicitly decided against with a reason recorded.
+If business-process.md exists: before domain analysis, review its `## Data Model Implications Summary` table. Every flagged entity/field must be addressed during modelling — either incorporated or explicitly decided against with a reason recorded.
 
-If PRODUCT_SPEC.md does not exist: STOP. Inform the user that the product spec must be defined first. Suggest `/sdlc:03-product-spec`.
+If prd.md does not exist: STOP. Inform the user that the product spec must be defined first. Suggest `/sdlc:idea`.
 
-If DATA_MODEL.md already exists and $ARGUMENTS mentions changes to existing entities:
+If data-model.md already exists and $ARGUMENTS mentions changes to existing entities:
 → Automatically activate `--review` mode. Changes to existing entities ALWAYS require review.
 
 ## Step 2: Domain Analysis
@@ -174,7 +187,7 @@ Create a high-level context diagram showing bounded context boundaries.
 
 ## Step 7: Write Output Documents
 
-**Update docs/data/DATA_MODEL.md:**
+**Update $ARTIFACTS/data-model/data-model.md:**
 
 ```markdown
 # Canonical Data Model
@@ -205,7 +218,7 @@ Create a high-level context diagram showing bounded context boundaries.
 [Cross-entity business rules]
 ```
 
-**Update docs/data/DATA_DICTIONARY.md:**
+**Update $ARTIFACTS/data-model/data-dictionary.md:**
 
 Every field in the system:
 ```markdown
@@ -234,9 +247,9 @@ Before finalizing, run self-review:
 
 ## Step 9: Update State
 
-Update `.sdlc/STATE.md`:
+Update `$STATE`:
 - Mark Phase 5 (Data Model) as complete
-- Add model version to Decisions: `[date] DATA-MODEL v[version]: [key design decision]`
+- Add model version to decisions: `{"date": "[date]", "type": "DATA-MODEL", "note": "v[version]: [key design decision]"}`
 - Note any breaking changes made
 
 Show user:
@@ -248,10 +261,10 @@ Entities: [N] ([N] new, [N] updated)
 Breaking Changes: [N] (confirmed)
 
 Files Updated:
-• docs/data/DATA_MODEL.md
-• docs/data/DATA_DICTIONARY.md
+• $ARTIFACTS/data-model/data-model.md
+• $ARTIFACTS/data-model/data-dictionary.md
 
 ⚠️  GATE UNLOCKED: Tech Architecture and Code phases can now proceed.
 Recommended Next: /sdlc:verify --phase 5   ← run this before proceeding
-Then:           /sdlc:06-tech-arch
+Then:           /sdlc:design
 ```

@@ -6,22 +6,33 @@ Run as the very first command in a new context window.
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Load Everything in Parallel
 
 Read all of the following simultaneously:
 
 **Primary state:**
-- `.sdlc/NEXT_ACTION.md` — last checkpoint (most important — tells Claude exactly where to pick up)
-- `.sdlc/STATE.md` — phase progress, decisions, verification log
-- `.sdlc/TODO.md` — task list with completion status
-- `.sdlc/PLAN.md` — execution plan (if exists)
+- `$STATE` — checkpoint (most important — tells Claude exactly where to pick up), phase progress, decisions, verification log, tasks (read and parse JSON)
+- `$ARTIFACTS/plan/implementation-plan.md` — execution plan (if exists)
 
-**Document existence check** (Glob `docs/**/*.md` — read index only, not full content):
+**Artifact existence check** (Glob `$ARTIFACTS/**/*.md` — read index only, not full content):
 - Which phase outputs exist tells Claude which phases are complete
 
-**Spot-read current work** (only if NEXT_ACTION.md specifies in-progress files):
-- Read any files listed under "In-Progress Files" in NEXT_ACTION.md
-- Read any files listed under "Exact Next Action" to understand what's being built
+**Spot-read current work** (only if checkpoint in $STATE specifies in-progress files):
+- Read any files listed under `checkpoint.in_progress_files` in $STATE
+- Read any files related to `checkpoint.next_action` to understand what's being built
 
 Do NOT read all docs in full — that defeats the purpose of a lean resume. Read only what's needed to execute the next action.
 
@@ -31,11 +42,11 @@ Do NOT read all docs in full — that defeats the purpose of a lean resume. Read
 
 From the files read, reconstruct:
 
-1. **Project identity** — name, type, domain (from STATE.md)
+1. **Project identity** — name, type, domain (from $STATE)
 2. **Phase status** — which phases complete, which in-progress, which blocked
-3. **Verification status** — which phases have been verified (from Verification Log in STATE.md)
-4. **Current task** — exact TODO item in-progress (from TODO.md + NEXT_ACTION.md)
-5. **Next action** — the single command to run next (from NEXT_ACTION.md)
+3. **Verification status** — which phases have been verified (from verification_log in $STATE)
+4. **Current task** — exact task in-progress (from $STATE tasks array + checkpoint)
+5. **Next action** — the single command to run next (from $STATE checkpoint.next_action)
 6. **Open decisions** — anything unresolved that may come up immediately
 7. **Do-not-lose items** — verbal constraints or preferences from last session
 
@@ -69,7 +80,7 @@ Print a structured brief before doing anything else:
 ║  [Critical verbal context from last session]         ║
 ║  ["None" if nothing]                                 ║
 ╠══════════════════════════════════════════════════════╣
-║  TODO: [N] complete / [N] total                      ║
+║  TASKS: [N] complete / [N] total                     ║
 ╚══════════════════════════════════════════════════════╝
 
 Ready. Run the next action above or say "go" to execute it now.
@@ -90,11 +101,11 @@ Only proceed to execute the next action when the user confirms.
 
 ---
 
-## If NEXT_ACTION.md Does Not Exist
+## If $STATE Does Not Exist or Has No Checkpoint
 
-Fall back to `/sdlc:00-start` behavior:
-- Read STATE.md to determine current phase
+Fall back to `/sdlc:start` behavior:
+- Inform the user which branch was detected
 - Display the standard SDLC dashboard
 - Route to the recommended next phase
 
-Inform the user: "No checkpoint found. Reading project state to determine where to resume..."
+Inform the user: "No checkpoint found for branch '$BRANCH'. Reading project state to determine where to resume..."

@@ -2,27 +2,39 @@
 
 Implement planned tasks following clean architecture, clean code, and established patterns. A plan MUST exist. No improvised coding.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight Gate Check
 
 Read in parallel (ALL required):
-- `.sdlc/PLAN.md` — REQUIRED. Must exist with tasks defined.
-- `.sdlc/TODO.md` — REQUIRED. Identifies tasks to work on.
-- `docs/data/DATA_MODEL.md` — entity shapes, invariants, field types
-- `docs/architecture/TECH_ARCHITECTURE.md` — component design, layer decisions, patterns chosen
-- `docs/architecture/API_SPEC.md` — contracts to implement exactly
-- `docs/architecture/SOLUTION_DESIGN.md` — ADRs: auth strategy, DB choice, patterns
-- `docs/product/PRODUCT_SPEC.md` — requirements and acceptance criteria to fulfill
-- `.sdlc/STATE.md` — project context, tech stack, constraints
+- `$ARTIFACTS/plan/implementation-plan.md` — REQUIRED. Must exist with tasks defined.
+- `$STATE` — REQUIRED. Identifies tasks to work on (tasks array in JSON).
+- `$ARTIFACTS/data-model/data-model.md` — entity shapes, invariants, field types
+- `$ARTIFACTS/design/tech-architecture.md` — component design, layer decisions, patterns chosen
+- `$ARTIFACTS/design/api-spec.md` — contracts to implement exactly
+- `$ARTIFACTS/design/solution-design.md` — ADRs: auth strategy, DB choice, patterns
+- `$ARTIFACTS/idea/prd.md` — requirements and acceptance criteria to fulfill
 
-If PLAN.md missing: STOP. Run `/sdlc:07-plan` first.
-If TODO.md missing or empty: STOP. No tasks to work on.
+If implementation-plan.md missing: STOP. Run `/sdlc:plan` first.
+If no tasks in $STATE or all complete: STOP. No tasks to work on.
 
 **Phase 8 scope boundary:**
 Phase 8 implements business logic and application-layer error handling.
 **Defer to Phase 12 (SRE):** circuit breakers, bulkheads, timeouts on outbound calls, graceful degradation, load shedding, SIGTERM drain, and the resilience checklist.
 In Phase 8, adapters may implement basic retry + backoff for transient errors (this is correct — it belongs in the adapter, not the use case). Circuit breakers and dependency classification are Phase 12 concerns.
 
-Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified, show the next available task from TODO.md and ask for confirmation before proceeding.
+Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified, show the next available task from $STATE tasks array and ask for confirmation before proceeding.
 
 **FE task detection:** If the identified task is tagged `[fe]`, switch to the FE screen workflow immediately:
 - Read `docs/frontend/SCREEN_SPEC.md`, `docs/frontend/DESIGN_TOKENS.md`, `docs/frontend/COMPONENT_LIBRARY.md`
@@ -34,7 +46,7 @@ Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified,
 ## Step 2: Task Orientation
 
 For the identified task:
-1. Read the task description and done criteria from TODO.md
+1. Read the task description and done criteria from $STATE tasks array
 2. Identify the layer: domain / application / infrastructure / delivery
 3. Read ALL existing code in the affected area — understand patterns before writing
 4. Identify which requirements (REQ-IDs) this task satisfies — note them
@@ -1132,15 +1144,15 @@ If any cross-check fails: fix before marking done — do not defer.
 ## Step 12: Mark Task Complete
 
 After implementation and verification:
-1. Update `.sdlc/TODO.md` — mark task done: `[x] TASK-NNN`, move to Done section
-2. Update `.sdlc/STATE.md` — note phase progress
+1. Update `$STATE` — set task status to "done" in the tasks array
+2. Update phase progress in $STATE
 3. Check phase completion (see below)
 4. Show what was implemented, which specs were satisfied, and what comes next
 
 **Phase completion check:**
-After marking the task `[x]`, scan TODO.md:
-- If any tasks remain in Active or Upcoming → show next task, continue
-- If Active and Upcoming are both empty (all tasks `[x]` in Done) → Phase 8 is complete:
+After marking the task done, scan $STATE tasks:
+- If any tasks remain with status "pending" or "in_progress" → show next task, continue
+- If all tasks are "done" → Phase 8 is complete:
 
 ```
 ✅ Phase 8 (Code) COMPLETE — all [N] tasks done
@@ -1150,7 +1162,7 @@ Update ROADMAP.md Phase Log:
 
 Recommended next:
   /sdlc:verify --phase 8    ← run the quality gate before proceeding
-  /sdlc:09-test-cases       ← after verify passes
+  /sdlc:test-cases          ← after verify passes
 ```
 
 Also update `.sdlc/ROADMAP.md` Phase Log row for Phase 8 to `✅ Complete | [date]` if ROADMAP.md exists.
@@ -1165,12 +1177,12 @@ Files changed:
 Specifications satisfied:
   ✅ REQ-[ID]: [requirement description]
   ✅ BR-[ID]: [business rule description]
-  ✅ API: [endpoint] matches API_SPEC.md
+  ✅ API: [endpoint] matches $ARTIFACTS/design/api-spec.md
 
 Done criteria:
   ✅ [criterion 1]
   ✅ [criterion 2]
 
 Next task: TASK-[NNN+1]: [description]
-Run: /sdlc:08-code --task TASK-[NNN+1]
+Run: /sdlc:build --task TASK-[NNN+1]
 ```

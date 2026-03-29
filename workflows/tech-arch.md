@@ -2,21 +2,34 @@
 
 Design the technical architecture from the canonical data model and product spec outward. Clean architecture. Established patterns only. No exotic choices.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight Gate Check
 
 Read in parallel (ALL required):
-- `docs/data/DATA_MODEL.md` — REQUIRED. Cannot design without data model.
-- `docs/product/PRODUCT_SPEC.md` — REQUIRED. Cannot design without requirements (especially NFRs).
-- `docs/research/SYNTHESIS.md` — technology direction (if exists)
-- `docs/product/CUSTOMER_JOURNEY.md` — personas and interaction patterns (if exists)
-- `docs/architecture/TECH_ARCHITECTURE.md` — existing architecture (update, never replace)
-- `docs/architecture/API_SPEC.md` — existing API spec (if any)
-- `.sdlc/STATE.md` — constraints (tech stack, team, compliance, environment)
+- `$ARTIFACTS/data-model/data-model.md` — REQUIRED. Cannot design without data model.
+- `$ARTIFACTS/idea/prd.md` — REQUIRED. Cannot design without requirements (especially NFRs).
+- `$ARTIFACTS/research/synthesis.md` — technology direction (if exists)
+- `$ARTIFACTS/journey/customer-journey.md` — personas and interaction patterns (if exists)
+- `$ARTIFACTS/design/tech-architecture.md` — existing architecture (update, never replace)
+- `$ARTIFACTS/design/api-spec.md` — existing API spec (if any)
+- `$STATE` — constraints (tech stack, team, compliance, environment — read and parse JSON)
 
-If DATA_MODEL.md missing: STOP. Require data model first.
-If PRODUCT_SPEC.md missing: STOP. Require product spec first.
+If data-model.md missing: STOP. Require data model first.
+If prd.md missing: STOP. Require product spec first.
 
-If existing TECH_ARCHITECTURE.md: read it fully before proposing changes. Update, don't replace. New changes require ADRs explaining the delta.
+If existing tech-architecture.md: read it fully before proposing changes. Update, don't replace. New changes require ADRs explaining the delta.
 
 ---
 
@@ -490,13 +503,13 @@ Design API contracts from the data model (not from convenience):
 - Depth limiting
 - Persisted queries for production clients
 
-Write full OpenAPI 3.x YAML in `docs/architecture/API_SPEC.md`.
+Write full OpenAPI 3.x YAML in `$ARTIFACTS/design/api-spec.md`.
 
 ---
 
 ## Step 14: Architecture Decision Records
 
-For each significant decision, write an ADR in `docs/architecture/SOLUTION_DESIGN.md`.
+For each significant decision, write an ADR in `$ARTIFACTS/design/solution-design.md`.
 
 Required ADRs (minimum):
 - ADR-001: Deployment topology (monolith vs microservices)
@@ -560,7 +573,7 @@ Cutover plan: [how traffic is shifted — feature flag / DNS / load balancer wei
 
 ## Step 16: Write Output Documents
 
-**Update docs/architecture/TECH_ARCHITECTURE.md:**
+**Update $ARTIFACTS/design/tech-architecture.md:**
 ```markdown
 # Technical Architecture
 *Last Updated: [date]*
@@ -633,10 +646,11 @@ After Phase 6 verify passes, if a Frontend Architecture section is present: outp
 
 > **Frontend stack detected.** Run `/sdlc:fe-setup` before Phase 7 to configure design tokens and derive SCREEN_SPEC.md from the customer journey. Phase 7 planning requires SCREEN_SPEC.md to generate FE tasks.
 
-**Update docs/architecture/API_SPEC.md:**
+
+**Update $ARTIFACTS/design/api-spec.md:**
 Full OpenAPI 3.x specification.
 
-**Update docs/architecture/SOLUTION_DESIGN.md:**
+**Update $ARTIFACTS/design/solution-design.md:**
 All ADRs (minimum 5 required: topology, auth, DB, messaging if async, key pattern choices).
 
 ---
@@ -657,7 +671,7 @@ If any answer suggests over-engineering: simplify, update the ADR, document the 
 
 ## Step 18: Update State
 
-Mark Phase 6 (Tech Architecture) complete in STATE.md.
+Mark Phase 6 (Tech Architecture) complete in $STATE.
 
 Output:
 ```
@@ -672,10 +686,10 @@ Security: Auth=[strategy] | AuthZ=[model] | Secrets=[approach]
 Event-driven: [yes — N event types / no]
 
 Files Updated:
-• docs/architecture/TECH_ARCHITECTURE.md
-• docs/architecture/API_SPEC.md
-• docs/architecture/SOLUTION_DESIGN.md
+• $ARTIFACTS/design/tech-architecture.md
+• $ARTIFACTS/design/api-spec.md
+• $ARTIFACTS/design/solution-design.md
 
 Recommended Next: /sdlc:verify --phase 6   ← run this before proceeding
-Then:           /sdlc:07-plan
+Then:           /sdlc:plan
 ```

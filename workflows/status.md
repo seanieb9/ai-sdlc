@@ -2,41 +2,49 @@
 
 Display a clear, useful SDLC dashboard showing exactly where things stand and what to do next.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Read State
 
-Read in parallel:
-- `.sdlc/STATE.md`
-- `.sdlc/TODO.md`
-- `.sdlc/PLAN.md`
+Read and parse `$STATE` (JSON).
 
-Check which doc files actually exist using Glob: `docs/**/*.md`
-
-If .sdlc/STATE.md doesn't exist: show "No SDLC project initialized. Run /sdlc:00-start to begin."
+If $STATE doesn't exist: show "No SDLC project initialized for branch $BRANCH. Run /sdlc:start to begin."
 
 ## Step 2: Compute Phase Status
 
-For each phase, check:
-- RESEARCH: docs/research/RESEARCH.md exists?
-- SYNTHESIZE: docs/research/SYNTHESIS.md exists?
-- PRODUCT-SPEC: docs/product/PRODUCT_SPEC.md exists?
-- CUSTOMER-JOURNEY: docs/product/CUSTOMER_JOURNEY.md exists?
-- DATA-MODEL: docs/data/DATA_MODEL.md exists?
-- TECH-ARCH: docs/architecture/TECH_ARCHITECTURE.md exists?
-- PLAN: .sdlc/PLAN.md exists with tasks?
-- CODE: TODO items for implementation marked [x]?
-- TEST-CASES: docs/qa/TEST_CASES.md exists?
-- TEST-AUTO: docs/qa/TEST_AUTOMATION.md exists?
-- OBSERVABILITY: docs/sre/OBSERVABILITY.md exists?
-- SRE: docs/sre/RUNBOOKS.md exists?
+For each phase, check artifact existence:
+- RESEARCH: $ARTIFACTS/research/research.md exists?
+- SYNTHESIZE: $ARTIFACTS/research/synthesis.md exists?
+- PRODUCT-SPEC: $ARTIFACTS/idea/prd.md exists?
+- CUSTOMER-JOURNEY: $ARTIFACTS/journey/customer-journey.md exists?
+- DATA-MODEL: $ARTIFACTS/data-model/data-model.md exists?
+- TECH-ARCH: $ARTIFACTS/design/tech-architecture.md exists?
+- PLAN: $ARTIFACTS/plan/implementation-plan.md exists with tasks?
+- CODE: tasks in $STATE for implementation marked done?
+- TEST-CASES: $ARTIFACTS/test-cases/test-cases.md exists?
+- TEST-AUTO: $ARTIFACTS/test-gen/test-automation.md exists?
+- OBSERVABILITY: $ARTIFACTS/observability/observability.md exists?
+- SRE: $ARTIFACTS/sre/runbooks.md exists?
 - REVIEW: docs/review/REVIEW_REPORT.md exists?
 
-## Step 3: Parse TODO Stats
+## Step 3: Parse Task Stats
 
-From .sdlc/TODO.md:
-- Count `[ ]` → pending
-- Count `[~]` → in progress
-- Count `[x]` → done
-- Count blocked items
+From $STATE tasks array:
+- Count status "pending" → pending
+- Count status "in_progress" → in progress
+- Count status "done" → done
+- Count status "blocked" → blocked
 
 ## Step 4: Determine Recommended Next Action
 

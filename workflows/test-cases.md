@@ -2,24 +2,37 @@
 
 Design comprehensive, MECE test cases with full requirement traceability. Test cases are the specification for automation — quality here directly determines quality of the system. Tests are derived from ALL source documents and the implementation itself.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight Gate Check
 
 Read ALL of the following in parallel — do not skip any source:
 
 **Specification sources:**
-- `docs/product/PRODUCT_SPEC.md` — REQUIRED. Requirements, BDD scenarios, business rules, NFRs, acceptance criteria
-- `docs/product/CUSTOMER_JOURNEY.md` — user flows, personas, failure paths, emotional states
-- `docs/architecture/API_SPEC.md` — every endpoint, request/response shape, error codes, auth requirements
-- `docs/data/DATA_MODEL.md` — entities, invariants, lifecycle states, relationships
-- `docs/data/DATA_DICTIONARY.md` — field constraints, types, valid values
+- `$ARTIFACTS/idea/prd.md` — REQUIRED. Requirements, BDD scenarios, business rules, NFRs, acceptance criteria
+- `$ARTIFACTS/journey/customer-journey.md` — user flows, personas, failure paths, emotional states
+- `$ARTIFACTS/design/api-spec.md` — every endpoint, request/response shape, error codes, auth requirements
+- `$ARTIFACTS/data-model/data-model.md` — entities, invariants, lifecycle states, relationships
+- `$ARTIFACTS/data-model/data-dictionary.md` — field constraints, types, valid values
 
 **Architecture and design sources (required — these generate tests too):**
-- `docs/architecture/TECH_ARCHITECTURE.md` — service boundaries, patterns chosen (circuit breaker → test it trips), infrastructure contracts
-- `docs/architecture/SOLUTION_DESIGN.md` — ADRs: every architectural decision is an implementation commitment that needs a test
+- `$ARTIFACTS/design/tech-architecture.md` — service boundaries, patterns chosen (circuit breaker → test it trips), infrastructure contracts
+- `$ARTIFACTS/design/solution-design.md` — ADRs: every architectural decision is an implementation commitment that needs a test
 
 **Phase-dependent sources (read if available — skip the corresponding test layer if not yet created):**
-- `docs/sre/OBSERVABILITY.md` — every structured log, metric, and span commitment needs a test asserting it's emitted. **Created in Phase 11, which runs after Phase 8.** If not yet created: skip the Observability test layer (mark as DEFERRED in coverage matrix), then re-run `/sdlc:09-test-cases` after Phase 11 completes.
-- `docs/sre/RUNBOOKS.md` — resilience behaviours documented here need corresponding tests. **Created in Phase 12, which runs after Phase 8.** If not yet created: skip the Resilience test layer detail (mark as DEFERRED), then re-run `/sdlc:09-test-cases` after Phase 12 completes.
+- `$ARTIFACTS/observability/observability.md` — every structured log, metric, and span commitment needs a test asserting it's emitted. **Created in Phase 11, which runs after Phase 8.** If not yet created: skip the Observability test layer (mark as DEFERRED in coverage matrix), then re-run `/sdlc:test-cases` after Phase 11 completes.
+- `$ARTIFACTS/sre/runbooks.md` — resilience behaviours documented here need corresponding tests. **Created in Phase 12, which runs after Phase 8.** If not yet created: skip the Resilience test layer detail (mark as DEFERRED), then re-run `/sdlc:test-cases` after Phase 12 completes.
 
 > **Two-pass pattern:** It is normal and correct to run Phase 9 twice — once after Phase 8 (covering Unit, Integration, Contract, E2E, Performance, Security) and once after Phases 11 and 12 (adding Observability and Resilience layers). The Phase 9 completion gate requires all 8 layers; the first pass covers 6.
 
@@ -27,9 +40,9 @@ Read ALL of the following in parallel — do not skip any source:
 - Relevant source code — read the actual implementation to find behaviour not in specs and verify spec alignment
 
 **Existing test state:**
-- `docs/qa/TEST_CASES.md` — read in full to avoid duplicates and find gaps
+- `$ARTIFACTS/test-cases/test-cases.md` — read in full to avoid duplicates and find gaps
 
-If PRODUCT_SPEC.md missing: STOP. Cannot design tests without requirements.
+If prd.md missing: STOP. Cannot design tests without requirements.
 
 ---
 
@@ -89,7 +102,7 @@ For every architectural commitment:
 - **Saga pattern** → test compensation actions are triggered on failure at each step
 - **API versioning strategy** → test that v1 and v2 can coexist, breaking change is rejected on old version
 
-### From OBSERVABILITY.md
+### From observability.md
 
 For every observability commitment:
 - **Structured log fields** → test that use case entry/exit logs contain trace_id, action, outcome
@@ -523,7 +536,7 @@ Report all findings. Resolve all HIGH/CRITICAL gaps before marking complete.
 
 ## Step 9: Write Output Document
 
-**Update docs/qa/TEST_CASES.md:**
+**Update $ARTIFACTS/test-cases/test-cases.md:**
 
 ```markdown
 # Test Cases
@@ -589,7 +602,7 @@ Rules — always enforced:
 
 ## Step 10: Update State
 
-Mark Phase 9 (Test Cases) complete.
+Mark Phase 9 (Test Cases) complete in $STATE.
 
 Output:
 ```
@@ -606,13 +619,12 @@ Coverage:
   NFRs: [N]/[N] NFR-IDs covered (100%)
   ADRs: [N]/[N] architectural commitments covered (100%)
 
-Spec divergence found: [N] (all flagged in REVIEW_REPORT.md)
+Spec divergence found: [N] (all flagged in review-report.md)
 Staleness findings: [N] (all resolved)
 MECE gaps: [N] (all addressed)
 MECE overlaps: [N] (all resolved)
 
-File: docs/qa/TEST_CASES.md
+File: $ARTIFACTS/test-cases/test-cases.md
 
 Recommended Next: /sdlc:verify --phase 9   ← run this before proceeding
-Then:           /sdlc:10-test-automation
 ```

@@ -2,17 +2,30 @@
 
 Create or update the product specification — the authoritative source of truth for what the system must do.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Pre-Flight
 
 Read in parallel:
-- `docs/product/PRODUCT_SPEC.md` — existing spec (critical: read ALL before changing ANYTHING)
-- `docs/research/RESEARCH.md` — market context
-- `docs/research/GAP_ANALYSIS.md` — customer needs
-- `docs/research/SYNTHESIS.md` — synthesis insights (if exists)
-- `docs/product/CUSTOMER_JOURNEY.md` — journeys (if exists)
-- `.sdlc/STATE.md` — project context and constraints
+- `$ARTIFACTS/idea/prd.md` — existing spec (critical: read ALL before changing ANYTHING)
+- `$ARTIFACTS/research/research.md` — market context
+- `$ARTIFACTS/research/gap-analysis.md` — customer needs
+- `$ARTIFACTS/research/synthesis.md` — synthesis insights (if exists)
+- `$ARTIFACTS/journey/customer-journey.md` — journeys (if exists)
+- `$STATE` — project context and constraints (read and parse JSON)
 
-If PRODUCT_SPEC.md exists: identify which sections need updating vs which are new. Never overwrite a section without reading it first.
+If prd.md exists: identify which sections need updating vs which are new. Never overwrite a section without reading it first.
 
 If neither research doc exists: warn the user. The spec will be weaker without research grounding. Offer to proceed anyway or run research first.
 
@@ -123,7 +136,7 @@ For each functional area, describe (non-technical):
 - What data goes in and comes out (in business terms, not technical)
 - What constraints apply (rate limiting, authorization)
 
-These are refined into full OpenAPI spec by /sdlc:06-tech-arch.
+These are refined into full OpenAPI spec by /sdlc:design.
 
 ## Step 8: Non-Functional Requirements
 
@@ -139,7 +152,7 @@ NFR-[NNN]: [Category]: [Requirement]
 
 ## Step 9: Write Output Document
 
-**Update docs/product/PRODUCT_SPEC.md:**
+**Update $ARTIFACTS/idea/prd.md:**
 
 ```markdown
 # Product Specification: [Name]
@@ -186,11 +199,11 @@ NFR-[NNN]: [Category]: [Requirement]
 [REQ-IDs deprecated with reason — never delete]
 ```
 
-Sharding: if a domain section exceeds 400 lines, create `PRODUCT_SPEC_[DOMAIN].md` and reference it from the main doc.
+Sharding: if a domain section exceeds 400 lines, create `prd-[domain].md` in the same directory and reference it from the main doc.
 
 ## Step 10: Update State
 
-Mark Phase 3 (Product Spec) complete.
+Mark Phase 3 (Product Spec) complete in $STATE.
 
 Output:
 ```
@@ -202,7 +215,7 @@ BDD Scenarios: [N]
 Exception Cases: [N]
 NFRs: [N]
 
-File: docs/product/PRODUCT_SPEC.md
+File: $ARTIFACTS/idea/prd.md
 
-Recommended Next: /sdlc:04-customer-journey
+Recommended Next: /sdlc:journey
 ```

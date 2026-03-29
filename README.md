@@ -381,20 +381,23 @@ All 11 gates are hard-enforced. Bypass with `--force` (reason required, logged t
 
 ## Installation
 
-AI-SDLC is a Claude Code plugin — a directory of Markdown instruction files that Claude reads and executes. No npm package, no runtime binary, no install script.
+AI-SDLC is a set of Claude Code custom commands and workflow files — Markdown instruction files that Claude reads and executes. No npm package, no runtime binary, no install script.
 
 ```bash
 # Clone the repo
 git clone https://github.com/seanieb9/ai-sdlc.git
 
-# Install as a Claude Code plugin in your project
-cp -r ai-sdlc/ <your-project>/.claude/plugins/ai-sdlc/
+# Install commands globally (available in all projects)
+cp -r ai-sdlc/commands/sdlc ~/.claude/commands/
+
+# Install workflow engine, references, and templates globally
+cp -r ai-sdlc/workflows ai-sdlc/references ai-sdlc/templates ~/.claude/sdlc/
 ```
 
-Open your project in Claude Code and run `/sdlc:start "your idea"` to start a new project, or `/sdlc:start` (no args) to see the status of an existing one.
+Open any project in Claude Code and run `/sdlc:start "your idea"` to start a new project, or `/sdlc:start` (no args) to see the status of an existing one.
 
-On first run, the plugin automatically:
-1. Detects your git branch and creates a branch-scoped workspace
+On first run, the system automatically:
+1. Detects your git branch and creates a branch-scoped workspace at `.claude/ai-sdlc/workflows/<branch>/`
 2. Creates `.claude/ai-sdlc/CLAUDE.md` (framework reference)
 3. Asks 5 setup questions → generates `.claude/ai-sdlc.config.yaml`
 4. Offers to add `.gitignore` entries

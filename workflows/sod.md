@@ -4,13 +4,24 @@ Orient Claude, plan the session, and start the first task — in under two minut
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Load Context
 
 Read in parallel:
-- `.sdlc/NEXT_ACTION.md` — last checkpoint/EOD state
-- `.sdlc/STATE.md` — phase progress, verification log, checkpoint log
-- `.sdlc/TODO.md` — full task list with completion status
-- `.sdlc/PLAN.md` — execution plan (scan for today-relevant tasks)
+- `$STATE` — checkpoint, phase progress, tasks, verification log (read and parse JSON)
+- `$ARTIFACTS/plan/implementation-plan.md` — execution plan (scan for today-relevant tasks, if exists)
 - Git log: `git log --oneline -5` — what was last committed
 
 ---
@@ -29,7 +40,7 @@ Check for anything that changed or needs attention since yesterday:
 
 **Phase gate check:**
 - Was yesterday's phase completed? If so, does it need verification before today's work begins?
-- Check Verification Log in STATE.md — any unverified completed phases?
+- Check verification_log in $STATE — any unverified completed phases?
 
 ---
 
@@ -43,7 +54,7 @@ Based on TODO.md and PLAN.md, determine:
 - Identify any natural stopping points (e.g., "complete the application layer today")
 
 **What to tackle first:**
-- The single first action (from NEXT_ACTION.md "Exact Next Action")
+- The single first action (from checkpoint.next_action in $STATE)
 - If that's blocked: identify the next unblocked task
 
 **What to watch for:**
@@ -81,7 +92,7 @@ Print the start-of-day brief:
 ║  [unverified phases, stale decisions, blockers —     ║
 ║   or "None"]                                         ║
 ╠══════════════════════════════════════════════════════╣
-║  TODO: [N] complete / [N] total   P0 remaining: [N]  ║
+║  TASKS: [N] complete / [N] total   P0 remaining: [N] ║
 ╚══════════════════════════════════════════════════════╝
 
 Say "go" to start the first action, or give a different instruction.

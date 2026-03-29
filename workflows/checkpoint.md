@@ -1,20 +1,31 @@
 # Checkpoint Workflow
 
-Save a precise session snapshot to `.sdlc/NEXT_ACTION.md`. Run this proactively before context fills, at the end of every phase, or any time you want a clean resume point.
+Save a precise session snapshot into state.json. Run this proactively before context fills, at the end of every phase, or any time you want a clean resume point.
 
 The goal is to capture everything needed to continue work in a fresh context window — so the next session starts in 30 seconds, not 10 minutes of re-orientation.
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Read Current State
 
 Read in parallel:
-- `.sdlc/STATE.md` — phase progress, decisions, verification log
-- `.sdlc/TODO.md` — task list (identify what's in-progress vs complete)
-- `.sdlc/PLAN.md` — execution plan (if exists)
-- `.sdlc/NEXT_ACTION.md` — previous checkpoint (if exists, to diff against)
+- `$STATE` — phase progress, decisions, verification log, tasks (read and parse JSON)
+- `$ARTIFACTS/plan/implementation-plan.md` — execution plan (if exists)
 
-Also check which docs exist (Glob `docs/**/*.md`) to build an accurate document index.
+Also check which artifacts exist (Glob `$ARTIFACTS/**/*.md`) to build an accurate document index.
 
 ---
 
@@ -49,52 +60,45 @@ Determine precisely:
 
 ---
 
-## Step 3: Write `.sdlc/NEXT_ACTION.md`
+## Step 3: Write checkpoint into `$STATE`
 
-Overwrite completely (this is always the current state, not a log):
+Update the `checkpoint` field in state.json (this is always the current state, not a log):
 
-```markdown
-# Session Checkpoint
-*Saved: [ISO datetime]*
-
-## Active Work
-- **Project:** [project name from STATE.md]
-- **Phase:** [N] — [Phase Name]
-- **Step:** [specific step, e.g. "Step 4b — implementing application use cases"]
-- **Status:** [in_progress | at_decision_point | phase_complete | blocked]
-
-## What Was Just Completed
-[1-3 sentences — what was finished this session, specific enough to orient a fresh context]
-
-## Exact Next Action
-**Run:** `[exact command with flags]`
-**What it does:** [what will happen when this runs]
-**Critical context:** [anything not in the documents that Claude needs to know]
-
-## Open Decisions
-[List each unresolved decision. "None" if clear.]
-
-## In-Progress Files
-[Files partially written or mid-edit. "None" if everything is committed.]
-
-## Do Not Lose
-[Verbal instructions, decisions, or preferences from this session not written anywhere else.
- These are lost on /clear without this checkpoint. Be specific.]
-
-## Stats
-- TODOs complete: [N]/[total]
-- Phases verified: [list]
-- Last verify: [phase N — PASS/FAIL]
-- Files changed this session: [N]
+```json
+{
+  "checkpoint": {
+    "saved_at": "[ISO datetime]",
+    "project": "[project name]",
+    "phase": [N],
+    "phase_name": "[Phase Name]",
+    "step": "[specific step, e.g. Step 4b — implementing application use cases]",
+    "status": "in_progress | at_decision_point | phase_complete | blocked",
+    "what_was_completed": "[1-3 sentences — what was finished this session]",
+    "next_action": {
+      "command": "[exact command with flags]",
+      "what_it_does": "[what will happen when this runs]",
+      "critical_context": "[anything not in the documents that Claude needs to know]"
+    },
+    "open_decisions": [],
+    "in_progress_files": [],
+    "do_not_lose": "[Verbal instructions, decisions, or preferences from this session not written anywhere else]",
+    "stats": {
+      "tasks_complete": "[N]/[total]",
+      "phases_verified": [],
+      "last_verify": "[phase N — PASS/FAIL]",
+      "files_changed": [N]
+    }
+  }
+}
 ```
 
 ---
 
-## Step 4: Update STATE.md
+## Step 4: Update state.json context log
 
-Append to `## Context` in STATE.md:
-```
-[datetime] CHECKPOINT: Phase [N] Step [X] — [one-line status] → Next: [command]
+Append to the `context_log` array in $STATE:
+```json
+{"datetime": "[datetime]", "event": "CHECKPOINT", "note": "Phase [N] Step [X] — [one-line status] → Next: [command]"}
 ```
 
 ---
@@ -102,13 +106,13 @@ Append to `## Context` in STATE.md:
 ## Step 5: Confirm to User
 
 ```
-✅ Checkpoint saved → .sdlc/NEXT_ACTION.md
+✅ Checkpoint saved → $STATE (checkpoint field)
 
 Phase [N]: [Phase Name] — [status]
 Next action: [exact command]
 Open decisions: [N]
 Do-not-lose items: [N]
 
-To resume after /clear: /sdlc:resume
+To resume after /clear: /sdlc:restore
 To auto-checkpoint:     /loop 15m /sdlc:checkpoint
 ```

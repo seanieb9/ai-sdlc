@@ -2,15 +2,28 @@
 
 Run a holistic quality review across all SDLC artifacts. Surface gaps, violations, and remediation actions. Be thorough and specific — vague findings are useless.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Load All Artifacts
 
 Read in parallel (read everything relevant):
-- All docs/product/ files
-- All docs/data/ files
-- All docs/architecture/ files
-- All docs/qa/ files
-- All docs/sre/ files
-- .sdlc/STATE.md, TODO.md, PLAN.md
+- All files under $ARTIFACTS/idea/, $ARTIFACTS/research/, $ARTIFACTS/journey/
+- All files under $ARTIFACTS/data-model/, $ARTIFACTS/design/
+- All files under $ARTIFACTS/test-cases/, $ARTIFACTS/test-gen/
+- All files under $ARTIFACTS/observability/, $ARTIFACTS/sre/
+- $STATE (JSON — tasks, phases, decisions)
+- $ARTIFACTS/plan/implementation-plan.md
 - Relevant source code (spot-check critical paths)
 - Recent git changes (if git repo: `git log --oneline -20` and `git diff HEAD~5`)
 
@@ -263,24 +276,24 @@ Perform targeted code review on changed files:
 
 ## Step 11: Create Remediation Tasks
 
-For each HIGH/CRITICAL finding, add a task to .sdlc/TODO.md:
+For each HIGH/CRITICAL finding, add a task to $STATE tasks array:
 
-```
-- [ ] TASK-[NNN]: [Fix description from REVIEW-NNN] | REVIEW | P0/P1
+```json
+{"id": "TASK-[NNN]", "description": "[Fix description from REVIEW-NNN]", "status": "pending", "tags": ["review"], "priority": "P0"}
 ```
 
 ## Step 12: Update State
 
-Mark Phase 13 (Review) complete in STATE.md.
+Mark Phase 13 (Review) complete in $STATE.
 
 Output:
 ```
 Review Complete: [feature/system]
 
 Critical: [N] | High: [N] | Medium: [N] | Low: [N]
-Remediation tasks added to TODO.md: [N]
+Remediation tasks added to $STATE: [N]
 
-File: docs/review/REVIEW_REPORT.md
+File: $ARTIFACTS/review/review-report.md
 
-Recommended Next: /sdlc:verify --phase 13   ← confirms all HIGH/CRITICAL findings have TODO items
+Recommended Next: /sdlc:verify --phase 13   ← confirms all HIGH/CRITICAL findings have tasks
 ```

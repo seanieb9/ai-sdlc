@@ -2,13 +2,26 @@
 
 Synthesize primary customer data into prioritized, evidence-backed findings. First-party data beats inferred pain from public forums every time.
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Assess Available Data
 
 Read existing context:
-- `.sdlc/STATE.md` — project context
-- `docs/research/RESEARCH.md` — existing market research (don't duplicate)
-- `docs/research/GAP_ANALYSIS.md` — existing gaps (we'll enrich these with evidence)
-- `docs/research/VOC.md` — existing VoC findings (update, don't replace)
+- `$STATE` — project context (read and parse JSON)
+- `$ARTIFACTS/research/research.md` — existing market research (don't duplicate)
+- `$ARTIFACTS/research/gap-analysis.md` — existing gaps (we'll enrich these with evidence)
+- `$ARTIFACTS/research/voc.md` — existing VoC findings (update, don't replace)
 
 Ask the user (AskUserQuestion) what primary data they have:
 1. "What customer data do you have available? (e.g. interview transcripts, support tickets, NPS responses, churn notes, sales call notes)"
@@ -165,7 +178,7 @@ Categories to tag:
 
 ## Step 8: Write Output Documents
 
-**Create/update docs/research/VOC.md:**
+**Create/update $ARTIFACTS/research/voc.md:**
 
 ```markdown
 # Voice of Customer
@@ -200,7 +213,7 @@ Categories to tag:
 [How these findings update or validate existing GAP_ANALYSIS.md findings]
 ```
 
-**Update docs/research/GAP_ANALYSIS.md:**
+**Update $ARTIFACTS/research/gap-analysis.md:**
 For each existing gap, add primary evidence:
 ```
 [Existing gap] — **Primary evidence: [N customers, severity [N]]** > "[Quote]"
@@ -208,8 +221,8 @@ For each existing gap, add primary evidence:
 
 ## Step 9: Update State
 
-Mark VoC phase complete in STATE.md.
-Update document index: `[x] docs/research/VOC.md`
+Mark VoC phase complete in $STATE.
+Update document index in $STATE with voc.md path.
 
 Output:
 ```
@@ -220,8 +233,8 @@ Themes identified: [N]
 Top pain (unmet): [theme name] — [N] customers, severity [N]/5
 
 Files:
-• docs/research/VOC.md (new)
-• docs/research/GAP_ANALYSIS.md (enriched with primary evidence)
+• $ARTIFACTS/research/voc.md (new)
+• $ARTIFACTS/research/gap-analysis.md (enriched with primary evidence)
 
-Recommended Next: /sdlc:02-synthesize or /sdlc:03b-personas
+Recommended Next: /sdlc:synthesize or /sdlc:personas
 ```

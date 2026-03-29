@@ -6,14 +6,27 @@ Independent quality gate between SDLC phases. Inspects artifacts produced by a c
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Determine Phase(s) to Verify
 
 - `--phase <N>` → verify Phase N only
-- `--last` → read STATE.md, verify the most recently completed phase
-- `--all` → verify every phase marked complete in STATE.md in sequence
-- No flag → read STATE.md, find the most recently completed phase (same as `--last`)
+- `--last` → read $STATE, verify the most recently completed phase
+- `--all` → verify every phase marked complete in $STATE in sequence
+- No flag → read $STATE, find the most recently completed phase (same as `--last`)
 
-Read `.sdlc/STATE.md` to confirm which phases are marked complete before starting.
+Read `$STATE` to confirm which phases are marked complete before starting.
 
 ---
 
@@ -25,7 +38,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 1: Research
 
-**Read:** `docs/research/RESEARCH.md`, `docs/research/GAP_ANALYSIS.md`
+**Read:** `$ARTIFACTS/research/research.md`, `$ARTIFACTS/research/gap-analysis.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -42,7 +55,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 1b: Voice of Customer
 
-**Read:** `docs/research/VOC.md`
+**Read:** `$ARTIFACTS/research/voc.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -55,7 +68,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 2: Synthesize
 
-**Read:** `docs/research/SYNTHESIS.md`
+**Read:** `$ARTIFACTS/research/synthesis.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -69,7 +82,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 3: Product Spec
 
-**Read:** `docs/product/PRODUCT_SPEC.md`
+**Read:** `$ARTIFACTS/idea/prd.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -87,7 +100,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 3b: Personas
 
-**Read:** `docs/product/PERSONAS.md`
+**Read:** `$ARTIFACTS/personas/personas.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -100,7 +113,7 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ### Phase 4: Customer Journey
 
-**Read:** `docs/product/CUSTOMER_JOURNEY.md`
+**Read:** `$ARTIFACTS/journey/customer-journey.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -111,11 +124,11 @@ Read all output documents for the phase(s) in parallel, then run the checks belo
 
 ---
 
-### Phase 4b: Business Process (only if BUSINESS_PROCESS.md exists)
+### Phase 4b: Business Process (only if business-process.md exists)
 
-**Read:** `docs/product/BUSINESS_PROCESS.md`, `docs/product/CUSTOMER_JOURNEY.md`, `docs/product/PRODUCT_SPEC.md`
+**Read:** `$ARTIFACTS/business-process/business-process.md`, `$ARTIFACTS/journey/customer-journey.md`, `$ARTIFACTS/idea/prd.md`
 
-If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check entirely (silent pass).
+If business-process.md does not exist (Phase 4b was skipped): skip this check entirely (silent pass).
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -130,12 +143,12 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 | 9 | `## Data Model Implications Summary` section present | HIGH |
 | 10 | No `{{placeholder}}` or `[TBD]` strings | MEDIUM |
 
-**Cross-checks (BUSINESS_PROCESS.md → CUSTOMER_JOURNEY.md):**
+**Cross-checks (business-process.md → customer-journey.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 11 | Every process named in CUSTOMER_JOURNEY.md `## Business Processes` section has a BP-ID in BUSINESS_PROCESS.md | HIGH |
+| 11 | Every process named in customer-journey.md `## Business Processes` section has a BP-ID in business-process.md | HIGH |
 
-**Cross-checks (BUSINESS_PROCESS.md → PRODUCT_SPEC.md):**
+**Cross-checks (business-process.md → prd.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
 | 12 | Every BR-ID that implies a multi-step approval or compliance process is linked to a BP-ID | MEDIUM |
@@ -144,7 +157,7 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 
 ### Phase 5: Data Model
 
-**Read:** `docs/data/DATA_MODEL.md`, `docs/data/DATA_DICTIONARY.md`, `docs/product/PRODUCT_SPEC.md`
+**Read:** `$ARTIFACTS/data-model/data-model.md`, `$ARTIFACTS/data-model/data-dictionary.md`, `$ARTIFACTS/idea/prd.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -160,17 +173,17 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 | 10 | No circular aggregate dependencies | HIGH |
 | 11 | No `{{placeholder}}` strings | MEDIUM |
 
-**Cross-checks (DATA_MODEL.md → PRODUCT_SPEC.md):**
+**Cross-checks (data-model.md → prd.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 12 | Every core noun in PRODUCT_SPEC.md requirements has a corresponding entity or value object | HIGH |
-| 13 | Every entity lifecycle state (if any) maps to a business state in PRODUCT_SPEC.md | MEDIUM |
+| 12 | Every core noun in prd.md requirements has a corresponding entity or value object | HIGH |
+| 13 | Every entity lifecycle state (if any) maps to a business state in prd.md | MEDIUM |
 
 ---
 
 ### Phase 6: Tech Architecture
 
-**Read:** `docs/architecture/TECH_ARCHITECTURE.md`, `docs/architecture/API_SPEC.md`, `docs/architecture/SOLUTION_DESIGN.md`, `docs/data/DATA_MODEL.md`, `docs/product/PRODUCT_SPEC.md`
+**Read:** `$ARTIFACTS/design/tech-architecture.md`, `$ARTIFACTS/design/api-spec.md`, `$ARTIFACTS/design/solution-design.md`, `$ARTIFACTS/data-model/data-model.md`, `$ARTIFACTS/idea/prd.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -190,28 +203,28 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 | 14 | Every API endpoint documents all response status codes | MEDIUM |
 | 15 | No `{{placeholder}}` strings | MEDIUM |
 
-**Cross-checks (TECH_ARCHITECTURE.md → DATA_MODEL.md):**
+**Cross-checks (tech-architecture.md → data-model.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 16 | Every entity in DATA_MODEL.md is referenced in component design | MEDIUM |
+| 16 | Every entity in data-model.md is referenced in component design | MEDIUM |
 | 17 | Every entity's DB table/collection is mapped to a repository component | MEDIUM |
 
-**Cross-checks (TECH_ARCHITECTURE.md → PRODUCT_SPEC.md):**
+**Cross-checks (tech-architecture.md → prd.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 18 | Every NFR from PRODUCT_SPEC.md appears in the NFR coverage section | HIGH |
+| 18 | Every NFR from prd.md appears in the NFR coverage section | HIGH |
 | 19 | Every external service referenced in requirements is in the dependency classification table | HIGH |
 
 ---
 
 ### Phase 7: Plan
 
-**Read:** `.sdlc/PLAN.md`, `.sdlc/TODO.md`
+**Read:** `$ARTIFACTS/plan/implementation-plan.md`, tasks from `$STATE`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | PLAN.md exists | CRITICAL |
-| 2 | TODO.md exists with ≥ 1 unchecked task | HIGH |
+| 1 | implementation-plan.md exists | CRITICAL |
+| 2 | $STATE has ≥ 1 task with status "pending" | HIGH |
 | 3 | Tasks follow layer order: domain → application → infrastructure → delivery | MEDIUM |
 | 4 | Every task has a priority (P0 / P1 / P2) | MEDIUM |
 | 5 | No task is overly vague (no tasks like "implement the feature") | MEDIUM |
@@ -221,7 +234,7 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 
 ### Phase 8: Code
 
-**Read:** Source files in `src/`, cross-reference with `.sdlc/TODO.md`, `docs/architecture/TECH_ARCHITECTURE.md`, `docs/data/DATA_MODEL.md`
+**Read:** Source files in `src/`, cross-reference with tasks in `$STATE`, `$ARTIFACTS/design/tech-architecture.md`, `$ARTIFACTS/data-model/data-model.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
@@ -233,44 +246,44 @@ If BUSINESS_PROCESS.md does not exist (Phase 4b was skipped): skip this check en
 | 6 | No raw DB client calls in use case files | HIGH |
 | 7 | Health endpoint handler exists | HIGH |
 | 8 | SIGTERM handler exists | HIGH |
-| 9 | All P0 TODO items are marked complete | HIGH |
+| 9 | All P0 tasks in $STATE are marked "done" | HIGH |
 
 **Cross-checks:**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 10 | Every entity in DATA_MODEL.md has a corresponding domain class | HIGH |
-| 11 | Every API endpoint in API_SPEC.md has a corresponding controller method | HIGH |
+| 10 | Every entity in data-model.md has a corresponding domain class | HIGH |
+| 11 | Every API endpoint in api-spec.md has a corresponding controller method | HIGH |
 | 12 | Every port interface in TECH_ARCHITECTURE.md has an implementation | MEDIUM |
 
 ---
 
 ### Phase 9: Test Cases
 
-**Read:** `docs/qa/TEST_CASES.md`, `docs/product/PRODUCT_SPEC.md`, `docs/architecture/API_SPEC.md`, `docs/architecture/TECH_ARCHITECTURE.md`
+**Read:** `$ARTIFACTS/test-cases/test-cases.md`, `$ARTIFACTS/idea/prd.md`, `$ARTIFACTS/design/api-spec.md`, `$ARTIFACTS/design/tech-architecture.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | TEST_CASES.md exists | CRITICAL |
+| 1 | test-cases.md exists | CRITICAL |
 | 2 | Coverage matrix section present | HIGH |
 | 3 | Test cases for all 8 layers present: Unit, Integration, Contract, E2E, Performance, Resilience, Observability, Security | HIGH |
 | 4 | No TC-ID in coverage matrix without a corresponding written test case | HIGH |
 | 5 | No duplicate TC-IDs | HIGH |
 | 6 | No `{{placeholder}}` strings | MEDIUM |
 
-**Cross-checks (TEST_CASES.md → PRODUCT_SPEC.md):**
+**Cross-checks (test-cases.md → prd.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 7 | Every REQ-ID from PRODUCT_SPEC.md appears in coverage matrix | HIGH |
-| 8 | Every BR-ID from PRODUCT_SPEC.md has a unit test case | HIGH |
+| 7 | Every REQ-ID from prd.md appears in coverage matrix | HIGH |
+| 8 | Every BR-ID from prd.md has a unit test case | HIGH |
 | 9 | Every NFR with a numeric threshold has a performance test case | HIGH |
 
-**Cross-checks (TEST_CASES.md → API_SPEC.md):**
+**Cross-checks (test-cases.md → api-spec.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
 | 10 | Every API endpoint has ≥ 1 contract test case | HIGH |
 | 11 | Each contract test covers the 401 (unauth) case | HIGH |
 
-**Cross-checks (TEST_CASES.md → TECH_ARCHITECTURE.md):**
+**Cross-checks (test-cases.md → tech-architecture.md):**
 | # | Check | Severity if fails |
 |---|-------|------------------|
 | 12 | Every CRITICAL dependency has a resilience test (circuit open + 503 response) | HIGH |
@@ -309,11 +322,11 @@ If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silen
 
 ### Phase 10: Test Automation
 
-**Read:** `docs/qa/TEST_AUTOMATION.md`, `docs/qa/TEST_CASES.md`, test files in `tests/`
+**Read:** `$ARTIFACTS/test-gen/test-automation.md`, `$ARTIFACTS/test-cases/test-cases.md`, test files in `tests/`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | TEST_AUTOMATION.md exists | CRITICAL |
+| 1 | test-automation.md exists | CRITICAL |
 | 2 | TC-ID to automation file mapping table present | HIGH |
 | 3 | Coverage gates documented | HIGH |
 | 4 | Drift detection rules documented | MEDIUM |
@@ -330,11 +343,11 @@ If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silen
 
 ### Phase 11: Observability
 
-**Read:** `docs/sre/OBSERVABILITY.md`
+**Read:** `$ARTIFACTS/observability/observability.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | OBSERVABILITY.md exists | CRITICAL |
+| 1 | observability.md exists | CRITICAL |
 | 2 | Structured logging spec present (mandatory fields listed) | HIGH |
 | 3 | trace_id and span_id listed as mandatory log fields | HIGH |
 | 4 | Trace propagation spec: W3C TraceContext header named | HIGH |
@@ -347,11 +360,11 @@ If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silen
 
 ### Phase 12: SRE
 
-**Read:** `docs/sre/RUNBOOKS.md`, `docs/sre/OBSERVABILITY.md`
+**Read:** `$ARTIFACTS/sre/runbooks.md`, `$ARTIFACTS/observability/observability.md`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | RUNBOOKS.md exists | CRITICAL |
+| 1 | runbooks.md exists | CRITICAL |
 | 2 | ≥ 1 runbook per CRITICAL dependency failure scenario | HIGH |
 | 3 | SLO targets defined (availability % and latency p95 target) | HIGH |
 | 4 | Alert → runbook mapping documented | HIGH |
@@ -361,14 +374,14 @@ If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silen
 
 ### Phase 13: Review
 
-**Read:** `docs/review/REVIEW_REPORT.md`, `.sdlc/TODO.md`
+**Read:** `$ARTIFACTS/review/review-report.md`, tasks from `$STATE`
 
 | # | Check | Severity if fails |
 |---|-------|------------------|
-| 1 | REVIEW_REPORT.md exists | CRITICAL |
+| 1 | review-report.md exists | CRITICAL |
 | 2 | Summary section has counts (Critical / High / Medium / Low) | HIGH |
-| 3 | Every HIGH finding has a TASK-NNN in TODO.md | HIGH |
-| 4 | Every CRITICAL finding has a TASK-NNN in TODO.md | CRITICAL |
+| 3 | Every HIGH finding has a TASK-NNN in $STATE tasks | HIGH |
+| 4 | Every CRITICAL finding has a TASK-NNN in $STATE tasks | CRITICAL |
 | 5 | No open CRITICAL findings (must be resolved or accepted before sign-off) | CRITICAL |
 | 6 | All 8 review dimensions were checked (not just code quality) | HIGH |
 
@@ -413,25 +426,21 @@ If `--all` flag: show one block per phase, then a final summary.
 
 ---
 
-## Step 5: Update STATE.md
+## Step 5: Update $STATE
 
-Append to the `## Verification Log` section of STATE.md:
+Append to the `verification_log` array in $STATE:
 
-```
-[date] VERIFY Phase [N] ([name]): [PASS | PASS WITH WARNINGS | FAIL] — [N failures, N warnings]
-  Failures: [list or "none"]
-  Warnings: [list or "none"]
+```json
+{"date": "[date]", "phase": [N], "phase_name": "[name]", "result": "PASS | PASS WITH WARNINGS | FAIL", "failures": [], "warnings": []}
 ```
 
-If FAIL: update the phase status back to 🔄 In Progress in STATE.md.
-
-If the `## Verification Log` section does not exist in STATE.md, add it.
+If FAIL: update the phase status back to "in_progress" in $STATE.
 
 ---
 
 ## Step 6: Update ROADMAP.md Phase Log
 
-If `.sdlc/ROADMAP.md` exists, update the Phase Log row for the verified phase:
+If a ROADMAP.md exists in the project root or `.sdlc/ROADMAP.md`, update the Phase Log row for the verified phase:
 
 **On PASS or PASS WITH WARNINGS:**
 Find the matching row in the `## Phase Log` table and update:

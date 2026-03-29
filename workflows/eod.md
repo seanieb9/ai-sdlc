@@ -4,12 +4,23 @@ Wrap up the session cleanly. The goal is to leave the project in a known, commit
 
 ---
 
+## Step 0: Workspace Resolution
+Run this bash to determine workspace paths:
+```bash
+BRANCH=$(git branch --show-current 2>/dev/null || echo "default")
+BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's|/|--|g' | sed 's|[^a-z0-9-]|-|g' | sed 's|-\+|-|g' | sed 's|^-||;s|-$||')
+[ -z "$BRANCH" ] && BRANCH="default"
+WORKSPACE=".claude/ai-sdlc/workflows/$BRANCH"
+STATE="$WORKSPACE/state.json"
+ARTIFACTS="$WORKSPACE/artifacts"
+mkdir -p "$WORKSPACE/artifacts"
+```
+Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
+
 ## Step 1: Read Current State
 
 Read in parallel:
-- `.sdlc/NEXT_ACTION.md` — current checkpoint (if any)
-- `.sdlc/STATE.md` — phase progress
-- `.sdlc/TODO.md` — task list
+- `$STATE` — current checkpoint, phase progress, tasks (read and parse JSON)
 - Git status: `git status --short` and `git diff --stat HEAD`
 
 ---
@@ -55,7 +66,7 @@ If nothing is worth committing (pure exploration, notes, scratch work): that's f
 
 Run the checkpoint workflow (same as `/sdlc:checkpoint`) with EOD-specific additions:
 
-Write `.sdlc/NEXT_ACTION.md` with:
+Update the `checkpoint` field in $STATE with:
 - Current phase and exact step
 - What was completed today (not just the session — frame it as a daily summary)
 - The single first action for tomorrow morning
@@ -94,15 +105,15 @@ Print the end-of-day summary:
 ║  [unresolved decisions — or "None"]                  ║
 ╚══════════════════════════════════════════════════════╝
 
-Checkpoint saved → .sdlc/NEXT_ACTION.md
+Checkpoint saved → $STATE (checkpoint field)
 Run /sdlc:sod tomorrow to start your session.
 ```
 
 ---
 
-## Step 6: Update STATE.md
+## Step 6: Update state.json context log
 
-Append to `## Checkpoint Log`:
-```
-[date] EOD: Phase [N] Step [X] — [what was completed today] → Tomorrow: [first command]
+Append to `context_log` array in $STATE:
+```json
+{"date": "[date]", "event": "EOD", "note": "Phase [N] Step [X] — [what was completed today] → Tomorrow: [first command]"}
 ```
