@@ -194,6 +194,38 @@ idea
 
 Phases marked `?` are optional. Include them if the project context warrants it (e.g. `voc?` if primary user research is available; `uat?` if external stakeholders must sign off). Ask the user once: "Any optional phases to include? [voc / personas / journey / business-process / prototype / uat / fe-setup / none]"
 
+### 4f. Phase Set Modifiers Based on Project Assumptions
+
+After the phase set is determined (Step 4e), read `projectAssumptions` from state.json and apply the following modifiers. These adjustments are applied before Step 5 and logged to state.json under `phaseSetModifiers`.
+
+```
+IF accessibility == "wcag-aa":
+  → Add accessibility-review phase after test-gen
+  → Ensure personas phase is included (accessibility persona)
+
+IF compliance includes GDPR or HIPAA or PCI-DSS:
+  → Auto-include threat-model in design auto-chain (always, not just if auth detected)
+  → Add compliance-checklist note to review phase
+  → Ensure pii-audit auto-chain fires after build (always, not conditional)
+
+IF multiTenant == "yes":
+  → Add note to data-model phase: "tenant_id isolation is required — see Step 4 Multi-tenancy notes"
+  → Add note to design phase: "tenant isolation architecture is required"
+
+IF teamSize == "solo-developer":
+  → Simplify SRE phase: skip on-call rotation, incident banding; focus on personal runbook
+  → Dashboard note: "SRE phase adapted for solo developer"
+
+IF i18n == "multiple-languages":
+  → Add i18n note to product-spec phase
+  → Add i18n review to review phase checklist
+
+IF database == "not-decided":
+  → Add database selection step to design phase gate: "You must choose a database before architecture is finalized"
+```
+
+Note: Step 4f runs only for `new-project` and `new-feature` intents. For `bug-fix`, `refactor`, and `documentation`, skip modifiers (projectAssumptions may not exist).
+
 ---
 
 ## Step 5: Structured Intake
@@ -216,6 +248,70 @@ Write answers to state.json:
 - Update `updatedAt`
 
 Also append a project summary to `.claude/ai-sdlc/CLAUDE.md` under a `## Current Focus` section.
+
+---
+
+## Step 5b: Project Assumptions Clarification
+
+**Runs only for `new-project` and `new-feature` intents on first run (Case C or after "Start fresh"). Skip entirely for `bug-fix`, `refactor`, and `documentation`.**
+
+Use AskUserQuestion to ask all of the following in a single call:
+
+```
+Before we begin, a few quick questions to configure the right workflows:
+
+1. Is this a multi-tenant system? (yes / no / not sure)
+   → affects data model isolation, auth, and security patterns
+
+2. Accessibility requirements? (wcag-aa required / best-effort / not applicable)
+   → WCAG 2.1 AA requires accessibility testing in every UI phase
+
+3. Regulatory/compliance scope? (select all that apply, or "none")
+   GDPR, HIPAA, PCI-DSS, SOC 2, ISO 27001, FedRAMP, CCPA, none
+
+4. Who will use this system? (external-customers / internal-employees / both / public-anonymous)
+   → affects auth model, data handling, logging requirements
+
+5. Internationalization needed? (english-only / multiple-languages / not-decided-yet)
+   → early decision — adding i18n later is expensive
+
+6. Team/operations size? (solo-developer / small-team-no-oncall / team-with-oncall / enterprise-sre)
+   → affects SRE and observability complexity level
+
+7. Primary database? (postgres / mysql / mongodb / dynamodb / sqlite / other / not-decided)
+   → affects data model recommendations and migration tooling
+```
+
+Parse user answers and store in state.json under `projectAssumptions`:
+
+```json
+{
+  "projectAssumptions": {
+    "multiTenant": "yes|no|not-sure",
+    "accessibility": "wcag-aa|best-effort|not-applicable",
+    "compliance": ["GDPR", "HIPAA"],
+    "userBase": "external-customers|internal-employees|both|public-anonymous",
+    "i18n": "english-only|multiple-languages|not-decided",
+    "teamSize": "solo-developer|small-team-no-oncall|team-with-oncall|enterprise-sre",
+    "database": "postgres|mysql|mongodb|dynamodb|sqlite|other|not-decided"
+  }
+}
+```
+
+For `compliance`, parse the user's answer as a list (e.g., "GDPR, HIPAA" → `["GDPR", "HIPAA"]`). If the user answers "none", store `[]`.
+
+After writing to state.json, display a confirmation:
+
+```
+Configuration locked:
+  Multi-tenant:    [answer]
+  Accessibility:   [answer]
+  Compliance:      [answer]
+  Users:           [answer]
+  i18n:            [answer]
+  Team:            [answer]
+  Database:        [answer]
+```
 
 ---
 
@@ -374,10 +470,14 @@ Auto-chain trigger table:
 | `plan` | observability | Always (pre-populate structure) |
 | `plan` | sre | Always (pre-populate runbook skeleton) |
 | `plan` | roadmap | Always (generate/update phase timeline) |
+| `build` | code-quality | Always |
 | `build` | test-gaps | Always |
 | `build` | audit-deps | Always |
 | `build` | pii-audit | Only if observability phase is complete |
 | `deploy` | maintain | Always (generate initial runbook entries) |
+| `design` | nfr-analysis | Always (pre-populate performance/availability/scalability analysis) |
+| `test-gen` | traceability | Always (verify test-to-requirement coverage) |
+| `observability` | ci-verify | Always (verify CI pipeline has observability steps) |
 
 For each auto-chain skill: run it, capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
 ```json

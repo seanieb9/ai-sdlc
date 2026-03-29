@@ -401,6 +401,34 @@ Cover per Maestro flow:
 
 ---
 
+### Layer 10: Accessibility Tests (if accessibility != "not-applicable")
+
+Check $STATE projectAssumptions.accessibility. If "wcag-aa": this layer is REQUIRED. If "best-effort": include. If "not-applicable": skip.
+
+Scope:
+- Automated: axe-core / Lighthouse accessibility audit on every rendered page/component
+- Manual: screen reader testing (NVDA/JAWS on Windows, VoiceOver on Mac/iOS)
+- Keyboard navigation: all interactive paths navigable without mouse
+
+For each screen/component in SCREEN_SPEC.md or customer journey, define:
+
+```
+TC-A001
+Layer: Accessibility
+Screen: [screen name]
+Tool: axe-core automated
+Condition: GIVEN the page is rendered WHEN axe-core audits run THEN 0 critical/serious violations
+Coverage: WCAG 2.1 AA Rule Set
+```
+
+Coverage requirements:
+- 100% of screens have automated axe-core test
+- 100% of critical user flows tested with keyboard-only navigation
+- 100% of forms tested for label association
+- Sample manual screen reader test on at least 1 full user journey
+
+---
+
 ### Security Tests
 
 Targets: auth/authz rules, input validation, injection prevention
@@ -449,6 +477,71 @@ Before finalising, perform the full MECE check:
 
 For any gap: add new test case immediately.
 For any overlap: merge or deprecate, document reason.
+
+---
+
+## Test Standards
+
+### Test Isolation Policy
+
+Every test must be fully isolated. No test may depend on:
+- State created by another test (each test creates its own data)
+- Execution order (tests must pass in any order)
+- External services in production (mock or use test doubles)
+- Real clocks or time (use time injection or fixed timestamps)
+- File system state (use temp directories, clean up in teardown)
+- Network calls to real external APIs in unit/integration tests (use VCR cassettes, WireMock, or test fixtures)
+
+**Setup/Teardown rules:**
+- Each test: create only what it needs, destroy exactly what it created
+- Use transactions for DB tests: start transaction in setup, rollback in teardown (never commit)
+- Use test factories (not manual INSERT statements) for consistent test data creation
+
+**Test data principles:**
+- Factories create minimal valid objects (only required fields, sensible defaults for optionals)
+- Tests that need specific field values set them explicitly — no "magic" data
+- No shared global fixtures that tests modify
+
+---
+
+### Flake Prevention Policy
+
+A flaky test is one that passes and fails without code changes. Flaky tests are WORSE than no tests — they destroy trust.
+
+Flake prevention rules:
+1. **No sleep/wait in tests** — use explicit event/condition waiting (waitFor, awaitCondition, polling with timeout)
+2. **No order dependencies** — tests must pass in any random order
+3. **No time-based assertions** — inject clocks, never assert on wall-clock times
+4. **No network calls** — mock all external HTTP calls in unit and integration tests
+5. **No test-vs-test race conditions** — parallel tests must use isolated databases/schemas/containers
+
+Flake detection:
+- Run new tests 5 times before merging to confirm they're stable
+- CI pipeline tracks flake rate per test (fail if same test fails in 3 non-consecutive runs within 7 days)
+- Quarantine procedure: flaky test gets tagged @flaky and excluded from required checks within 24 hours; must be fixed within 7 days or deleted
+
+When a test is flaky: the first action is always to understand WHY before attempting to fix it.
+
+---
+
+### Mutation Testing (recommended for critical business logic)
+
+Mutation testing verifies that your tests actually detect bugs (not just that they execute code).
+
+Tool selection by language:
+- JavaScript/TypeScript: Stryker
+- Java/Kotlin: PIT (Pitest)
+- Python: mutmut or Cosmic Ray
+- Go: go-mutesting
+
+When to run:
+- Run on domain layer and application layer (not infrastructure or delivery — too slow)
+- Run before each release (not on every commit — expensive)
+- Target: mutation score >= 80% for domain layer
+
+What it does: Stryker/PIT modifies your code (mutations) and checks if your tests catch each mutation. A low mutation score means your tests don't actually verify behavior.
+
+For the most critical business rules (payment logic, authorization, invariants): target 90%+ mutation score.
 
 ---
 

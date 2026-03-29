@@ -556,6 +556,82 @@ module.exports = {
 
 ---
 
+## Test Speed Budgets
+
+Tests that are too slow don't get run. Enforce speed budgets:
+
+| Test Layer | Max per test | Max for full suite | CI enforcement |
+|-----------|-------------|-------------------|----------------|
+| Unit | 100ms | 60 seconds | Hard fail if exceeded |
+| Integration | 5 seconds | 5 minutes | Hard fail if exceeded |
+| Contract | 10 seconds | 2 minutes | Hard fail if exceeded |
+| E2E | 30 seconds | 15 minutes | Warn if exceeded |
+| Performance | N/A (they're measuring time) | 30 minutes | N/A |
+
+If a unit test exceeds 100ms: it's likely not actually a unit test (probably hitting DB or network). Investigate and fix.
+
+Slow test detection in CI:
+```yaml
+# Jest example
+jest --testTimeout=100 --forceExit
+
+# pytest
+pytest --timeout=5 tests/unit/
+```
+
+---
+
+## Test Failure Artifacts
+
+When tests fail in CI, capture these artifacts for debugging:
+
+For E2E tests:
+- Screenshot at point of failure (Playwright: `page.screenshot()` on test failure)
+- Video of test run (Playwright: `video: 'retain-on-failure'`)
+- Browser console logs captured
+- Network request log (all XHR/fetch calls made during test)
+
+For integration tests:
+- Database state at time of failure (selected records from affected tables)
+- Application logs from the test run
+
+For all tests:
+- Full test output (not just summary)
+- Environment variables used (redacted for secrets)
+- Timestamp and test machine info
+
+CI configuration: store artifacts for 30 days, accessible from PR check link.
+
+---
+
+## Parallel Test Execution
+
+Speed up test suites by running tests in parallel:
+
+**Unit tests**: always safe to parallelize (each test is fully isolated)
+**Integration tests**: parallelize only if each test gets its own DB schema or transaction rollback
+**E2E tests**: parallelize with separate browser contexts; ensure test data doesn't conflict
+
+```yaml
+# Jest example (parallel workers)
+jest --maxWorkers=50%
+
+# pytest-xdist
+pytest -n auto tests/unit/
+
+# Playwright sharding
+npx playwright test --shard=1/3  # Run on CI matrix
+```
+
+**Database isolation for parallel integration tests:**
+- Option A: Transaction rollback — each test wraps in a transaction, never commits
+- Option B: Schema per worker — each parallel worker gets a dedicated schema (test_1, test_2...)
+- Option C: Container per worker — each worker gets its own DB container (slow but fully isolated)
+
+Recommended: Option A (transaction rollback) for speed; Option C for tests that commit transactions explicitly.
+
+---
+
 ## Step 13: Automation Completeness Audit
 
 After implementing automation, run the completeness check:

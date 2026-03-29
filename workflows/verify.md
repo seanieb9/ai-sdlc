@@ -257,6 +257,77 @@ If business-process.md does not exist (Phase 4b was skipped): skip this check en
 
 ---
 
+### Engineering Verification Checklist
+
+These gates enforce engineering rigor at the transition into and out of Phase 8 (Build). They are checked automatically as part of Phase 7 and Phase 8 verification.
+
+---
+
+#### Pre-Build Gate (verified as part of Phase 7 verification — before Phase 8 starts)
+
+Before starting implementation, verify:
+- [ ] Implementation plan exists and has tasks defined
+- [ ] All tasks have clear done criteria
+- [ ] Architecture decisions (ADRs) are documented
+- [ ] API contracts are specified (OpenAPI spec exists)
+- [ ] Data model is finalized (no pending breaking changes)
+- [ ] Test strategy is defined (which layers, which frameworks)
+- [ ] Development environment setup is documented
+
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| E1 | Implementation plan has ≥ 1 task with done criteria | HIGH |
+| E2 | ≥ 1 ADR documented in SOLUTION_DESIGN.md | HIGH |
+| E3 | API_SPEC.md exists and is not empty | HIGH |
+| E4 | DATA_MODEL.md is finalized (no `[TBD]` in entity definitions) | HIGH |
+| E5 | Test strategy section present in TECH_ARCHITECTURE.md or a separate test-strategy document | MEDIUM |
+| E6 | Development environment setup steps documented in README or equivalent | MEDIUM |
+
+---
+
+#### Post-Build Gate (verified as part of Phase 8 verification — before Phase 9 starts)
+
+After implementation, verify:
+
+**Code Quality:**
+- [ ] Lint: 0 errors (run lint command from config)
+- [ ] Types: 0 type errors
+- [ ] Format: all files pass format check
+- [ ] Complexity: no function exceeds cyclomatic complexity 10
+
+**Testing:**
+- [ ] Unit test coverage >= [threshold from config] for domain/application layers
+- [ ] All new business logic has unit tests
+- [ ] All new API endpoints have integration tests
+- [ ] No tests are skipped/commented out without explanation
+
+**Security:**
+- [ ] Dependency scan: 0 CRITICAL, 0 HIGH vulnerabilities
+- [ ] Secrets scan: 0 secrets detected
+- [ ] OWASP API Top 10: each applicable item has documented mitigation
+
+**Architecture:**
+- [ ] Dependency rule respected (no domain → infrastructure imports)
+- [ ] New code follows the patterns established in ADRs
+- [ ] No direct database access from delivery layer
+- [ ] No business logic in delivery layer (thin controllers only)
+
+| # | Check | Severity if fails |
+|---|-------|------------------|
+| E7 | Lint command exits 0 (0 errors) | HIGH |
+| E8 | Type check command exits 0 (0 type errors) | HIGH |
+| E9 | No domain file imports from infrastructure packages | HIGH |
+| E10 | No raw DB client calls in use case files | HIGH |
+| E11 | No business logic in delivery layer controllers | HIGH |
+| E12 | Dependency vulnerability scan: 0 CRITICAL findings | HIGH |
+| E13 | Secrets scan: 0 secrets detected in committed files | CRITICAL |
+| E14 | No tests skipped (`xit`, `it.skip`, `@Disabled`) without explanation comment | MEDIUM |
+| E15 | Unit test coverage for domain/application layer meets or exceeds configured threshold | HIGH |
+
+If any item FAILS: mark verification as FAILED, list the failures, block advancement to next phase.
+
+---
+
 ### Phase 9: Test Cases
 
 **Read:** `$ARTIFACTS/test-cases/test-cases.md`, `$ARTIFACTS/idea/prd.md`, `$ARTIFACTS/design/api-spec.md`, `$ARTIFACTS/design/tech-architecture.md`

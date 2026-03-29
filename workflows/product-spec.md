@@ -162,7 +162,6 @@ NFR-[NNN]: [Category]: [Requirement]
 ### Purpose
 ### Scope
 ### Out of Scope
-### Success Metrics
 
 ## 2. Personas and Roles
 [From CUSTOMER_JOURNEY.md — reference or inline]
@@ -194,6 +193,39 @@ NFR-[NNN]: [Category]: [Requirement]
 
 ## 10. Open Questions
 [Questions still needing answers — remove when resolved]
+
+## 11. Accessibility Requirements
+*Based on project configuration: [wcag-aa / best-effort / not-applicable]*
+
+- [ ] WCAG 2.1 AA conformance required for all UI components (if wcag-aa)
+- [ ] Keyboard navigation for all interactive elements
+- [ ] Screen reader compatibility (ARIA labels, roles, live regions)
+- [ ] Minimum contrast ratio: 4.5:1 for normal text, 3:1 for large text
+- [ ] No content that flashes more than 3 times per second
+- [ ] All form inputs have associated labels
+- [ ] Error messages are announced to screen readers
+- [ ] Focus management on modal/dialog open/close
+- [ ] Skip-to-content link on each page
+
+## 12. Data Retention & Privacy
+*Required if GDPR/HIPAA/CCPA in compliance scope*
+
+| Data Type | Retention Period | Deletion Method | Legal Basis |
+|-----------|-----------------|-----------------|-------------|
+| [e.g., User accounts] | [e.g., Lifetime + 30 days after deletion request] | [soft-delete → hard-delete after 30d] | [legitimate interest / contract] |
+
+Right-to-erasure procedure: [describe how a deletion request is fulfilled]
+Data portability: [describe how a user can export their data]
+Data residency: [where data is stored geographically — matters for GDPR]
+
+## 13. Success Metrics
+*How we know this feature/product is working*
+
+| Metric | Definition | Target | Measurement Method |
+|--------|-----------|--------|-------------------|
+| [e.g., Activation rate] | [% of signups that complete first key action] | [>60% within 7 days] | [analytics event / DB query] |
+| [e.g., Error rate] | [% of API requests returning 5xx] | [< 0.1%] | [monitoring dashboard] |
+| [e.g., p95 latency] | [95th percentile response time for key endpoint] | [< 300ms] | [APM tool] |
 
 ## Deprecated Requirements
 [REQ-IDs deprecated with reason — never delete]

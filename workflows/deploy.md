@@ -28,6 +28,32 @@ Read the report. If any CRITICAL findings are open: STOP. Output the list of ope
 
 **HARD gate 2 (conditional):** If `$ARTIFACTS/uat/uat-plan.md` exists: check that `phases.uat.signedOffBy` in state.json is not null. If UAT was performed but no sign-off is recorded: WARN. Ask the user to confirm they want to deploy without sign-off before continuing.
 
+**Pre-deploy Safety Checks (run before proceeding):**
+
+```bash
+# 1. Check for uncommitted changes — deploy only from clean state
+git status --short
+
+# 2. Verify we're on the correct branch
+git branch --show-current
+
+# 3. Check SSL certificate expiry (if applicable)
+# echo | openssl s_client -connect [your-domain]:443 2>/dev/null | openssl x509 -noout -dates 2>/dev/null
+
+# 4. Verify database backup is recent (last 24 hours)
+# [Prompt user]: "Has a database backup been taken in the last 24 hours? (yes / no / N/A)"
+
+# 5. Check for any open CRITICAL items in the technical debt register
+grep -i "CRITICAL" $ARTIFACTS/plan/implementation-plan.md 2>/dev/null | head -10
+```
+
+Ask the user: "Before deploying, confirm:
+1. Is there a recent database backup? (yes / no / N/A)
+2. Has staging been tested and is healthy? (yes / no / deploying-to-staging-now)
+3. Is the on-call person aware of this deployment? (yes / no / N/A — solo dev)"
+
+If the user answers "no" to question 1 for a production deployment: STOP. A backup is required before production deployment. Explain why: data corruption or failed migration without a backup is unrecoverable.
+
 Read in parallel (after gates pass):
 - `$ARTIFACTS/verify/verification-report.md`
 - `$ARTIFACTS/design/tech-architecture.md` — deployment architecture (if exists)
@@ -123,6 +149,14 @@ Pre-Deploy
 [ ] Downstream service owners notified (if breaking API changes)
 [ ] On-call rotation aware of this deployment
 [ ] Rollback plan reviewed by deployer (see Rollback Procedure section)
+[ ] SSL certificates: not expiring within 30 days
+[ ] Database backup: taken within last 24 hours (production only)
+[ ] Staging deployment: tested and healthy before promoting to production
+[ ] Security scan: no CRITICAL vulnerabilities in latest code-quality report
+[ ] Secrets rotation: any secrets due for rotation have been rotated
+[ ] Breaking API changes: consumer teams notified and ready
+[ ] Deployment window: scheduled during low-traffic period (or communicated to team)
+[ ] Incident response: on-call engineer is aware and available (if team)
 ```
 
 ### Deployment Steps
@@ -216,6 +250,33 @@ Rollback Procedure
 4. Notify stakeholders of rollback
 5. Create post-mortem issue
 ```
+
+### Post-deploy Monitoring Window
+
+After deployment completes, monitor for [15 minutes for low-risk / 30 minutes for high-risk]:
+
+```
+Post-deploy Watch Period
+────────────────────────
+Minutes 0-5: Critical checks
+  [ ] Health endpoints returning 200 (check every 30s)
+  [ ] Error rate < [threshold] (watch [monitoring URL])
+  [ ] No critical alerts firing
+
+Minutes 5-15: Performance stability
+  [ ] p95 latency within expected range
+  [ ] Database connections stable (no connection pool exhaustion)
+  [ ] Memory usage not climbing
+
+Minutes 15-30 (high-risk deploys only):
+  [ ] No customer-reported issues in [support channel]
+  [ ] Conversion/usage metrics normal
+  [ ] Background jobs completing (no queue backup)
+
+Rollback trigger: if any metric exceeds threshold or alerts fire → execute rollback immediately
+```
+
+Document the outcome: SUCCESS | ROLLED BACK | MONITORING EXTENDED
 
 ### Notification Plan
 

@@ -66,6 +66,83 @@ Decompose the work following clean architecture layers:
 
 **XL tasks must be split** — no task should span more than one session.
 
+### Required Engineering Tasks (auto-add to every plan)
+
+These tasks must always be present in the plan, in addition to feature tasks. They are often forgotten but are non-negotiable:
+
+**Security & Quality Setup (once per project, first sprint):**
+- [ ] Configure linting and formatting tools (.eslintrc, .prettierrc, pyproject.toml, etc.)
+- [ ] Configure pre-commit hooks (lint, format, secrets scan, commit message validation)
+- [ ] Set up CODEOWNERS file
+- [ ] Configure coverage thresholds in CI (fail build if coverage drops below [N]%)
+- [ ] Set up dependency vulnerability scanning (npm audit / pip-audit / govulncheck in CI)
+- [ ] Set up secrets scanning in CI (gitleaks or similar)
+
+**Database (every feature that adds schema):**
+- [ ] Write database migration file (forward migration)
+- [ ] Write rollback migration file (reverse migration)
+- [ ] Test migration in isolated environment before merging
+- [ ] Add seed/fixture data for development environment
+
+**Testing (every feature):**
+- [ ] Unit tests for all domain entities and use cases
+- [ ] Integration tests for all repository implementations
+- [ ] Contract tests for all external API integrations (if any)
+- [ ] E2E test for the primary happy path of the feature
+- [ ] Performance test if the feature has a latency NFR
+
+**Documentation (every feature):**
+- [ ] Update API documentation (OpenAPI spec) for any new/changed endpoints
+- [ ] Update README if setup steps changed
+- [ ] Update runbooks if new failure modes introduced
+- [ ] Create/update ADR for any significant technical decisions made during implementation
+
+**Observability (every feature):**
+- [ ] Add structured log entries for key business events
+- [ ] Add metrics for key operations (created_total, duration_seconds)
+- [ ] Update health check if new external dependency added
+
+---
+
+### Definition of Done
+
+A task is only DONE when ALL of the following are true:
+
+**Code quality:**
+- [ ] Linting passes with 0 errors, 0 warnings
+- [ ] Type checking passes with 0 errors (TypeScript / mypy / etc.)
+- [ ] Code follows the project's style guide (format check passes)
+- [ ] No commented-out code in the commit
+- [ ] No debug logging left in
+- [ ] No hardcoded secrets or environment-specific values
+
+**Testing:**
+- [ ] Unit tests written and passing for new business logic
+- [ ] Test coverage for this task meets or exceeds the project threshold
+- [ ] Integration tests written for new DB/service interactions
+- [ ] All existing tests still pass (no regressions)
+- [ ] New tests are not flaky (run them 3 times to confirm)
+
+**Security:**
+- [ ] No new security vulnerabilities introduced (dependency scan clean)
+- [ ] Input validation added for all new user-facing inputs
+- [ ] No sensitive data exposed in logs or error messages
+- [ ] New endpoints have authentication and authorization
+
+**Documentation:**
+- [ ] Code is self-documenting (intent clear from names and structure)
+- [ ] Complex logic has explanatory comments (the "why", not the "what")
+- [ ] API spec updated for new endpoints
+
+**Review:**
+- [ ] Code reviewed by at least one other person (if team) or self-reviewed after 24 hours (if solo)
+- [ ] All review comments addressed or explicitly deferred with reason
+- [ ] PR description explains the "why" of the change
+
+Only mark a task COMPLETE in the plan when every item above is checked.
+
+---
+
 ## Step 3: Dependency Graph
 
 Build the dependency graph:

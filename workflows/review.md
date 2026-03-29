@@ -102,6 +102,114 @@ Severity: HIGH for dependency rule violations, MEDIUM for SRP violations
 
 Severity: HIGH for gaps on critical paths, MEDIUM for duplicates, LOW for style issues
 
+## Accessibility Review (WCAG 2.1 AA)
+
+Read from $STATE projectAssumptions.accessibility. If "not-applicable", skip this section and note skipped.
+
+For each UI component/screen in the deliverable:
+- [ ] All images have descriptive alt text (or empty alt="" if decorative)
+- [ ] All interactive elements are keyboard-accessible (Tab, Enter, Space, Arrow keys)
+- [ ] All interactive elements have accessible names (aria-label or visible label)
+- [ ] Color is not the only means of conveying information
+- [ ] Text contrast ratio meets 4.5:1 (normal) / 3:1 (large text) — use browser devtools
+- [ ] All form inputs have associated <label> elements
+- [ ] Error messages are programmatically associated with their input (aria-describedby)
+- [ ] Modal dialogs trap focus and restore on close
+- [ ] Page has a skip-to-main-content link
+- [ ] Document language is set (lang attribute on <html>)
+- [ ] Reading order makes sense without CSS (test by disabling CSS)
+- [ ] All videos have captions (if applicable)
+- [ ] No content flashes more than 3 times/second
+
+Automated check: run axe-core or Lighthouse a11y audit. Score must be >= 90 for wcag-aa.
+
+Findings classified as: CRITICAL (blocks user access) / HIGH (degrades experience) / MEDIUM / LOW
+
+---
+
+## Performance Review
+
+- [ ] Key API endpoint response times measured and documented (p50, p95, p99)
+- [ ] Database query explain plans reviewed for queries touching > 10k rows
+- [ ] No N+1 queries detected (use query logging to verify)
+- [ ] Large payload responses paginated (no endpoint returning > 100 records unbounded)
+- [ ] Images optimized (next/image, lazy loading, appropriate format)
+- [ ] JavaScript bundle size measured (if web app) — document and compare to previous
+- [ ] Memory usage stable under sustained load (no memory leaks in profiling)
+- [ ] Startup time acceptable (record time-to-ready from health check)
+
+For each NFR with a latency/throughput target (from product spec):
+| NFR | Target | Measured | Pass/Fail |
+|-----|--------|----------|-----------|
+| [e.g., API p95] | < 200ms | [measured] | ✅/❌ |
+
+---
+
+## Security Review
+
+### Authentication & Authorization
+- [ ] All non-public endpoints require authentication
+- [ ] Authorization checked at use-case level (not just middleware)
+- [ ] JWT tokens expire and refresh correctly
+- [ ] No sensitive data in JWT payload (no passwords, full card numbers)
+- [ ] Refresh token rotation implemented (old token invalidated on refresh)
+
+### Input Handling
+- [ ] All user input validated at delivery layer (schema + type)
+- [ ] No SQL injection risk: all DB queries use parameterized statements / ORM
+- [ ] No XSS risk: all HTML output escaped, Content-Security-Policy header set
+- [ ] File uploads: type validated, size limited, virus-scanned, stored outside web root
+- [ ] URL parameters validated before use in queries or file paths
+
+### HTTP Security Headers
+- [ ] Strict-Transport-Security (HSTS)
+- [ ] X-Content-Type-Options: nosniff
+- [ ] X-Frame-Options: DENY or SAMEORIGIN
+- [ ] Content-Security-Policy defined (not just "unsafe-inline")
+- [ ] Referrer-Policy: strict-origin-when-cross-origin
+- [ ] Permissions-Policy configured
+
+### Secrets & Configuration
+- [ ] No secrets in source code, config files, or logs
+- [ ] All secrets loaded from environment variables or vault
+- [ ] .env file in .gitignore
+- [ ] Secrets scanning (gitleaks) shows no findings
+
+### API Security
+- [ ] Rate limiting on all public endpoints (stricter on auth endpoints)
+- [ ] CORS configured with explicit allowlist (no wildcard * for credentialed requests)
+- [ ] Error responses don't leak stack traces or internal details to callers
+- [ ] API versioning in place (existing consumers won't break on API changes)
+
+### Dependency Security
+- [ ] npm audit / pip-audit / govulncheck: 0 CRITICAL, 0 HIGH vulnerabilities
+- [ ] No dependencies with GPL license used in commercial product without legal review
+- [ ] All direct dependencies pinned to specific versions in lock file
+
+---
+
+## ADR Review
+
+For each ADR in $ARTIFACTS/design/solution-design.md:
+- [ ] ADR status is "Accepted" (not "Proposed" or "Deprecated")
+- [ ] ADR consequences are reflected in the implementation
+- [ ] Any ADRs marked for review trigger (from their "Review trigger" field) — check if those conditions have been reached
+- [ ] New patterns used in code but not in ADRs → create new ADRs before sign-off
+
+---
+
+## Operations Readiness Review
+
+- [ ] All runbooks in $ARTIFACTS/sre/runbooks.md cover this new feature's failure modes
+- [ ] SLO targets are achievable based on measured performance
+- [ ] Health check endpoints (/health/live, /health/ready) updated if new dependencies added
+- [ ] Monitoring dashboards updated to include new service/feature metrics
+- [ ] On-call team briefed on new feature's failure modes (if team with on-call)
+- [ ] Database backup verified: new tables/data included in backup scope
+- [ ] Rollback procedure tested or verified in staging
+
+---
+
 ## Step 6: Observability Review
 
 **Check: Logging**

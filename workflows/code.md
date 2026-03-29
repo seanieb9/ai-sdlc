@@ -58,6 +58,363 @@ Never start coding without reading the existing code in the affected area. If th
 
 ---
 
+## Step 2.5: Code Quality Tooling Setup (first-time only)
+
+Run this step once per project, at the start of the first coding task. Skip entirely if already configured.
+
+### 1. Check for existing lint/format config
+
+```bash
+ls .eslintrc* .eslintrc.json .eslintrc.js .prettierrc* pyproject.toml .flake8 .rubocop.yml clippy.toml .golangci.yml 2>/dev/null
+```
+
+Read `.claude/ai-sdlc.config.yaml` to determine the project language.
+
+**If lint/format config already exists** — skip to pre-commit check (section 3 below).
+
+**If NOT configured**, set up based on language:
+
+#### JavaScript / TypeScript
+Write `.eslintrc.json`:
+```json
+{
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:security/recommended"],
+  "plugins": ["@typescript-eslint", "security"],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "security/detect-object-injection": "warn"
+  }
+}
+```
+
+Write `.prettierrc`:
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}
+```
+
+Add scripts to `package.json` (merge — do not overwrite existing scripts):
+```json
+{
+  "scripts": {
+    "lint": "eslint src/ --ext .ts,.tsx,.js,.jsx --max-warnings 0",
+    "lint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json}'",
+    "format:check": "prettier --check 'src/**/*.{ts,tsx,js,jsx,json}'",
+    "type-check": "tsc --noEmit"
+  }
+}
+```
+
+#### Python
+Write `pyproject.toml` (or merge into existing):
+```toml
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "S", "B", "UP"]
+ignore = []
+target-version = "py311"
+
+[tool.ruff.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+```
+
+#### Go
+Write `.golangci.yml`:
+```yaml
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec
+    - gocyclo
+    - gocritic
+linters-settings:
+  gocyclo:
+    min-complexity: 10
+run:
+  timeout: 5m
+```
+
+#### Ruby
+Write `.rubocop.yml`:
+```yaml
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - 'db/schema.rb'
+    - 'vendor/**/*'
+Metrics/MethodLength:
+  Max: 30
+Metrics/CyclomaticComplexity:
+  Max: 10
+Style/Documentation:
+  Enabled: false
+```
+
+#### Java / Kotlin
+Ask the user: "Which build tool? (maven/gradle)" and set up Checkstyle + SpotBugs config accordingly. Write `checkstyle.xml` with Google style as baseline. Add SpotBugs plugin to build config.
+
+#### Unknown language
+Ask the user: "What linting/formatting tools does this project use?" — wait for answer before proceeding.
+
+---
+
+### 2. Update `.gitignore`
+
+Ensure these entries exist in `.gitignore` (add if missing, never duplicate):
+```
+# Code quality tool caches
+.eslintcache
+.ruff_cache/
+.mypy_cache/
+__pycache__/
+*.pyc
+.coverage
+htmlcov/
+```
+
+---
+
+### 3. Check for pre-commit hooks
+
+```bash
+ls .husky/ .pre-commit-config.yaml 2>/dev/null
+```
+
+**If hooks already exist** — skip to CODEOWNERS check (section 5).
+
+**If NOT configured**, set up based on language:
+
+#### JavaScript / TypeScript
+```bash
+npm install --save-dev husky lint-staged @commitlint/cli @commitlint/config-conventional
+npx husky init
+```
+
+Write `.husky/pre-commit`:
+```sh
+#!/bin/sh
+npx lint-staged
+```
+
+Write `.husky/commit-msg`:
+```sh
+#!/bin/sh
+npx --no-install commitlint --edit "$1"
+```
+
+Write `commitlint.config.js`:
+```js
+module.exports = { extends: ['@commitlint/config-conventional'] };
+```
+
+Write `.lintstagedrc.json`:
+```json
+{
+  "*.{ts,tsx,js,jsx}": ["eslint --fix --max-warnings 0", "prettier --write"],
+  "*.{json,md,yaml,yml}": ["prettier --write"]
+}
+```
+
+Add to `package.json`:
+```json
+{
+  "scripts": {
+    "prepare": "husky"
+  }
+}
+```
+
+#### Python
+Write `.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.8
+    hooks:
+      - id: bandit
+        args: ["-r", "src/", "-ll"]
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: Conventional Commit Message
+        language: pygrep
+        entry: '^(feat|fix|docs|chore|refactor|test|style|perf|ci|build|revert)(\(.+\))?: .+'
+        args: [--multiline]
+        stages: [commit-msg]
+```
+
+#### Generic (all other languages)
+Write `.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: Conventional Commit Message
+        language: pygrep
+        entry: '^(feat|fix|docs|chore|refactor|test|style|perf|ci|build|revert)(\(.+\))?: .+'
+        args: [--multiline]
+        stages: [commit-msg]
+```
+
+**Always include regardless of language:**
+- Secrets scanning hook (`detect-secrets` or `gitleaks`)
+- Commit message validation (Conventional Commits pattern: `^(feat|fix|docs|chore|refactor|test|style|perf|ci|build|revert)(\(.+\))?: .+`)
+
+---
+
+### 4. Install pre-commit (if .pre-commit-config.yaml was written)
+
+```bash
+pip install pre-commit 2>/dev/null || brew install pre-commit 2>/dev/null || echo "Install pre-commit manually: https://pre-commit.com"
+pre-commit install
+pre-commit install --hook-type commit-msg
+```
+
+---
+
+### 5. CODEOWNERS
+
+Check if `CODEOWNERS` exists at repo root or `.github/CODEOWNERS`:
+```bash
+ls CODEOWNERS .github/CODEOWNERS 2>/dev/null
+```
+
+If it does NOT exist, ask the user:
+> "Who owns this codebase? Enter GitHub usernames separated by commas (e.g. @alice, @bob), or press enter to skip CODEOWNERS:"
+
+If usernames are provided, write `CODEOWNERS`:
+```
+# CODEOWNERS — auto-generated by AI-SDLC
+# Format: <path> <owner> [<owner2> ...]
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*   @<owner1> @<owner2>
+```
+
+---
+
+### 6. CONTRIBUTING.md
+
+Check if `CONTRIBUTING.md` exists:
+```bash
+ls CONTRIBUTING.md 2>/dev/null
+```
+
+If it does NOT exist, write `CONTRIBUTING.md`:
+```markdown
+# Contributing Guide
+
+## Branch Naming Convention
+
+```
+<type>/<short-description>
+```
+
+Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`
+
+Examples:
+- `feat/add-user-auth`
+- `fix/order-status-null-check`
+- `chore/update-dependencies`
+
+## Commit Message Format (Conventional Commits)
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`, `ci`, `build`, `revert`
+
+Examples:
+- `feat(orders): add idempotency key support`
+- `fix(auth): handle expired token edge case`
+- `docs: update API setup instructions`
+
+Breaking changes: append `!` after type or add `BREAKING CHANGE:` in footer.
+
+## Pull Request Process
+
+1. Branch off `main` (or the relevant base branch)
+2. Implement changes following the coding standards in this repo
+3. Ensure all pre-commit hooks pass: `pre-commit run --all-files`
+4. Run the full test suite and confirm all tests pass
+5. Open a PR with a clear title (Conventional Commit format) and description
+6. Request review from CODEOWNERS
+7. Address all review comments before merging
+8. Squash-merge or rebase-merge — no merge commits on `main`
+
+## Code Review Checklist
+
+For reviewers:
+
+- [ ] Code satisfies the stated requirements/ticket
+- [ ] No business logic in the delivery layer (controllers are thin)
+- [ ] Error handling covers all external calls
+- [ ] No hardcoded secrets, credentials, or environment-specific values
+- [ ] Logging is structured and contains no sensitive data
+- [ ] New code has appropriate test coverage
+- [ ] No commented-out code committed
+- [ ] No magic numbers or strings — named constants used
+- [ ] Functions are ≤ 30 lines; cyclomatic complexity ≤ 10
+- [ ] Dependencies injected — nothing `new`'d inside a class body
+```
+
+---
+
 ## Step 3: Design the Error Hierarchy (first time only)
 
 If the project does not yet have a defined exception hierarchy, establish it now. This is infrastructure for all subsequent code.
@@ -96,6 +453,161 @@ Rules:
 - Infrastructure exceptions are caught at the boundary, logged with full detail, re-thrown as `InfrastructureException` with a safe message (never leak DB errors to callers)
 - Never throw HTTP-specific exceptions from domain or application layers — they know nothing about HTTP
 - Never swallow exceptions — empty catch blocks are a bug
+
+---
+
+## Step 3.5: Startup Configuration Validation
+
+**Every service must validate all required environment variables at startup — fail fast before accepting traffic.**
+
+Do not silently use a default for a required value. If the app starts with missing config, it will fail in production at the worst possible moment (under load, or on first real request). Validate up front and crash loudly at startup instead.
+
+### Pattern: Config Validation by Language
+
+#### Python
+```python
+import os
+from dataclasses import dataclass
+
+REQUIRED_VARS = [
+    "DATABASE_URL",
+    "REDIS_URL",
+    "SECRET_KEY",
+    "STRIPE_API_KEY",
+]
+
+OPTIONAL_FEATURES = {
+    "SENTRY_DSN": "error tracking",
+    "DATADOG_API_KEY": "metrics",
+    "FEATURE_FLAG_NEW_CHECKOUT": "new checkout flow",
+}
+
+def load_and_validate_config() -> "Config":
+    missing = [v for v in REQUIRED_VARS if not os.environ.get(v)]
+    if missing:
+        raise RuntimeError(
+            f"FATAL: Missing required environment variables: {', '.join(missing)}\n"
+            f"Service cannot start. Set these variables and restart."
+        )
+
+    config = Config(
+        database_url=os.environ["DATABASE_URL"],
+        redis_url=os.environ["REDIS_URL"],
+        secret_key=os.environ["SECRET_KEY"],
+        stripe_api_key=os.environ["STRIPE_API_KEY"],
+    )
+
+    # Log startup summary — what was loaded, which optional features are enabled
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("startup.config_loaded", extra={
+        "environment": os.environ.get("APP_ENV", "unknown"),
+        "database_host": config.database_url.split("@")[-1].split("/")[0],  # host only, not credentials
+        "optional_features_enabled": [
+            name for name, desc in OPTIONAL_FEATURES.items() if os.environ.get(name)
+        ],
+    })
+
+    return config
+```
+
+#### TypeScript / Node.js
+```typescript
+const REQUIRED_VARS = ['DATABASE_URL', 'REDIS_URL', 'SECRET_KEY', 'STRIPE_API_KEY'] as const;
+
+export function loadConfig(): Config {
+  const missing = REQUIRED_VARS.filter((v) => !process.env[v]);
+  if (missing.length > 0) {
+    console.error(`FATAL: Missing required environment variables: ${missing.join(', ')}`);
+    console.error('Service cannot start. Set these variables and restart.');
+    process.exit(1);
+  }
+
+  const config: Config = {
+    databaseUrl: process.env.DATABASE_URL!,
+    redisUrl: process.env.REDIS_URL!,
+    secretKey: process.env.SECRET_KEY!,
+    stripeApiKey: process.env.STRIPE_API_KEY!,
+  };
+
+  // Startup summary log
+  console.info('startup.config_loaded', JSON.stringify({
+    environment: process.env.NODE_ENV ?? 'unknown',
+    optionalFeaturesEnabled: [
+      process.env.SENTRY_DSN && 'error-tracking',
+      process.env.FEATURE_FLAG_NEW_CHECKOUT && 'new-checkout-flow',
+    ].filter(Boolean),
+  }));
+
+  return config;
+}
+```
+
+#### Go
+```go
+func LoadConfig() (Config, error) {
+    required := []string{"DATABASE_URL", "REDIS_URL", "SECRET_KEY", "STRIPE_API_KEY"}
+    var missing []string
+    for _, v := range required {
+        if os.Getenv(v) == "" {
+            missing = append(missing, v)
+        }
+    }
+    if len(missing) > 0 {
+        return Config{}, fmt.Errorf("FATAL: missing required env vars: %s", strings.Join(missing, ", "))
+    }
+
+    cfg := Config{
+        DatabaseURL: os.Getenv("DATABASE_URL"),
+        RedisURL:    os.Getenv("REDIS_URL"),
+        SecretKey:   os.Getenv("SECRET_KEY"),
+        StripeKey:   os.Getenv("STRIPE_API_KEY"),
+    }
+
+    slog.Info("startup.config_loaded",
+        "environment", os.Getenv("APP_ENV"),
+        "sentry_enabled", os.Getenv("SENTRY_DSN") != "",
+    )
+
+    return cfg, nil
+}
+```
+
+**Rules:**
+- Call the config loader at the very first line of `main()` (or app startup) — before any other initialization
+- Log the startup summary at INFO level — operators need to know what environment booted
+- Never log credential values — log host names, feature flags, and environment name only
+- Call `process.exit(1)` / `os.Exit(1)` / `raise RuntimeError` — do not return a partial config
+
+---
+
+## Step 3.6: Coding Standards (always apply)
+
+These are non-negotiable. Apply them to every file touched in this task.
+
+1. **No magic numbers/strings** — extract to named constants. `MAX_RETRY_ATTEMPTS = 3`, not `3`. `STATUS_PENDING = "pending"`, not `"pending"`.
+
+2. **Function/method size limit — max 30 lines.** If a function exceeds 30 lines, it is doing too many things. Extract and name the sub-operation. The extracted function name is the documentation.
+
+3. **Cyclomatic complexity limit — max 10 per function.** Count: +1 for each `if`, `elif`, `else`, `for`, `while`, `case`, `catch`, `and`, `or`. If complexity > 10, decompose into smaller functions each handling one decision path.
+
+4. **Single Responsibility Principle** — each class or module has exactly one reason to change. If you can describe a class's purpose with the word "and", split it.
+
+5. **Dependency injection everywhere** — never `new` a dependency inside a class body. Receive all dependencies via the constructor. The composition root is the only place where `new` is called. This makes every class trivially testable.
+
+6. **Immutable data by default** — prefer immutable structures (frozen dataclasses, `readonly`, `const`, `val`). Mutability is explicit and carries a comment explaining why.
+
+7. **Null safety** — never return `null`/`None` from a function that callers expect a value from. Use `Optional`/`Maybe`/`Result` types, or throw a typed exception. Callers should not need to null-check every return value.
+
+8. **Dead code policy** — commented-out code is deleted, not committed. Git history is the undo button. If code might be needed again, it lives in git — not in a comment.
+
+9. **Test-first for bug fixes** — every bug fix starts with a failing test that reproduces the bug. The fix is not done until the test passes. This prevents the bug from regressing silently.
+
+10. **Logging levels discipline:**
+    - `DEBUG`: entering/exiting complex operations — dev only, never enabled in prod by default
+    - `INFO`: significant business events — user created, order placed, payment processed
+    - `WARN`: unexpected-but-recoverable situations — retry triggered, fallback used, config missing (non-fatal)
+    - `ERROR`: operation failed and needs investigation — always actionable, always includes trace_id
 
 ---
 
@@ -1138,6 +1650,70 @@ Before marking any task done, cross-check implementation against the source docu
 - [ ] NFRs applicable to this component are addressed (performance-critical paths have caching/indexes noted)
 
 If any cross-check fails: fix before marking done — do not defer.
+
+---
+
+## Step 11.5: Pre-Commit Quality Gate
+
+Run this checklist in full before marking the task complete. **If any item fails, do NOT mark the task done. Fix it first.**
+
+Determine the appropriate commands from `.claude/ai-sdlc.config.yaml` (language, package manager, test framework). Substitute `[lang-specific command]` with the actual command for this project.
+
+```
+Quality Gate Checklist:
+
+[ ] Lint
+    JS/TS:  npx eslint src/ --ext .ts,.tsx,.js,.jsx --max-warnings 0
+    Python: ruff check src/
+    Go:     golangci-lint run ./...
+    Ruby:   bundle exec rubocop --format progress
+    → Required: 0 errors, 0 warnings
+
+[ ] Format check
+    JS/TS:  npx prettier --check 'src/**/*.{ts,tsx,js,jsx}'
+    Python: ruff format --check src/ (or black --check src/)
+    Go:     gofmt -l . (output must be empty)
+    → Required: all files formatted; if not, run format fix and re-check
+
+[ ] Type check (if applicable)
+    JS/TS:  npx tsc --noEmit
+    Python: mypy src/ --ignore-missing-imports
+    → Required: 0 type errors
+
+[ ] Unit tests
+    Read testFramework from .claude/ai-sdlc.config.yaml, run the appropriate command
+    JS/TS:  npx jest --coverage
+    Python: pytest --cov=src/ --cov-fail-under=<threshold>
+    Go:     go test ./... -cover
+    → Required: all tests pass; coverage >= threshold defined in config (default: 80%)
+
+[ ] No debug code
+    Search: grep -rn "console\.log\|debugger\|pdb\.set_trace\|breakpoint()\|pp \|print(" src/
+    → Each match must be removed or have an inline comment justifying it (e.g. # intentional: startup log)
+
+[ ] No hardcoded secrets
+    Search: grep -rni "password\s*=\s*['\"][^'\"]\|secret\s*=\s*['\"][^'\"]\|api_key\s*=\s*['\"][^'\"]" src/
+    → All must come from config/environment — no literal credential values in code
+
+[ ] Error handling coverage
+    Every call to an external service (DB, HTTP, queue, file system) must be wrapped in
+    a try/catch (or equivalent) that catches a specific error type — not bare `except Exception`
+    → Spot-check: search for `await `, `self._db.`, `requests.`, `urllib` calls without adjacent try
+
+[ ] Logging completeness
+    Key operations are logged with structured fields:
+      - Use case entry and exit (with trace_id, action, outcome, duration_ms)
+      - External service calls (service name, operation — no sensitive values)
+      - All error paths (error_type, error_code, trace_id)
+    → No sensitive data in log fields (no passwords, tokens, card numbers, raw PII)
+```
+
+**Failure policy:**
+- Lint/format failures → run auto-fix, re-run check, commit the formatting changes
+- Type errors → fix before proceeding; do not suppress with `@ts-ignore` / `type: ignore` without a documented reason
+- Test failures → fix the code or the test; do not delete or skip a failing test
+- Debug code found → remove it; if it must stay (e.g. intentional startup log), add an inline justification comment
+- Hardcoded secrets found → move to environment config immediately; rotate the exposed value if it was ever committed
 
 ---
 

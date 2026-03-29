@@ -266,6 +266,141 @@ For each dependency, test the failure path:
 
 Add these as integration tests tagged `[resilience]` so they can be run in CI.
 
+## Chaos Engineering Plan
+
+Adapt complexity based on team size from $STATE projectAssumptions.teamSize:
+- solo-developer: skip formal chaos plan; document manual resilience tests
+- small-team/enterprise: full chaos schedule below
+
+### Chaos Experiment Catalog
+
+For each critical dependency, define a chaos experiment:
+
+```
+Experiment: [Name, e.g., "Database Connection Loss"]
+Target: [what is being disrupted]
+Hypothesis: "When [condition], the system will [expected behavior]"
+Method: [how to introduce the failure — e.g., Toxiproxy network timeout, kill container, block port]
+Duration: [how long to run the experiment — typically 5-15 minutes]
+Success criteria: [what passing looks like — e.g., "circuit breaker opens within 30s, fallback serves stale data"]
+Rollback: [how to restore normal state immediately]
+Frequency: [monthly / quarterly]
+```
+
+Minimum experiments (run quarterly):
+1. Primary database connection loss
+2. Cache (Redis/Memcached) unavailable
+3. Downstream service timeout (slowness, not failure)
+4. Single pod/instance crash (restart recovery)
+5. High CPU load (at 90% capacity)
+6. Disk full simulation (if applicable)
+
+### Chaos Experiment Schedule Template
+
+| Experiment | Frequency | Last Run | Next Due | Owner | Result |
+|-----------|-----------|----------|----------|-------|--------|
+| DB connection loss | Quarterly | - | [date] | [name] | - |
+| Cache unavailable | Quarterly | - | [date] | [name] | - |
+| Downstream timeout | Monthly | - | [date] | [name] | - |
+
+---
+
+## Disaster Recovery Plan
+
+### RTO and RPO Targets
+*(from NFRs in product spec)*
+
+| Scenario | RTO | RPO | Validated |
+|---------|-----|-----|-----------|
+| Primary database failure | [target] | [target] | Never / [date] |
+| Full region outage | [target] | [target] | Never / [date] |
+| Accidental data deletion | [target] | [target] | Never / [date] |
+| Application service crash | [target] | [target] | Never / [date] |
+
+### Backup Verification Schedule
+
+- Database backup: daily automated + weekly manual restore test
+- Weekly restore test procedure:
+  1. Identify most recent backup
+  2. Restore to isolated test environment
+  3. Verify data integrity (record count, spot check key records)
+  4. Measure restore time (compare against RTO)
+  5. Document result in this table
+
+| Test Date | Backup Taken | Restore Time | Data Integrity | Pass/Fail |
+|-----------|-------------|--------------|----------------|-----------|
+| [date] | [backup timestamp] | [duration] | [verified] | ✅/❌ |
+
+### Failover Runbook
+
+If primary [database/service/region] becomes unavailable:
+1. Detection: alert fires in [monitoring tool] for [metric] exceeding [threshold]
+2. Confirm failure: [verification command/check]
+3. Execute failover: [exact steps — commands, URLs, procedures]
+4. Verify failover successful: [health check / smoke test]
+5. Notify stakeholders: [channels, message template]
+6. Document incident: [incident tracking tool/procedure]
+7. Post-incident: schedule post-mortem within 48 hours
+
+---
+
+## Incident Communication Plan
+
+### Status Page
+[Link to status page, or "Not configured — configure one at statuspage.io / atlassian / etc."]
+
+### Communication Templates
+
+**SEV1 — Customer-impacting outage (send within 15 minutes):**
+```
+Subject: [Service Name] — Service Disruption — [Start Time]
+
+We are aware of an issue affecting [service/feature]. Our team is actively investigating.
+
+Impact: [what users cannot do]
+Started at: [time]
+We will provide an update by: [time + 30 minutes]
+
+We apologize for the inconvenience.
+— [Team Name]
+```
+
+**SEV1 Update (every 30 minutes):**
+```
+Subject: [Service Name] — Update #[N] — [Start Time]
+
+We continue to investigate the issue affecting [service/feature].
+
+Current status: [what we know, what we've tried]
+ETA to resolution: [estimate or "unknown, still investigating"]
+Next update by: [time + 30 minutes]
+```
+
+**Resolution:**
+```
+Subject: [Service Name] — Resolved — [Start Time] → [End Time]
+
+The issue affecting [service/feature] has been resolved.
+
+Duration: [N hours N minutes]
+Root cause: [brief description]
+What we're doing to prevent recurrence: [action items]
+
+Thank you for your patience.
+— [Team Name]
+```
+
+### Escalation Matrix
+
+| Severity | Who is notified | Within | Channel |
+|---------|----------------|--------|---------|
+| SEV1 | [list] | 15 min | [channel] |
+| SEV2 | [list] | 30 min | [channel] |
+| SEV3 | [list] | 2 hours | [channel] |
+| SEV4 | [list] | Next business day | [channel] |
+
+---
+
 ## Step 6: Write Output Documents
 
 **$ARTIFACTS/sre/runbooks.md** — all runbooks

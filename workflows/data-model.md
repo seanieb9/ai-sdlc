@@ -101,6 +101,11 @@ Attributes:
   created_at  timestamp   system-generated, immutable
   updated_at  timestamp   system-updated
   version     integer     optimistic locking (if needed)
+  deleted_at  timestamp   nullable, soft delete marker (null = active)
+
+  # Data Classification (PII/Security):
+  # For each sensitive field, add a comment:
+  # [field]  [type]  [nullable]  [PII: yes/no]  [Encrypted at rest: yes/no]  [Masked in logs: yes/no]
 
 Invariants:
   - [business rule that must always hold]
@@ -121,6 +126,37 @@ Relationships:
 - Optimistic locking (version) for entities with concurrent update risk
 - Foreign keys always nullable if the relationship is optional
 - Junction/join tables are full entities (with their own IDs and timestamps)
+
+**After each entity definition, include a Data Security Classification block:**
+
+```
+Data Security Classification:
+  PII fields: [list fields containing personally identifiable information]
+  PHI fields: [list fields containing protected health information — HIPAA]
+  PCI fields: [list fields containing payment card data — PCI-DSS]
+  Encrypted at rest: [list fields requiring encryption]
+  Log masking required: [list fields that must NEVER appear in logs]
+  Retention period: [how long this entity's records are kept]
+  Deletion trigger: [what causes this record to be deleted/archived]
+```
+
+## Step 4.5: Multi-Tenancy Modeling (if applicable)
+
+If `projectAssumptions.multiTenant == "yes"` (check $STATE):
+
+Every entity that belongs to a tenant MUST have:
+```
+  tenant_id   UUID   NOT NULL FK → tenants.id   (enforce at DB level)
+```
+
+Rules:
+- All queries MUST filter by tenant_id (never query cross-tenant)
+- tenant_id must be part of composite indexes on frequently-queried entities
+- API layer must inject tenant_id from the authenticated user's JWT — callers never supply their own
+- Cross-tenant data (shared reference data) lives in a separate bounded context with no tenant_id
+- Document every entity as: TENANT-SCOPED or SHARED
+
+If `projectAssumptions.multiTenant` is not "yes", skip this step entirely.
 
 ## Step 5: Impact Analysis (if modifying existing model)
 
@@ -244,6 +280,13 @@ Before finalizing, run self-review:
 - [ ] Breaking changes confirmed by user
 - [ ] Industry standards applied where relevant
 - [ ] DATA_DICTIONARY.md complete for all new/changed fields
+- [ ] PII fields identified and classified for all entities
+- [ ] Encryption-at-rest fields documented
+- [ ] Log masking fields documented
+- [ ] Data retention periods set for all entities
+- [ ] Soft-delete (deleted_at) on all user-visible entities
+- [ ] Audit trail fields (created_by, updated_by) on entities requiring change tracking
+- [ ] Multi-tenancy: tenant_id on all tenant-scoped entities (if multiTenant=yes from projectAssumptions)
 
 ## Step 9: Update State
 

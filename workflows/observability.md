@@ -74,6 +74,24 @@ Identify:
 - ALWAYS log at entry AND exit of use case boundaries
 - ALWAYS include trace context in every log entry
 
+### Log Redaction Rules
+
+The following field types MUST NEVER appear in logs (redact or mask at the logging layer):
+
+| Category | Examples | Masking Rule |
+|---------|---------|-------------|
+| Passwords / secrets | password, secret, token, api_key, private_key | Replace entirely: [REDACTED] |
+| Payment card data | card_number, cvv, pan | Keep first 6 + last 4: 411111******1234 |
+| Social security / tax IDs | ssn, tax_id, sin | Replace entirely: [REDACTED] |
+| Personal health info | diagnosis, medication, health_condition | Replace entirely: [REDACTED-PHI] |
+| Full email addresses in prod | email | Mask domain: u***@domain.com |
+| Authentication tokens | bearer tokens, session IDs, refresh tokens | Replace entirely: [REDACTED] |
+| Private keys / certificates | -----BEGIN PRIVATE KEY----- | Replace entirely: [REDACTED-KEY] |
+
+Implementation: apply masking at the logging middleware level, not ad-hoc per call site. Create a `sanitize(obj)` utility function that all structured loggers call before writing.
+
+Validation: the pii-audit auto-chain verifies these rules are in place after every build.
+
 ## Step 3: Distributed Tracing (OpenTelemetry)
 
 **Instrumentation points:**
@@ -143,6 +161,34 @@ cache_misses_total{service, cache_type}
 queue_messages_published_total{service, queue}
 queue_messages_consumed_total{service, queue, outcome}
 queue_depth{queue}
+```
+
+### Custom Business Metrics
+
+Beyond the standard RED metrics (Rate, Errors, Duration), define domain-specific metrics that measure business outcomes:
+
+For each significant business operation, define:
+
+```
+Metric name: [snake_case_metric_name]_total (counter) or [name]_duration_seconds (histogram)
+Labels: [label names — keep cardinality low, max ~20 values per label]
+What it measures: [business meaning]
+Alert condition: [when should this fire an alert]
+Dashboard placement: [which dashboard section]
+```
+
+Minimum custom metrics required:
+- `[entity]_created_total` counter (with `status` label: success/failed)
+- `[entity]_processing_duration_seconds` histogram for any async processing
+- `active_[entity]_count` gauge for key business objects
+- `[critical_external_call]_duration_seconds` histogram for each external API call
+
+Example:
+```
+Metric: orders_created_total
+Labels: status=success|failed, channel=web|mobile|api
+Meaning: How many orders are being placed (and how many fail)
+Alert: if orders_created_total{status="failed"} / orders_created_total > 0.05 (5% failure rate)
 ```
 
 ## Step 5: Central Configuration
@@ -221,6 +267,39 @@ Define base alerting rules (document in OBSERVABILITY.md):
   expr: container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.85
   severity: warning
 ```
+
+### Alerting Strategy
+
+**Alert fatigue prevention rules:**
+1. Every alert MUST have a runbook link — no alert without documented response procedure
+2. Every alert MUST be actionable — if there's nothing to do, it shouldn't fire
+3. Alerts are grouped by severity: P1 (page immediately), P2 (page within 30 min), P3 (ticket created)
+4. Alert windows: use multi-minute windows to avoid flapping (minimum 2/5-minute evaluation windows)
+
+**SLO-to-Alert mapping:**
+
+For each SLO defined in the SRE phase, create:
+1. **Burn rate alert (fast burn)**: alert when error budget burns at 14x normal rate over 1 hour
+2. **Burn rate alert (slow burn)**: alert when error budget burns at 2x normal rate over 6 hours
+
+```
+SLO: [name, e.g., API Availability 99.9%]
+Error budget: 0.1% = 43.8 minutes/month
+Fast burn alert: error rate > 14.4% over 5 minutes → P1
+Slow burn alert: error rate > 2.88% over 1 hour → P2
+Exhaustion alert: error budget < 10% remaining → P2 (ticket)
+```
+
+**Minimum alert set for every service:**
+| Alert | Condition | Severity | Runbook |
+|-------|-----------|---------|---------|
+| Service down | /health/live returning non-200 for 2 minutes | P1 | [runbook link] |
+| Error rate spike | 5xx rate > 5% for 5 minutes | P1 | [runbook link] |
+| High latency | p95 > [2x SLO target] for 10 minutes | P2 | [runbook link] |
+| Error budget burn | Burning at 14x rate | P1 | [runbook link] |
+| Disk space | > 85% used | P2 | [runbook link] |
+| Memory pressure | > 90% used | P2 | [runbook link] |
+| Certificate expiry | < 30 days to expiry | P2 | [runbook link] |
 
 ## Step 8: Write Output Document
 
