@@ -1717,6 +1717,108 @@ Quality Gate Checklist:
 
 ---
 
+## Code Review Standards
+
+### Author Responsibilities (before opening PR)
+
+Before requesting review, the author must verify:
+- [ ] PR description explains WHY this change is made (not just what)
+- [ ] PR is small and focused (≤ 400 lines of production code — split if larger)
+- [ ] All CI checks pass on the PR branch
+- [ ] Self-review completed: read your own diff as if you're a reviewer
+- [ ] Tests cover the new code (coverage check passed)
+- [ ] No TODO, FIXME, or HACK comments without an accompanying issue tracker link
+- [ ] Documentation updated (API spec, README, runbooks) if behavior changed
+
+**PR Description template:**
+```markdown
+## Why
+[What problem does this solve / what feature does this add]
+
+## What Changed
+[High-level summary — not a list of files changed]
+
+## How to Test
+[Specific steps to verify the change works]
+
+## Checklist
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] No breaking changes (or: breaking changes communicated to consumers)
+```
+
+**PR Size Guide:**
+- Small (< 200 lines): ideal, reviewed quickly
+- Medium (200-400 lines): acceptable, keep focused
+- Large (400-800 lines): split into smaller PRs if possible
+- XL (> 800 lines): must be split before review. Reviewer will return it.
+
+### Reviewer Responsibilities
+
+Reviewers must check:
+
+**Correctness:**
+- [ ] Code does what the PR description says it does
+- [ ] Logic is correct — trace through the main code paths
+- [ ] Error cases are handled (not just the happy path)
+- [ ] Edge cases are tested
+
+**Design:**
+- [ ] Code follows clean architecture (no cross-layer violations)
+- [ ] New code fits the existing patterns (doesn't introduce new patterns without ADR)
+- [ ] Abstractions are at the right level (not too early, not too late)
+- [ ] No copy-paste without extraction (DRY applied where it reduces complexity)
+
+**Security:**
+- [ ] Input validated before use
+- [ ] No secrets in code or logs
+- [ ] Auth/authz applied on new endpoints
+- [ ] New dependencies have acceptable licenses + no known CVEs
+
+**Readability:**
+- [ ] Code is self-documenting (method/variable names convey intent)
+- [ ] Complex logic has explanatory comments
+- [ ] No clever tricks that require deep knowledge to understand
+
+**Testing:**
+- [ ] Test cases cover the scenarios described
+- [ ] Tests test behavior, not implementation details
+- [ ] No obvious missing edge case tests
+
+### Code Review SLA
+
+| Priority | First Response | Decision | Applies To |
+|----------|--------------|---------|------------|
+| P0 — Security / Critical Bug | 4 hours | 8 hours | Security fix, data loss bug, SEV1 mitigation |
+| P1 — Feature / Significant Change | 24 hours | 48 hours | New features, architecture changes |
+| P2 — Maintenance / Docs / Refactor | 48 hours | 72 hours | Cleanup, documentation, minor refactors |
+
+SLA is measured from when the PR is marked "Ready for Review" (not from when it was opened).
+
+If SLA is missed: author follows up in team channel, not email.
+
+**For solo developers:** self-review after a 24-hour break. Read the code as if someone else wrote it.
+
+### What Not to Block On
+
+Reviewers must not block PRs for:
+- Style preferences (enforced by linter — not a human judgment call)
+- Personal preference when multiple valid approaches exist
+- "I would have done it differently" without a concrete reason
+- Asking for changes that weren't in the original requirements
+
+If a reviewer disagrees with an approach, they should say: "I prefer X because Y. You can proceed with this if you disagree, but I'd like to understand your reasoning."
+
+### Merge Criteria
+
+A PR is ready to merge when:
+- [ ] All CI checks pass
+- [ ] At least 1 approving review (from a qualified reviewer)
+- [ ] All BLOCKING comments addressed (optional comments can be deferred)
+- [ ] No unresolved BLOCKING conversations
+
+---
+
 ## Step 12: Mark Task Complete
 
 After implementation and verification:

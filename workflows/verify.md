@@ -215,6 +215,29 @@ If business-process.md does not exist (Phase 4b was skipped): skip this check en
 | 18 | Every NFR from prd.md appears in the NFR coverage section | HIGH |
 | 19 | Every external service referenced in requirements is in the dependency classification table | HIGH |
 
+### ADR Completeness Check
+
+For Phase 6 (Tech Architecture) verification, enforce:
+
+```
+ADR Completeness Verification:
+- [ ] ADR-001 exists (deployment topology decision)
+- [ ] ADR-002 exists (authentication strategy)
+- [ ] ADR-003 exists (database choice)
+- [ ] ADR-004 exists (message broker — if async architecture)
+- [ ] Each ADR has: Context, Decision, Rationale, Alternatives Considered, Consequences, Review Trigger
+- [ ] No ADR has status "Proposed" without a scheduled review meeting
+- [ ] New patterns introduced in code but not yet in ADRs → flag as warning
+
+Expected ADR count by project size:
+- Small project (1 service): 3-5 ADRs minimum
+- Medium project (2-3 services): 5-10 ADRs
+- Large project (5+ services): 10+ ADRs
+
+If ADR count is below minimum for project size: WARN "Major decisions may be undocumented"
+If any ADR missing required fields: FAIL "ADR-[NNN] is missing [fields]"
+```
+
 ---
 
 ### Phase 7: Plan
@@ -440,6 +463,18 @@ If FE stack not present in TECH_ARCHITECTURE.md: skip this check entirely (silen
 | 3 | SLO targets defined (availability % and latency p95 target) | HIGH |
 | 4 | Alert → runbook mapping documented | HIGH |
 | 5 | Incident severity classification table present | MEDIUM |
+
+### Feature Launch Readiness (for user-facing features)
+
+If this release includes user-facing features (check $ARTIFACTS/idea/prd.md for "user-facing" classification):
+
+- [ ] User documentation updated (help center, API docs, README)
+- [ ] Support team has been briefed on the new feature (or: internal-only feature)
+- [ ] Success metrics are defined and instrumented (analytics events firing)
+- [ ] Feature can be disabled without a deployment (feature flag exists)
+- [ ] Known limitations documented and communicated to users
+- [ ] If changing existing behavior: migration path for existing users documented
+- [ ] If deprecating something: deprecation notice in place, sunset date communicated
 
 ---
 

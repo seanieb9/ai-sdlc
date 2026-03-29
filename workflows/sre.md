@@ -155,6 +155,126 @@ Author: [who wrote this]
 - [ ] [Preventive action] | Owner: [person] | Due: [date]
 ```
 
+## Incident SLA Matrix
+
+| Severity | Definition | Time to Acknowledge (TTA) | Time to Mitigate (TTM) | Post-Mortem |
+|----------|-----------|--------------------------|----------------------|-------------|
+| SEV1 | Complete outage, data loss risk, active security breach, revenue stopped | 5 minutes | 1 hour | Required — within 4 hours of resolution |
+| SEV2 | Partial outage, major feature unavailable, >5% error rate, SLO breach | 15 minutes | 2 hours | Required — within 24 hours |
+| SEV3 | Degraded performance, minor feature unavailable, elevated errors (not SLO breach) | 1 hour | 8 hours | Required — within 48 hours |
+| SEV4 | Minor issue, no current user impact, warning signs | Next business day | Next sprint | Optional — recommended for patterns |
+
+SLA enforcement:
+- TTA is measured from when the alert fires to when the on-call acknowledges in the alerting tool
+- TTM (mitigation) means users are no longer impacted — full root cause fix can follow asynchronously
+- If TTA is missed: auto-escalate to on-call lead + engineering manager
+- If TTM is missed: auto-escalate to director/VP level for SEV1, engineering manager for SEV2
+
+For solo developers: TTA and TTM targets still apply. If you cannot meet them, adjust your SLOs to match reality.
+
+## Post-Mortem Process
+
+Every SEV1, SEV2, and SEV3 incident requires a post-mortem. No exceptions.
+
+### Required Post-Mortem Fields
+
+```markdown
+# Post-Mortem: [Incident Title]
+*Severity: SEV[N]*
+*Date: [date]*
+*Duration: [start → end]*
+*Impact: [number of users affected, revenue impact, feature unavailability]*
+
+## Timeline (chronological)
+| Time | Event |
+|------|-------|
+| HH:MM | Alert fired |
+| HH:MM | On-call acknowledged |
+| HH:MM | Root cause identified |
+| HH:MM | Mitigation applied |
+| HH:MM | Resolved |
+
+## Root Cause
+[ONE specific root cause — not "our system failed" but "the connection pool was exhausted because the retry logic did not respect the backoff window"]
+
+## Contributing Factors
+[What made this worse or allowed it to happen]
+
+## What Went Well
+[Genuinely honest — detection was fast, rollback worked, team communicated well]
+
+## What Went Wrong
+[What we wish had happened differently]
+
+## Action Items
+
+| Item | Owner | Priority | Due Date | Status |
+|------|-------|----------|----------|--------|
+| [specific fix] | [name] | P1/P2/P3 | [date] | Open |
+
+Priorities:
+- P1: Fix within current sprint (1-2 weeks) — prevents recurrence of this exact incident
+- P2: Fix within 2 sprints — reduces risk significantly
+- P3: Fix in backlog — nice-to-have improvement
+
+## Closure Criteria
+This post-mortem is CLOSED when:
+- [ ] All P1 action items completed and verified
+- [ ] Root cause fix deployed and confirmed working
+- [ ] Runbook updated with new knowledge
+- [ ] Alert thresholds reviewed (were we warned early enough?)
+```
+
+### Repeated Incident Policy
+
+If the same root cause occurs 3 times in 90 days:
+1. Escalate to engineering lead immediately
+2. Block all non-critical work until systemic fix is implemented
+3. Root cause is classified as a "chronic reliability issue"
+4. Add to technical debt register with P1 priority
+
+### Post-Mortem Tracking
+
+Maintain an incident log: `$ARTIFACTS/sre/incident-log.md`
+
+| Date | Severity | Title | Duration | Root Cause | Status | Action Items Closed |
+|------|---------|-------|----------|-----------|--------|---------------------|
+| [date] | SEV[N] | [title] | [mins] | [one-liner] | Open/Closed | [N/N] |
+
+Review open post-mortems weekly. Close only when all P1 items are verified complete.
+
+## Toil Measurement + Reduction
+
+Toil is manual, repetitive work that keeps the service running but doesn't improve it. It scales with traffic, not automation.
+
+Definition of toil:
+- Manual deployment steps (not fully automated)
+- Runbook-following without decision-making
+- Responding to alerts that don't require human judgment
+- Ticket triage that could be automated
+- Manual database queries to answer routine questions
+
+**Monthly toil tracking:**
+
+| Toil Activity | Hours/Month | Automatable? | Priority |
+|--------------|------------|--------------|---------|
+| [e.g., Manual deploys] | [N] | Yes | High |
+| [e.g., Restart service on OOM] | [N] | Yes | High |
+| [e.g., DB query for support tickets] | [N] | Yes | Medium |
+
+Target: toil < 30% of operational time. If > 50%: escalate to engineering lead. Automation required.
+
+Toil reduction rule: Every time you do something manually more than 3 times → automate it.
+
+**Quarterly review:**
+- Calculate total toil hours for the quarter
+- Calculate toil as % of engineering time
+- Identify top 3 toil sources
+- Set specific automation goals for next quarter
+- Measure improvement
+
+---
+
 ## Step 5: Resilience Implementation
 
 This step implements resilient code. Do not skip it and do not treat it as a review checklist — write the code here or verify it exists with the correct implementation.
@@ -265,6 +385,96 @@ For each dependency, test the failure path:
 - Verify SIGTERM drains gracefully
 
 Add these as integration tests tagged `[resilience]` so they can be run in CI.
+
+---
+
+## Capacity Planning + Load Testing
+
+Every service must be load tested before production deployment. "It works on my machine" is not sufficient.
+
+### Step 5l: Load Testing Requirements
+
+**Required for:**
+- All production deployments (first time)
+- Any deployment that changes request handling, DB queries, or scaling config
+- Any deployment after 3x growth in user count
+
+**Load test plan template:**
+
+```yaml
+# k6 load test configuration
+scenarios:
+  baseline:
+    executor: constant-arrival-rate
+    rate: [BASELINE_RPS]  # Expected normal load
+    timeUnit: '1s'
+    duration: '5m'
+    preAllocatedVUs: 20
+
+  peak:
+    executor: constant-arrival-rate
+    rate: [BASELINE_RPS * 2]  # 2x expected peak
+    timeUnit: '1s'
+    duration: '15m'  # Sustained — not just a spike
+    preAllocatedVUs: 50
+    startTime: '6m'
+
+  stress:
+    executor: ramping-arrival-rate
+    stages:
+      - duration: '2m', target: [BASELINE_RPS * 3]
+      - duration: '5m', target: [BASELINE_RPS * 3]
+      - duration: '2m', target: 0
+
+thresholds:
+  http_req_duration:
+    - 'p(50) < [P50_TARGET_MS]'
+    - 'p(95) < [P95_TARGET_MS]'  # From NFRs
+    - 'p(99) < [P99_TARGET_MS]'
+  http_req_failed:
+    - 'rate < 0.001'  # < 0.1% error rate
+
+checks: [health_check, auth_endpoint, primary_endpoint]
+```
+
+**Pass criteria (all must pass):**
+- [ ] p95 latency within NFR target at 2x peak load
+- [ ] Error rate < 0.1% at 2x peak load
+- [ ] Memory usage stable (no upward trend over 15-minute sustained test)
+- [ ] CPU < 80% at peak load (headroom for spikes)
+- [ ] No DB connection pool exhaustion (check pool metrics during test)
+- [ ] No leaked goroutines/threads (check after test, not during)
+- [ ] Graceful behavior at 3x peak: either handles it or returns 429 — never crashes
+
+**If any check fails:**
+1. Profile: identify bottleneck (CPU, DB, network, memory)
+2. Fix: add cache, optimize query, increase pool size, scale horizontally
+3. Re-test: run full suite again
+4. Document: what was the bottleneck, what was the fix, what headroom exists now
+
+**Capacity headroom documentation (required output):**
+
+```markdown
+## Capacity Report
+
+Baseline load:   [N] rps
+Peak tested:     [N] rps (2x baseline)
+System limit:    ~[N] rps (estimated from stress test — point where p99 > NFR or errors spike)
+Headroom:        [N]x (system_limit / baseline)
+
+Performance at peak:
+  p50: [N]ms (target: [N]ms) ✅/❌
+  p95: [N]ms (target: [N]ms) ✅/❌
+  p99: [N]ms (target: [N]ms) ✅/❌
+  Errors: [N]% (target: < 0.1%) ✅/❌
+
+Bottleneck: [if found — e.g., "DB query on /search endpoint, takes 180ms at peak, needs index"]
+Scaling plan: [what to do when we approach 80% of system_limit]
+```
+
+Save to: `$ARTIFACTS/sre/capacity-report.md`
+
+---
 
 ## Chaos Engineering Plan
 

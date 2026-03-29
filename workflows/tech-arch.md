@@ -669,6 +669,52 @@ If any answer suggests over-engineering: simplify, update the ADR, document the 
 
 ---
 
+## Step 17b: Architecture Design Review Gate
+
+Before advancing to the plan/build phases, the architecture must be reviewed by at least one other engineer (or self-reviewed after a 24-hour pause for solo developers).
+
+**Review process:**
+
+1. Share `$ARTIFACTS/design/tech-architecture.md` and `$ARTIFACTS/design/solution-design.md` with reviewer(s)
+
+2. Reviewer(s) must explicitly sign off on:
+   - [ ] Service boundary decisions are justified (monolith/microservices/hybrid)
+   - [ ] Security architecture is appropriate for the threat model
+   - [ ] NFRs (performance, availability, scalability) are achievable with this design
+   - [ ] Dependency failure modes are handled (timeouts, circuit breakers, fallbacks)
+   - [ ] Data model aligns with architecture (no impedance mismatch)
+   - [ ] All significant decisions have ADRs
+   - [ ] Design is not over-engineered for current scale
+
+3. Record approval in `$ARTIFACTS/design/solution-design.md` header:
+   ```markdown
+   ## Architecture Review Sign-off
+   Reviewed by: [reviewer name(s)]
+   Date: [ISO date]
+   Status: APPROVED | APPROVED WITH CHANGES | NEEDS REWORK
+   Notes: [any conditions or required changes]
+   ```
+
+4. Update state.json:
+   ```json
+   { "phases.design.reviewedBy": ["name"], "phases.design.reviewedAt": "ISO", "phases.design.reviewApproved": true }
+   ```
+
+**If reviewer requests changes:**
+- Make the requested changes
+- Update the relevant ADRs to reflect the decision
+- Apply stale cascade to any downstream phases that were already started
+- Return to reviewer for sign-off
+
+**Solo developer rule:**
+Write self-review notes in the sign-off section. Common questions to ask yourself:
+- "Would a new engineer understand this design in 30 minutes?"
+- "Is there a simpler design that meets all the NFRs?"
+- "What would be the most expensive mistake I could make with this design?"
+- "Am I choosing this because it's the right tool, or because it's familiar?"
+
+---
+
 ## Step 18: Update State
 
 Mark Phase 6 (Tech Architecture) complete in $STATE.

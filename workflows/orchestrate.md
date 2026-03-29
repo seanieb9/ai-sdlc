@@ -169,17 +169,17 @@ If the intent is ambiguous, ask: "Is this a new project, a new feature on an exi
 
 **new-project** (full lifecycle):
 ```
-research → voc? → synthesize → idea → personas? → journey? → business-process? → prototype? → data-model → design → fe-setup? → plan → build → test-cases → test-gen → observability → sre → verify → uat? → deploy → maintain → retro
+research → voc? → synthesize → idea → personas? → journey? → business-process? → prototype? → data-model → design → fe-setup? → plan → build → test-cases → test-gen → observability → sre → verify → uat? → prr → deploy → maintain → retro
 ```
 
 **new-feature** (idea through deploy):
 ```
-idea → data-model → design → plan → build → test-cases → test-gen → verify → deploy
+idea → data-model → design → plan → build → test-cases → test-gen → verify → prr → deploy
 ```
 
 **bug-fix** (minimal):
 ```
-plan → build → test-cases → verify → deploy
+plan → build → test-cases → verify → prr → deploy
 ```
 
 **refactor** (structural):
@@ -332,7 +332,7 @@ Show the dashboard whenever `status` is requested, after intake, or when resumin
              [ ] build
   VERIFY     [ ] test-cases    [ ] test-gen     [ ] observability
              [ ] sre           [ ] verify       [ ] uat
-  SHIP       [ ] deploy        [ ] maintain     [ ] retro
+  SHIP       [ ] prr          [ ] deploy        [ ] maintain     [ ] retro
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   NEXT: /sdlc:<phase>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -367,7 +367,7 @@ Before executing a phase, check whether its prerequisites are satisfied:
 | `test-gen` | `test-cases` |
 | `sre` | `observability` |
 | `build` | `plan` |
-| `deploy` | `verify` with 0 CRITICAL findings |
+| `deploy` | `verify` with 0 CRITICAL findings AND `prr` with outcome APPROVED or APPROVED_WITH_CONDITIONS |
 
 **If gate fails and `--force <phase>` was NOT provided:**
 ```
@@ -450,6 +450,7 @@ Phases are executed by directing the user to run the corresponding command or by
 | sre | `/sdlc:sre` |
 | verify | `/sdlc:verify` |
 | uat | `/sdlc:uat` |
+| prr | `/sdlc:prr` |
 | deploy | `/sdlc:deploy` |
 | maintain | `/sdlc:maintain` |
 | retro | `/sdlc:retro` |

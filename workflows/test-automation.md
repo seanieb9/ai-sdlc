@@ -556,6 +556,90 @@ module.exports = {
 
 ---
 
+## Coverage Ratchet Enforcement
+
+**Rule: Code coverage can never decrease. Any commit that lowers overall test coverage is rejected by CI.**
+
+This is different from a coverage threshold (minimum). A ratchet means if you're at 82%, you stay at 82% or go higher — never 81%.
+
+### CI Implementation
+
+**Jest (JavaScript/TypeScript):**
+```yaml
+# .github/workflows/test.yml
+- name: Run tests with coverage
+  run: npm test -- --coverage --coverageReporters=json
+
+- name: Coverage ratchet check
+  run: |
+    # Get current coverage from this run
+    CURRENT=$(cat coverage/coverage-summary.json | node -e "
+      const d = require('./coverage/coverage-summary.json');
+      process.stdout.write(d.total.statements.pct.toString());
+    ")
+    # Get baseline from main branch artifact
+    BASELINE=$(cat .coverage-baseline 2>/dev/null || echo "0")
+    echo "Current: $CURRENT% | Baseline: $BASELINE%"
+    if awk "BEGIN{exit !($CURRENT < $BASELINE)}"; then
+      echo "COVERAGE RATCHET FAILED: Coverage dropped from ${BASELINE}% to ${CURRENT}%"
+      echo "You must not decrease test coverage. Add tests for the code you changed."
+      exit 1
+    fi
+    echo "Coverage ratchet passed: ${CURRENT}% >= ${BASELINE}%"
+
+- name: Update coverage baseline on main
+  if: github.ref == 'refs/heads/main'
+  run: |
+    CURRENT=$(cat coverage/coverage-summary.json | node -e "
+      const d = require('./coverage/coverage-summary.json');
+      process.stdout.write(d.total.statements.pct.toString());
+    ")
+    echo "$CURRENT" > .coverage-baseline
+    git config user.email "ci@example.com"
+    git config user.name "CI"
+    git add .coverage-baseline
+    git commit -m "chore: update coverage baseline to ${CURRENT}%" || true
+    git push || true
+```
+
+**pytest (Python):**
+```yaml
+- name: Run tests with coverage
+  run: pytest --cov=src --cov-report=json --cov-fail-under=$BASELINE_COVERAGE
+
+- name: Coverage ratchet
+  run: |
+    CURRENT=$(python -c "import json; d=json.load(open('coverage.json')); print(d['totals']['percent_covered_display'])")
+    BASELINE=$(cat .coverage-baseline 2>/dev/null || echo "0")
+    python -c "import sys; c=float('$CURRENT'); b=float('$BASELINE'); sys.exit(0 if c >= b else 1)" || \
+      (echo "Coverage dropped from ${BASELINE}% to ${CURRENT}%"; exit 1)
+```
+
+### Rules for Coverage Exceptions
+
+If a PR legitimately reduces coverage (e.g., deleted a tested feature, removed a test file):
+
+1. Author adds `coverage-exception: <reason>` to PR description
+2. Reviewer explicitly approves the exception
+3. CI reads the exception label and skips ratchet check for that PR
+4. Exception is logged — too many exceptions signal a culture problem
+
+### Coverage Targets Per Layer
+
+Track coverage separately per layer (not just overall):
+
+| Layer | Minimum | Ratchet | Rationale |
+|-------|---------|---------|-----------|
+| Domain entities | 95% | Yes | Core business logic, zero tolerance for bugs |
+| Application use cases | 90% | Yes | Orchestration logic, must be fully tested |
+| Infrastructure adapters | 70% | Yes | DB/HTTP adapters — integration tests cover partially |
+| Delivery layer | 60% | No | Thin controllers — E2E tests cover the rest |
+| Config/startup | 50% | No | Hard to unit test, covered by smoke tests |
+
+Add per-layer coverage reporting to CI so regressions are visible per layer.
+
+---
+
 ## Test Speed Budgets
 
 Tests that are too slow don't get run. Enforce speed budgets:

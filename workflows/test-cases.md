@@ -15,6 +15,52 @@ mkdir -p "$WORKSPACE/artifacts"
 ```
 Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
 
+## Testing Pyramid Strategy
+
+Testing is an investment. Get the right balance.
+
+```
+        /\
+       /E2E\         10% — full journeys, critical paths only
+      /------\
+     /Integr. \      20% — real DB, real queues, adapter boundaries
+    /---------- \
+   /    Unit     \   70% — domain logic, use cases, pure functions
+  /-------------- \
+```
+
+**Unit tests (70% of test effort)**
+- Test: domain entities, value objects, domain services, use cases (with mocked ports)
+- Speed: < 100ms each, full suite < 60 seconds
+- Isolation: zero external dependencies, zero network calls
+- Coverage target: >= 90% statement, >= 85% branch for domain/application layers
+
+**Integration tests (20% of test effort)**
+- Test: repository implementations, DB queries, message publishing/consuming, external HTTP adapters
+- Speed: < 5 seconds each, full suite < 5 minutes
+- Isolation: real DB (test containers), real queues — but fully isolated from other tests
+- Coverage target: 100% of repository methods, 100% of message handlers
+
+**E2E tests (10% of test effort)**
+- Test: complete user journeys via API or browser — the P0 happy paths and critical failure cases only
+- Speed: < 30 seconds each, full suite < 15 minutes
+- Focus: what users actually care about, not implementation details
+- Coverage: all primary user flows, all P0 failure scenarios (auth failure, data not found, etc.)
+
+**Enforcement:**
+- If unit test suite takes > 60s: split or parallelize
+- If integration suite takes > 5min: split or parallelize
+- If E2E suite takes > 15min: remove redundant cases, parallelize
+- Total CI test time target: < 20 minutes
+
+**Anti-patterns to actively avoid:**
+- Integration tests pretending to be unit tests (they hit the DB — they're integration tests)
+- E2E tests for every feature (only P0 happy paths belong in E2E)
+- "Brittle" E2E tests that break on every UI change (test behavior, not implementation)
+- Testing getters/setters (not business logic — skip them)
+
+---
+
 ## Step 1: Pre-Flight Gate Check
 
 Read ALL of the following in parallel — do not skip any source:

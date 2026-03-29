@@ -192,6 +192,69 @@ Common risks:
 - Security (auth changes, data exposure)
 - Breaking changes to existing functionality
 
+## Release Branching Strategy
+
+Choose ONE branching strategy and document it. Don't mix strategies — inconsistency causes merge conflicts and CI confusion.
+
+**Option A: Trunk-Based Development (recommended for small teams and CI/CD)**
+- All development happens on `main`
+- Feature branches are short-lived (< 1 day ideally, max 3 days)
+- Feature flags gate incomplete work in production
+- Benefits: no long-lived branches, no painful merges, encourages small commits
+
+**Option B: GitHub Flow (good for teams with less frequent releases)**
+- Feature branches off `main`, merged via PR
+- `main` is always deployable
+- Releases tagged from `main`
+- Benefits: simple, clear, good for cloud-native projects
+
+**Option C: Git Flow (for teams with scheduled releases)**
+- `main` = production
+- `develop` = integration
+- `feature/*` branches off `develop`
+- `release/*` branches for release prep
+- `hotfix/*` for production patches
+- Benefits: clear separation, supports multiple versions
+- Caution: complex, long-lived branches cause merge pain
+
+Document the choice in `$ARTIFACTS/plan/implementation-plan.md`:
+```
+Branching Strategy: [trunk-based / github-flow / git-flow]
+Reason: [why this fits the team and release cadence]
+Branch naming: [e.g., feat/TICKET-123-description, fix/TICKET-456-description]
+Commit standard: Conventional Commits (feat, fix, docs, chore, refactor, test, perf, ci, build)
+```
+
+## Dependency Management Policy
+
+Document how third-party dependencies are managed:
+
+**Selection criteria (before adding any dependency):**
+1. Is there a simpler solution without a new dependency?
+2. How actively maintained is it? (last commit within 6 months, issues responded to)
+3. What is the license? (MIT/Apache-2.0: fine. GPL: requires legal review for commercial use)
+4. How large is the dependency tree? (avoid dependency-heavy packages for simple problems)
+5. Are there known security vulnerabilities? (check npm audit / snyk / osv.dev)
+
+**Version pinning rules:**
+- Pin exact versions in lockfile (package-lock.json, poetry.lock, go.sum)
+- Use `^` or `~` in package.json/pyproject.toml as minimum, but lockfile is authoritative
+- Never use `*` or `latest` in dependencies
+
+**Security update SLA:**
+- CRITICAL CVE in direct dependency: patch within 24 hours
+- HIGH CVE in direct dependency: patch within 7 days
+- MEDIUM CVE: next sprint
+- LOW CVE: next quarterly dependency update
+
+**Quarterly dependency audit:**
+- Run `npm outdated` / `pip list --outdated` / `go list -m -u all`
+- Review major version updates for breaking changes
+- Update minor/patch versions in batch
+- Document any dependencies intentionally held back (with reason)
+
+---
+
 ## Step 6: Write Output Files
 
 **Write/update $ARTIFACTS/plan/implementation-plan.md:**
