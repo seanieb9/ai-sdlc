@@ -669,51 +669,86 @@ If any answer suggests over-engineering: simplify, update the ADR, document the 
 
 ---
 
-## Step 17b: Architecture Self-Critique
+## Step 17b: Architecture Challenger Review
 
-Before moving to planning and building, the AI re-reads the completed architecture with a critical eye and surfaces any concerns to the user. The user then decides whether to proceed, adjust, or rethink.
+Before moving to planning and building, take two explicit positions against the architecture just designed. This is not a self-check — it is a structured adversarial review designed to surface problems that confirmation bias would miss.
 
-**AI critique checklist — re-read `tech-architecture.md` and `solution-design.md` and honestly answer:**
+Re-read `tech-architecture.md`, `solution-design.md`, and `api-spec.md` in full.
 
-1. **Over-engineering check**: Is every service, pattern, and abstraction actually needed for the current stated scale? Name anything that is there "just in case" rather than because a real requirement demands it.
+---
 
-2. **NFR achievability**: For each NFR (latency, availability, throughput), does the design actually deliver it — or does it just assume it will? Flag any NFR where the design lacks a concrete mechanism.
+### Position A — Architect's defence (one sentence per decision)
 
-3. **Single point of failure**: Is there any component where its failure would take down the whole system, with no fallback? If yes, is that acceptable given the availability SLO?
+Briefly state the strongest justification for each major decision:
+- Deployment topology choice (monolith/microservices/hybrid)
+- Primary database choice
+- Authentication strategy
+- Any non-obvious pattern (CQRS, Saga, Event Sourcing, etc.)
 
-4. **Security blind spots**: Does the threat model cover every external entry point? Is there any data flow where sensitive data could be exposed that the threat model didn't catch?
+This is not for the user — it is to force an explicit articulation of why before the attack begins.
 
-5. **Data model alignment**: Does the API surface match the data model cleanly, or are there awkward translations that signal a design mismatch?
+---
 
-6. **Operational burden**: How hard will this be to operate at 2am? Are runbooks possible for the most likely failure modes?
+### Position B — Challenger's attack
 
-7. **Reversibility**: Which decisions will be hardest to undo if they turn out to be wrong? Flag those — they deserve the most scrutiny.
+For each attack below, adopt an adversarial stance. The goal is to find real problems, not to validate. Be specific — name the component, the NFR, the endpoint, or the ADR being challenged.
 
-**Present findings to the user:**
+**Attack 1 — Over-engineering**
+Name every service, pattern, or abstraction that exists for a requirement that isn't in `prd.md`. Common offenders: event sourcing added "for auditability" when a simple updated_at field would do; CQRS added when there is no read/write model divergence; microservices when a single team owns everything.
+For each: what is the cost (operational complexity, latency, debugging difficulty) vs the concrete requirement it satisfies?
+
+**Attack 2 — NFR gaps**
+For each NFR in `prd.md` with a numeric threshold (p95 latency, uptime %, throughput rps), identify the specific architectural mechanism that delivers it:
+- p95 < 200ms: which component is the bottleneck? Does the design have caching, indexing, or async offloading for that path?
+- 99.9% availability: where does the design have a single point of failure with no fallback? Is the SPOF acceptable given the SLO?
+- If any NFR has no corresponding design mechanism: it is a gap, not a goal.
+
+**Attack 3 — Security surface not covered by threat model**
+Walk every external entry point (API endpoints, event consumers, admin interfaces, webhooks) and ask: is there a threat model entry for this? Common gaps:
+- Internal service-to-service calls with no mTLS or API key
+- Webhook endpoints that accept payloads without signature verification
+- Admin endpoints with no rate limiting or IP allowlisting
+- Events consumed from an external broker with no schema validation
+
+**Attack 4 — Data model / API mismatch**
+For every resource in `api-spec.md`, trace it back to `data-model.md`. If the API shape requires joining multiple aggregates, or if a field in the API response has no clear source in the data model, flag it — these are design mismatches that will produce ugly infrastructure code.
+
+**Attack 5 — Operational survivability**
+For the three most likely failure scenarios (primary DB down, external payment service down, message broker down), trace exactly what happens to in-flight requests. Does the design have circuit breakers, fallbacks, and graceful degradation for each? If a failure requires manual intervention to recover, is there a runbook path?
+
+**Attack 6 — Irreversible decisions**
+List every decision that would require a full rewrite or data migration to undo. Rank them by: (a) how likely they are to be wrong, and (b) how expensive they would be to reverse. The highest-risk irreversible decisions deserve the most scrutiny before they are locked in.
+
+---
+
+### Present the debate to the user
 
 ```
-Architecture Review
+Architecture Challenger Review
 ════════════════════════════════════════
-[For each concern found, present it clearly:]
+Architect's position: [N major decisions defended]
 
-⚠️  [concern title]
-    [1-2 sentence description of the risk]
-    Options:
-      a) [how to address this now]
-      b) [how to address this later / accept the risk]
+Challenger findings:
 
-[If no concerns:]
-✅  Architecture looks solid for the stated requirements.
-    Significant decisions: [N ADRs]
-    Potential future pressure points: [list if any]
+[BLOCKING | WARN | NOTE]  [attack area] — [specific component or decision]
+  Architect: [one sentence defence]
+  Challenger: [one sentence attack]
+  Risk if wrong: [what breaks]
+  Options:
+    a) [address now — specific change]
+    b) [accept the risk — state the assumption explicitly in an ADR]
 
-→ Do you want to adjust anything before we start planning and building?
-  (Type your changes or "proceed" to continue)
+[If no significant issues:]
+✅  No blocking issues found. The architecture is well-matched to the stated requirements.
+    Noted future pressure points: [list if any, or "none"]
+
+→ Do you want to adjust anything before planning and building?
+  (Type your changes, address specific items by letter, or "proceed")
 ```
 
-If the user wants to adjust: make the changes, update the relevant ADRs, apply stale cascade to downstream phases, then re-run the critique.
+**If the user adjusts:** make the changes, update the relevant ADRs, apply stale cascade to any downstream phases that are affected, then re-run this step.
 
-If the user proceeds: update state.json `phases.design.critiqueComplete = true` and continue.
+**If the user proceeds:** record `phases.design.challengerReviewComplete = true` in `$STATE` and continue to Step 18.
 
 ---
 

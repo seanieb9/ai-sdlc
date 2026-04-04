@@ -1653,67 +1653,124 @@ If any cross-check fails: fix before marking done — do not defer.
 
 ---
 
-## Step 11.5: Pre-Commit Quality Gate
+## Step 11.5: Auto-Verify Gate
 
-Run this checklist in full before marking the task complete. **If any item fails, do NOT mark the task done. Fix it first.**
+Run every check below automatically. Do not proceed to Step 12 until all pass. This is an execution step, not a checklist — run the commands, handle failures, retry with fixes.
 
-Determine the appropriate commands from `.claude/ai-sdlc.config.yaml` (language, package manager, test framework). Substitute `[lang-specific command]` with the actual command for this project.
+Read `.claude/ai-sdlc.config.yaml` to determine language, package manager, and testFramework.
+
+---
+
+### Auto-run protocol
+
+For each command below:
+1. **Run it.** Capture stdout and stderr.
+2. **On pass** → note ✅, continue to next check.
+3. **On fail** → apply the auto-fix strategy for that check, then re-run once.
+4. **If still failing after one retry** → surface the full failure output with root-cause diagnosis. Do NOT mark the task done. Present to the user:
+   ```
+   ❌ Auto-Verify Failed: [check name]
+   ─────────────────────────────────────
+   [command run]
+   [relevant lines of failure output — trim noise, keep signal]
+
+   Root cause: [1-2 sentence diagnosis]
+   Fix attempted: [what was tried]
+   Still failing: [what remains broken]
+
+   Options:
+     a) Fix [specific thing] and re-run /sdlc:build --task [TASK-ID]
+     b) Mark as known issue and track as TD-NNN (provide justification)
+   ```
+
+---
+
+### Check 1: Lint
+
+| Language | Command | Auto-fix |
+|----------|---------|---------|
+| JS/TS | `npx eslint src/ --ext .ts,.tsx,.js,.jsx --max-warnings 0` | `npx eslint src/ --ext .ts,.tsx,.js,.jsx --fix` then re-run |
+| Python | `ruff check src/` | `ruff check src/ --fix` then re-run |
+| Go | `golangci-lint run ./...` | `gofmt -w .` then re-run |
+| Ruby | `bundle exec rubocop --format progress` | `bundle exec rubocop -a` then re-run |
+
+Required: 0 errors, 0 warnings.
+
+---
+
+### Check 2: Format
+
+| Language | Command | Auto-fix |
+|----------|---------|---------|
+| JS/TS | `npx prettier --check 'src/**/*.{ts,tsx,js,jsx}'` | `npx prettier --write 'src/**/*.{ts,tsx,js,jsx}'` then re-run |
+| Python | `ruff format --check src/` | `ruff format src/` then re-run |
+| Go | `gofmt -l .` (must produce no output) | `gofmt -w .` then re-run |
+
+Required: no unformatted files.
+
+---
+
+### Check 3: Type check
+
+| Language | Command | Auto-fix |
+|----------|---------|---------|
+| JS/TS | `npx tsc --noEmit` | Fix type errors manually, then re-run |
+| Python | `mypy src/ --ignore-missing-imports` | Fix type errors manually, then re-run |
+
+Required: 0 type errors. Do not suppress with `@ts-ignore` / `type: ignore` without a comment explaining why.
+
+---
+
+### Check 4: Unit tests
+
+Read `testFramework` from config. Run:
+
+| Framework | Command |
+|-----------|---------|
+| jest | `npx jest --coverage --passWithNoTests` |
+| pytest | `pytest --cov=src/ --cov-fail-under=<threshold from config, default 80>` |
+| go test | `go test ./... -cover` |
+| rspec | `bundle exec rspec` |
+
+On test failure:
+1. Read the failure output. Identify the failing test and the assertion that failed.
+2. Check whether the failure is in the code just written, or in an existing test that the new code broke.
+3. Fix the code (or the test if it was testing the wrong thing). Do NOT delete or skip a failing test.
+4. Re-run once. If still failing, surface to user per the protocol above.
+
+Required: all tests pass; coverage ≥ threshold in config.
+
+---
+
+### Check 5: Static scans (run in parallel)
+
+```bash
+# Debug code
+grep -rn "console\.log\|debugger\|pdb\.set_trace\|breakpoint()\|pp \|print(" src/ || true
+
+# Hardcoded secrets
+grep -rni "password\s*=\s*['\"][^'\"]\|secret\s*=\s*['\"][^'\"]\|api_key\s*=\s*['\"][^'\"]" src/ || true
+```
+
+- Debug code: each match must be removed or have an inline justification comment. Auto-fix: remove the line.
+- Hardcoded secrets: move to environment config immediately. If the value was ever committed, treat as exposed — note it as a TD-NNN item requiring rotation.
+
+---
+
+### Gate result
+
+After all checks pass, output:
 
 ```
-Quality Gate Checklist:
-
-[ ] Lint
-    JS/TS:  npx eslint src/ --ext .ts,.tsx,.js,.jsx --max-warnings 0
-    Python: ruff check src/
-    Go:     golangci-lint run ./...
-    Ruby:   bundle exec rubocop --format progress
-    → Required: 0 errors, 0 warnings
-
-[ ] Format check
-    JS/TS:  npx prettier --check 'src/**/*.{ts,tsx,js,jsx}'
-    Python: ruff format --check src/ (or black --check src/)
-    Go:     gofmt -l . (output must be empty)
-    → Required: all files formatted; if not, run format fix and re-check
-
-[ ] Type check (if applicable)
-    JS/TS:  npx tsc --noEmit
-    Python: mypy src/ --ignore-missing-imports
-    → Required: 0 type errors
-
-[ ] Unit tests
-    Read testFramework from .claude/ai-sdlc.config.yaml, run the appropriate command
-    JS/TS:  npx jest --coverage
-    Python: pytest --cov=src/ --cov-fail-under=<threshold>
-    Go:     go test ./... -cover
-    → Required: all tests pass; coverage >= threshold defined in config (default: 80%)
-
-[ ] No debug code
-    Search: grep -rn "console\.log\|debugger\|pdb\.set_trace\|breakpoint()\|pp \|print(" src/
-    → Each match must be removed or have an inline comment justifying it (e.g. # intentional: startup log)
-
-[ ] No hardcoded secrets
-    Search: grep -rni "password\s*=\s*['\"][^'\"]\|secret\s*=\s*['\"][^'\"]\|api_key\s*=\s*['\"][^'\"]" src/
-    → All must come from config/environment — no literal credential values in code
-
-[ ] Error handling coverage
-    Every call to an external service (DB, HTTP, queue, file system) must be wrapped in
-    a try/catch (or equivalent) that catches a specific error type — not bare `except Exception`
-    → Spot-check: search for `await `, `self._db.`, `requests.`, `urllib` calls without adjacent try
-
-[ ] Logging completeness
-    Key operations are logged with structured fields:
-      - Use case entry and exit (with trace_id, action, outcome, duration_ms)
-      - External service calls (service name, operation — no sensitive values)
-      - All error paths (error_type, error_code, trace_id)
-    → No sensitive data in log fields (no passwords, tokens, card numbers, raw PII)
+✅ Auto-Verify Gate PASSED — TASK-[NNN]
+  Lint:       ✅ 0 errors
+  Format:     ✅ clean
+  Type check: ✅ 0 errors
+  Tests:      ✅ [N] passed, coverage [N]%
+  Scans:      ✅ no debug code, no hardcoded secrets
 ```
 
-**Failure policy:**
-- Lint/format failures → run auto-fix, re-run check, commit the formatting changes
-- Type errors → fix before proceeding; do not suppress with `@ts-ignore` / `type: ignore` without a documented reason
-- Test failures → fix the code or the test; do not delete or skip a failing test
-- Debug code found → remove it; if it must stay (e.g. intentional startup log), add an inline justification comment
-- Hardcoded secrets found → move to environment config immediately; rotate the exposed value if it was ever committed
+Then proceed to Step 12.
 
 ---
 
