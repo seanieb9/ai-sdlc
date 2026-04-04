@@ -63,7 +63,7 @@ Read in parallel (after gates pass):
 
 Note the target environment from `$ARGUMENTS` (e.g., staging, production). If not specified: ask "Which environment are you deploying to?"
 
-**Execution mode check:** If state.json `executionMode` is `"yolo"` or `$ARGUMENTS` contains `--yolo`: proceed fully autonomously. Otherwise: INTERACTIVE mode — confirm the checklist before finalizing.
+**Execution mode:** INTERACTIVE — confirm the checklist before finalizing.
 
 ---
 

@@ -33,7 +33,7 @@ Read in parallel:
 - `--debt-only`: skip Steps 4 and 5 (scheduled operations and upgrade roadmap), produce debt register only
 - `--schedule-only`: skip Steps 3 and 5 (debt and roadmap), produce scheduled operations only
 
-**Execution mode check:** If state.json `executionMode` is `"yolo"` or `$ARGUMENTS` contains `--yolo`: proceed fully autonomously. Otherwise: INTERACTIVE mode.
+**Execution mode:** INTERACTIVE.
 
 ---
 

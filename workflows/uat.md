@@ -33,7 +33,7 @@ Read in parallel (after gate passes):
 
 If prd.md is missing: WARN but continue — UAT scenarios will be less precise. Note the gap in the UAT plan.
 
-**Execution mode check:** If state.json `executionMode` is `"yolo"` or `$ARGUMENTS` contains `--yolo`: proceed fully autonomously. Otherwise: INTERACTIVE mode.
+**Execution mode:** INTERACTIVE.
 
 ---
 

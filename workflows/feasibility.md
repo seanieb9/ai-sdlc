@@ -30,7 +30,7 @@ Read in parallel (if they exist):
 
 Note the idea from `$ARGUMENTS`. If not provided, check state.json `projectName` and `description`. If neither exists, ask the user: "What is the idea or feature you want to assess?"
 
-**Execution mode check:** If state.json `executionMode` is `"yolo"` or `$ARGUMENTS` contains `--yolo`: proceed fully autonomously, document all assumptions at the end. Otherwise: INTERACTIVE mode — confirm direction before writing the document.
+**Execution mode:** INTERACTIVE — confirm direction before writing the document.
 
 ---
 

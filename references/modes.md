@@ -1,8 +1,6 @@
-# SDLC Execution Modes
+# SDLC Execution Mode
 
-Every phase command operates in one of two modes. Check `.sdlc/STATE.md` → `Mode:` field before executing. If MODE is missing or STATE.md doesn't exist, default to INTERACTIVE.
-
-A `--yolo` flag on any command overrides the project mode for that run only.
+Every phase command operates in INTERACTIVE mode. Check `.sdlc/STATE.md` → `Mode:` field before executing. If MODE is missing or STATE.md doesn't exist, default to INTERACTIVE.
 
 ---
 
@@ -55,52 +53,8 @@ Wait for user response. On confirmation, write all documents and complete the ph
 
 ---
 
-## YOLO
-
-Run all workflow steps autonomously without pausing. Make all decisions, apply defaults, proceed.
-
-### Behavior
-
-- Do not present analysis summaries before writing
-- Do not ask for confirmation before writing documents
-- When a decision point is reached, choose the most reasonable default and note it
-- Track every assumption in a running internal list as you work
-
-### Assumptions tracking
-
-Whenever you make a judgment call the user didn't specify, record it:
-- Assumed [X] because [Y was not stated / Z is the industry default]
-- Defaulted to [X] based on [research findings / product spec context]
-- Chose [X] over [Y] because [reason]
-
-### Output at end of phase
-
-After auto-verify completes, add:
-
-```
----
-⚡ YOLO MODE — Assumptions made this phase:
-1. [assumption]
-2. [assumption]
-...
-Review these if anything looks unexpected.
----
-```
-
-If no assumptions were made, omit the block.
-
-### Rules
-
-- Breaking changes always require confirmation regardless of mode
-- Data model gate approval always requires explicit user sign-off regardless of mode
-- If a blocking ambiguity is encountered (two equally valid options with significant downstream impact), pause and ask — then resume YOLO after resolution
-
----
-
 ## Setting Mode
 
 **At project start:** The orchestrator asks during `/sdlc:00-start` initialization. Mode is recorded in `.sdlc/STATE.md` → `Mode:` field.
 
-**Per-command override:** Any phase command accepts `--yolo` to run in YOLO mode for that invocation only. Does not change the project-level mode in STATE.md.
-
-**Changing mode mid-project:** Edit `.sdlc/STATE.md` directly — change `Mode: INTERACTIVE` to `Mode: YOLO` or vice versa.
+**Changing mode mid-project:** Edit `.sdlc/STATE.md` directly.

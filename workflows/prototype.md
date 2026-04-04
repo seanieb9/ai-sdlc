@@ -30,7 +30,7 @@ Read in parallel:
 - `$ARTIFACTS/idea/prd.md` — user flows, acceptance criteria, feature description
 - `$ARTIFACTS/journey/customer-journey.md` — journey steps and touchpoints (if exists)
 
-**Execution mode check:** If state.json `executionMode` is `"yolo"` or `$ARGUMENTS` contains `--yolo`: proceed fully autonomously. Otherwise: INTERACTIVE — present the screen inventory for confirmation before producing wireframes.
+**Execution mode:** INTERACTIVE — present the screen inventory for confirmation before producing wireframes.
 
 ---
 
@@ -253,4 +253,3 @@ Ready to continue?
   → Revise a screen first:  describe which screen to update
 ```
 
-In YOLO mode: proceed and list all assumptions made during wireframe production.

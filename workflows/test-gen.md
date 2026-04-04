@@ -100,8 +100,6 @@ Total files:   ~[N]
 Confirm this test generation plan? (yes / no / adjust)
 ```
 
-In YOLO mode: skip the confirmation, proceed immediately, note plan in output.
-
 On "no" or "adjust": ask what should change before proceeding.
 
 ---
