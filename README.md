@@ -25,11 +25,115 @@ The result is fast-looking progress that collapses under real-world conditions.
 
 Every phase produces a canonical artifact. Every artifact is verified before the next phase starts. Every requirement traces forward to a test case. Every test case maps to an automation script. Every architectural decision is recorded as an ADR with a review trigger. Nothing falls through the cracks.
 
-**One command to start anything:**
-```bash
-/sdlc:start "I want to build a payment processing integration"
+---
+
+## How to Use
+
+Four scenarios. One command pattern for each.
+
+---
+
+### 1. Start a brand-new project
+
 ```
-The orchestrator reads your project state, classifies your intent, enforces gate conditions, and routes you to exactly the right next step.
+/sdlc:00-start "I want to build a payment processing API"
+```
+
+That's it. The orchestrator reads your description, classifies intent, detects complexity tier (SIMPLE / STANDARD / CRITICAL), and walks you through the full lifecycle in order:
+
+```
+Research → Synthesize → Product Spec → Data Model → Tech Architecture
+→ Plan → Code → Test Cases → Test Automation → Observability → SRE → Review
+```
+
+Phase gates are enforced automatically. No coding without a plan. No plan without a data model. You confirm the decisions that matter (tech stack, database, SLA targets); everything else runs.
+
+---
+
+### 2. Add a feature to an existing (brownfield) project
+
+**Step 1 — Map the codebase (once, first time only):**
+```
+/sdlc:map
+```
+Four parallel agents read the codebase and write a persistent index. Subsequent sessions load the index instead of re-scanning.
+
+**Step 2 — Start the iteration:**
+```
+/sdlc:iterate "add multi-currency support"
+```
+
+`/sdlc:iterate` determines which phases the change actually touches and runs only those — in the correct order, with impact propagation. New REQ-IDs, TC-IDs, and ADRs continue the existing sequence; they never restart. Every iteration gets a stable ID (`ITER-001`, `ITER-002`, ...) tracked in `.sdlc/ITERATIONS/`.
+
+**To explore the codebase before starting:**
+```
+/sdlc:explore "where is payment processing handled?"
+/sdlc:explore "what calls OrderService?"
+```
+
+---
+
+### 3. Fix a bug
+
+```
+/sdlc:fix "order total is wrong when a discount is applied"
+```
+
+Lighter path — no spec update unless the bug reveals a design gap. The workflow:
+
+1. **Diagnose** — root cause, which data or behavior is wrong
+2. **Check data model** — does this reveal a model gap? If yes, fix model first
+3. **Plan** — what exactly changes, how it will be verified
+4. **Code** — implement the fix in clean architecture
+5. **Regression test** — new TC-ID added, automated
+6. **Verify** — did the fix introduce any new issues?
+
+For production incidents:
+```
+/sdlc:fix --hotfix "payment gateway returning 500"
+```
+
+---
+
+### 4. Keep everything aligned and in sync
+
+**Daily rhythm:**
+```
+Morning:   /sdlc:sod              ← reads checkpoint, sets goal, delivers brief
+During:    /sdlc:checkpoint       ← save session state mid-session (or use /loop 15m /sdlc:checkpoint)
+Evening:   /sdlc:eod              ← clean stop, commit WIP, write tomorrow's first action
+```
+
+**Check current status at any time:**
+```
+/sdlc:status                      ← phases complete, active work, todos, next action
+/sdlc:00-start                    ← same, with routing to recommended next command
+```
+
+**Verify a phase is complete before moving on:**
+```
+/sdlc:verify                      ← verifies last completed phase
+/sdlc:verify --phase 5            ← verify a specific phase
+```
+
+**After a data model or spec change — check what's now stale:**
+```
+/sdlc:docs                        ← audit doc health, find stale docs, missing sections
+/sdlc:13-review                   ← cross-cutting quality audit: requirements traceability,
+                                     data model integrity, test coverage, architecture compliance
+```
+
+**Resume after a break or `/clear`:**
+```
+/sdlc:resume                      ← reads NEXT_ACTION.md, delivers a structured brief,
+                                     picks up exactly where you left off
+```
+
+**Ship completed work:**
+```
+/sdlc:release                     ← groups ITER-NNN + FIX-NNN into a versioned release,
+                                     generates CHANGELOG.md, recommends git tag
+```
 
 ---
 
