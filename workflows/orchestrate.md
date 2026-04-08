@@ -206,7 +206,7 @@ IF accessibility == "wcag-aa":
 IF compliance includes GDPR or HIPAA or PCI-DSS:
   → Auto-include threat-model in design auto-chain (always, not just if auth detected)
   → Add compliance-checklist note to review phase
-  → Ensure pii-audit auto-chain fires after build (always, not conditional)
+  → Ensure pii-audit auto-chain fires after build (only if observability.md exists)
 
 IF multiTenant == "yes":
   → Add note to data-model phase: "tenant_id isolation is required — see Step 4 Multi-tenancy notes"
@@ -465,20 +465,20 @@ Auto-chain trigger table:
 
 | Trigger phase | Auto-chain skills | Condition |
 |---|---|---|
+| `idea` | nfr-analysis | Always — NFRs must inform design, not validate it post-facto |
 | `design` | threat-model | Only if project uses auth or calls external services |
 | `design` | adr-gen | Always |
 | `design` | infra-design | Always |
-| `plan` | observability | Always (pre-populate structure) |
-| `plan` | sre | Always (pre-populate runbook skeleton) |
-| `plan` | roadmap | Always (generate/update phase timeline) |
+| `design` | observability | Always (pre-populate skeleton so plan can scope observability tasks) |
+| `design` | sre | Always (pre-populate runbook skeleton — requires observability skeleton) |
+| `plan` | roadmap | Always (generate/update phase timeline with actuals from plan) |
+| `test-gen` | test-gaps | Always — gaps identified before build so devs can fill them |
 | `build` | code-quality | Always |
-| `build` | test-gaps | Always |
 | `build` | audit-deps | Always |
-| `build` | pii-audit | Only if observability phase is complete |
-| `deploy` | maintain | Always (generate initial runbook entries) |
-| `design` | nfr-analysis | Always (pre-populate performance/availability/scalability analysis) |
+| `build` | pii-audit | Only if observability.md exists (from pre-population or full phase) |
 | `test-gen` | traceability | Always (verify test-to-requirement coverage) |
-| `observability` | ci-verify | Always (verify CI pipeline has observability steps) |
+| `deploy` | ci-verify | Hard gate — blocks deploy if CI pipeline missing or incomplete |
+| `deploy` | maintain | Always (generate initial maintenance entries after deploy) |
 
 For each auto-chain skill: read and execute `workflows/<skill>.md` inline (do NOT invoke as a slash command — the workflow files are the source of truth), capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
 ```json
