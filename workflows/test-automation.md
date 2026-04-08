@@ -27,7 +27,7 @@ Read in parallel — ALL required:
 - `$ARTIFACTS/design/tech-architecture.md` — for resilience pattern config (timeout values, circuit breaker thresholds)
 - Existing test files (Glob `**/*.test.*`, `**/*.spec.*`, `**/test_*.py`, etc.)
 
-If test-cases.md missing: STOP. Run `/sdlc:test-cases` first.
+If test-cases.md missing: STOP. Run `/sdlc:09-test-cases` first.
 If test-cases.md has untreated staleness findings: STOP. Resolve staleness before automating.
 
 ---
@@ -755,7 +755,7 @@ After any test update, run the drift check to catch test cases that no longer ma
 - For each test with a REQ-ID reference: is that REQ-ID still active in PRODUCT_SPEC.md?
 - Flag: REQ-ID deprecated → deprecate corresponding test cases
 
-Run drift detection on every `/sdlc:10-test-automation` run, not just the first time.
+Run drift detection on every `run this test-automation workflow` run, not just the first time.
 
 ---
 
@@ -847,5 +847,5 @@ Files:
 • [test files created/updated]
 
 Recommended Next: /sdlc:verify --phase 10   ← run this before proceeding
-Then:           /sdlc:observability
+Then:           /sdlc:11-observability
 ```

@@ -26,7 +26,7 @@ Read in parallel (ALL required):
 - `$ARTIFACTS/design/solution-design.md` — ADRs: auth strategy, DB choice, patterns
 - `$ARTIFACTS/idea/prd.md` — requirements and acceptance criteria to fulfill
 
-If implementation-plan.md missing: STOP. Run `/sdlc:plan` first.
+If implementation-plan.md missing: STOP. Run `/sdlc:07-plan` first.
 If no tasks in $STATE or all complete: STOP. No tasks to work on.
 
 **Phase 8 scope boundary:**
@@ -38,7 +38,7 @@ Identify the task from `$ARGUMENTS` (TASK-ID or description). If none specified,
 
 **FE task detection:** If the identified task is tagged `[fe]`, switch to the FE screen workflow immediately:
 - Read `docs/frontend/SCREEN_SPEC.md`, `docs/frontend/DESIGN_TOKENS.md`, `docs/frontend/COMPONENT_LIBRARY.md`
-- Follow `/sdlc:fe-screen` workflow for this task — do not follow the BE clean architecture steps below
+- Read and execute `workflows/fe-screen.md` inline for this task — do not follow the BE clean architecture steps below
 - The BE layer ordering (domain → application → infrastructure → delivery) does NOT apply to FE tasks
 
 ---
@@ -1679,7 +1679,7 @@ For each command below:
    Still failing: [what remains broken]
 
    Options:
-     a) Fix [specific thing] and re-run /sdlc:build --task [TASK-ID]
+     a) Fix [specific thing] and re-run /sdlc:08-code --task [TASK-ID]
      b) Mark as known issue and track as TD-NNN (provide justification)
    ```
 
@@ -1883,7 +1883,7 @@ Update ROADMAP.md Phase Log:
 
 Recommended next:
   /sdlc:verify --phase 8    ← run the quality gate before proceeding
-  /sdlc:test-cases          ← after verify passes
+  /sdlc:09-test-cases          ← after verify passes
 ```
 
 Also update `.sdlc/ROADMAP.md` Phase Log row for Phase 8 to `✅ Complete | [date]` if ROADMAP.md exists.
@@ -1905,5 +1905,5 @@ Done criteria:
   ✅ [criterion 2]
 
 Next task: TASK-[NNN+1]: [description]
-Run: /sdlc:build --task TASK-[NNN+1]
+Run: /sdlc:08-code --task TASK-[NNN+1]
 ```

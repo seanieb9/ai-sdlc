@@ -249,5 +249,5 @@ Files:
 
 GATE UNLOCKED: /sdlc:07-plan can now include FE tasks.
 Recommended Next: /sdlc:07-plan
-  Then:           /sdlc:fe-screen <screen-name> for each screen during Phase 8
+  Then:           ask Claude to run the fe-screen workflow <screen-name> for each screen during Phase 8
 ```

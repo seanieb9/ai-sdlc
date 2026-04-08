@@ -136,7 +136,7 @@ For each functional area, describe (non-technical):
 - What data goes in and comes out (in business terms, not technical)
 - What constraints apply (rate limiting, authorization)
 
-These are refined into full OpenAPI spec by /sdlc:design.
+These are refined into full OpenAPI spec by /sdlc:06-tech-arch.
 
 ## Step 8: Non-Functional Requirements
 
@@ -249,5 +249,5 @@ NFRs: [N]
 
 File: $ARTIFACTS/idea/prd.md
 
-Recommended Next: /sdlc:journey
+Recommended Next: /sdlc:04-customer-journey
 ```

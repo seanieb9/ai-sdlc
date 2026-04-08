@@ -28,7 +28,7 @@ Read ALL of the following (personas without evidence are fiction):
 Assess evidence quality:
 - voc.md exists with real data → STRONG (proceed)
 - Only gap-analysis.md (inferred from research) → MODERATE (note evidence is secondary)
-- No research at all → WEAK (run /sdlc:research and /sdlc:voc first)
+- No research at all → WEAK (run /sdlc:01-research and the voc workflow first)
 
 Warn the user if evidence is weak. Proceed with explicit caveat.
 
@@ -312,6 +312,6 @@ Unvalidated assumptions: [N] (flagged in doc)
 Files:
 • $ARTIFACTS/personas/personas.md
 
-Recommended Next: /sdlc:journey
+Recommended Next: /sdlc:04-customer-journey
 (Personas are now the authoritative input — customer-journey will reference them)
 ```

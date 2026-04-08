@@ -28,8 +28,8 @@ Read in parallel:
 - `$STATE` — project context (includes todos/tasks — read and parse JSON)
 
 If data-model.md missing: STOP. Cannot plan without data model.
-If tech-architecture.md missing: WARN. Recommend running /sdlc:design first, but allow continuation.
-If tech-architecture.md has a ## Frontend Architecture section but SCREEN_SPEC.md missing: WARN. Recommend running /sdlc:fe-setup first — FE tasks cannot be generated without SCREEN_SPEC.md.
+If tech-architecture.md missing: WARN. Recommend running /sdlc:06-tech-arch first, but allow continuation.
+If tech-architecture.md has a ## Frontend Architecture section but SCREEN_SPEC.md missing: WARN. Recommend running the fe-setup workflow inline first — FE tasks cannot be generated without SCREEN_SPEC.md.
 
 If existing implementation-plan.md: read fully. Add new phases/tasks rather than replacing.
 
@@ -347,6 +347,6 @@ Files:
 • $ARTIFACTS/plan/implementation-plan.md
 • $STATE (tasks array updated)
 
-⚠️  GATE UNLOCKED: /sdlc:build can now proceed.
-Recommended Next: /sdlc:build --task TASK-001
+⚠️  GATE UNLOCKED: /sdlc:08-code can now proceed.
+Recommended Next: /sdlc:08-code --task TASK-001
 ```

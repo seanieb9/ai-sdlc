@@ -28,9 +28,9 @@ If missing:
 ```
 PREREQUISITE NOT MET: Codebase map not found.
 
-/sdlc:gaps relies on the codebase map for accurate analysis.
+ask Claude to run the gaps workflow relies on the codebase map for accurate analysis.
 
-STOP: Run /sdlc:map first, then re-run /sdlc:gaps.
+STOP: Run /sdlc:map first, then re-run ask Claude to run the gaps workflow.
 ```
 **STOP execution.**
 
@@ -344,7 +344,7 @@ Top 3 priorities:
   3. [HIGH]     <description> — <file>
 
 Next:
-  Run /sdlc:debt to view and manage the full technical debt register.
+  Run ask Claude to run the debt workflow to view and manage the full technical debt register.
   Run /sdlc:fix --maintenance to address debt items.
-  Run /sdlc:assess for a readiness score to track improvement over time.
+  Run ask Claude to re-run the assess workflow for a readiness score to track improvement over time.
 ```

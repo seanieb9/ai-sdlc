@@ -23,7 +23,7 @@ Read in parallel:
 - `$STATE` — project name, type, description, constraints (read and parse JSON)
 - `.sdlc/ROADMAP.md` — if exists, this is an update, not a fresh generation
 
-If $STATE does not exist: tell the user to run `/sdlc:start` first to initialise the project before creating a roadmap.
+If $STATE does not exist: tell the user to run `/sdlc:00-start` first to initialise the project before creating a roadmap.
 
 ---
 

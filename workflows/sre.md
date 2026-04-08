@@ -602,5 +602,5 @@ Files:
 • $ARTIFACTS/sre/slo.md
 • $ARTIFACTS/sre/incident-response.md
 
-Recommended Next: /sdlc:review
+Recommended Next: /sdlc:13-review
 ```

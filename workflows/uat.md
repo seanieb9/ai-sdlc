@@ -267,7 +267,7 @@ Artifact: $ARTIFACTS/uat/uat-plan.md
 
 Distribute the UAT plan to your stakeholders.
 When testing is complete and sign-off is obtained, run:
-  /sdlc:uat --sign-off
+  ask Claude to run the UAT workflow --sign-off
 
 Then continue to:
   → /sdlc:deploy

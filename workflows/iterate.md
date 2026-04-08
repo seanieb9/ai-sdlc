@@ -9,7 +9,7 @@ Scoped mini-lifecycle for adding or evolving features. Classifies the iteration 
 Execute the workspace resolution procedure from `workspace-resolution.md`. Variables available after this step: `$BRANCH`, `$WORKSPACE`, `$STATE`, `$ARTIFACTS`.
 
 **Initialization guard:** After resolving the workspace, verify that `$STATE` exists and that at least the `idea` phase has `status: "completed"` in state.json. If not:
-- If state.json does not exist: STOP. Output: "No initialized workspace found on branch `$BRANCH`. Run /sdlc:start to begin a project first."
+- If state.json does not exist: STOP. Output: "No initialized workspace found on branch `$BRANCH`. Run /sdlc:00-start to begin a project first."
 - If idea phase is not completed: WARN. Output: "The idea/spec phase has not been completed. Iterations are most effective after the initial product spec exists. Proceeding anyway — you may need to create a new spec rather than iterate."
 
 Also create the ITERATIONS directory:
@@ -131,7 +131,7 @@ Read the following files in parallel (if they exist):
    **Require explicit user confirmation before proceeding:**
    Use AskUserQuestion: "This iteration appears to introduce breaking changes: [list specific breaking aspects]. This may require coordinated deployment and consumer updates. Confirm you want to proceed? (yes/no)"
 
-   If user says no: STOP. Output: "Iteration paused. Reconsider the approach or use /sdlc:compare to evaluate backward-compatible alternatives."
+   If user says no: STOP. Output: "Iteration paused. Reconsider the approach or ask Claude to compare backward-compatible alternatives."
 
 4. **Show scope summary to user:**
    ```

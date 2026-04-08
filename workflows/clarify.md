@@ -1,6 +1,6 @@
 # Clarify Workflow
 
-Structured requirements elicitation session. Asks targeted questions across functional, edge-case, NFR, and scope dimensions. Assigns REQ-NNN and NFR-NNN IDs. Produces a clarify-brief.md artifact ready to feed into /sdlc:idea.
+Structured requirements elicitation session. Asks targeted questions across functional, edge-case, NFR, and scope dimensions. Assigns REQ-NNN and NFR-NNN IDs. Produces a clarify-brief.md artifact ready to feed into /sdlc:03-product-spec.
 
 ---
 
@@ -285,6 +285,6 @@ Requirements captured:
 
 Artifact: $ARTIFACTS/clarify/clarify-brief.md
 
-Next: Run /sdlc:idea to turn this brief into a full product spec.
+Next: Run /sdlc:03-product-spec to turn this brief into a full product spec.
      The idea phase will read clarify-brief.md automatically.
 ```

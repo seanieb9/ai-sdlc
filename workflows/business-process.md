@@ -26,7 +26,7 @@ Read in parallel:
 - `$ARTIFACTS/business-process/business-process.md` — existing document (if any — update, never recreate)
 - `$STATE` — project context (read and parse JSON)
 
-If customer-journey.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest `/sdlc:journey`.
+If customer-journey.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest `/sdlc:04-customer-journey`.
 
 ---
 
@@ -271,6 +271,6 @@ Open items:        [N]
 
 File: $ARTIFACTS/business-process/business-process.md
 
-Recommended Next: /sdlc:data-model ⚠️ (Critical Gate)
+Recommended Next: /sdlc:05-data-model ⚠️ (Critical Gate)
   → Read business-process.md ## Data Model Implications Summary before modelling
 ```

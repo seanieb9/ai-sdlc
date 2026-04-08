@@ -85,8 +85,8 @@ Output:
 No progress.json or implementation-plan.md found for branch $BRANCH.
 
 To get started:
-  1. Run /sdlc:plan to generate an implementation plan
-  2. Then run /sdlc:progress again to see the task dashboard
+  1. Run /sdlc:07-plan to generate an implementation plan
+  2. Then run ask Claude to run the progress workflow again to see the task dashboard
 ```
 STOP.
 
@@ -99,7 +99,7 @@ If `--update` flag is present:
 Parse: `--update <TASK-ID> <done|skip>`
 
 **Validate:**
-- TASK-ID must exist in progress.json. If not: output "TASK-ID '<id>' not found. Run /sdlc:progress to see all task IDs." STOP.
+- TASK-ID must exist in progress.json. If not: output "TASK-ID '<id>' not found. Run ask Claude to run the progress workflow to see all task IDs." STOP.
 - Status must be `done` or `skip`. If not: output "Status must be 'done' or 'skip'." STOP.
 
 **Update the task in progress.json:**
@@ -230,7 +230,7 @@ Updated: <ISO timestamp>
 Artifact: $WORKSPACE/progress.json
 
 Commands:
-  /sdlc:progress --next                    — show the single next task
-  /sdlc:progress --update TASK-NNN done   — mark a task complete
-  /sdlc:progress --update TASK-NNN skip   — skip a task
+  ask Claude to run the progress workflow --next                    — show the single next task
+  ask Claude to run the progress workflow --update TASK-NNN done   — mark a task complete
+  ask Claude to run the progress workflow --update TASK-NNN skip   — skip a task
 ```

@@ -126,7 +126,7 @@ Output:
 ROOT CAUSE: Design Gap Detected
 The root cause appears to be a specification or architecture gap, not a coding error.
 
-Recommendation: After completing this fix, run /sdlc:idea to update the product spec
+Recommendation: After completing this fix, run /sdlc:03-product-spec to update the product spec
 with the missing requirement or constraint, then run /sdlc:verify to confirm consistency.
 
 Proceeding with fix. A follow-up spec update is strongly recommended.
@@ -287,7 +287,7 @@ Update FIX-NNN.md Phase Status: deploy → completed.
     "severity": "HIGH",
     "phaseCreated": "fix",
     "status": "open",
-    "recommendation": "Run /sdlc:idea to update spec with missing requirement"
+    "recommendation": "Run /sdlc:03-product-spec to update spec with missing requirement"
   }
   ```
 

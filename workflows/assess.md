@@ -26,7 +26,7 @@ WARNING: Codebase map not found at .claude/ai-sdlc/codebase/architecture.md
 
 The assessment will proceed but with reduced accuracy. For a more comprehensive assessment:
   1. Run /sdlc:map first to build the codebase map
-  2. Then re-run /sdlc:assess
+  2. Then re-run ask Claude to re-run the assess workflow
 
 Continuing with direct codebase inspection...
 ```
@@ -264,20 +264,20 @@ Based on the overall rating and dimension scores:
 **If READY:**
 ```
 Next: Run /sdlc:iterate to add new features on a solid foundation.
-      Run /sdlc:gaps for a deeper dive into specific debt areas.
+      Run ask Claude to run the gaps workflow for a deeper dive into specific debt areas.
 ```
 
 **If NEEDS-WORK:**
 ```
 Next: Address P0 items before new feature work (run /sdlc:fix --maintenance).
-      Run /sdlc:gaps for detailed debt identification.
+      Run ask Claude to run the gaps workflow for detailed debt identification.
       Consider /sdlc:iterate with --type nfr to address observability/security gaps.
 ```
 
 **If SIGNIFICANT-GAPS:**
 ```
-Next: Run /sdlc:gaps for a comprehensive debt analysis.
+Next: Run ask Claude to run the gaps workflow for a comprehensive debt analysis.
       Plan a dedicated hardening sprint before new feature development.
       Run /sdlc:fix --maintenance for each P0 item.
-      Re-run /sdlc:assess after hardening sprint to track improvement.
+      Re-run ask Claude to re-run the assess workflow after hardening sprint to track improvement.
 ```

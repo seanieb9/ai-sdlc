@@ -19,7 +19,7 @@ Then use $WORKSPACE, $STATE, $ARTIFACTS throughout.
 
 Read and parse `$STATE` (JSON).
 
-If $STATE doesn't exist: show "No SDLC project initialized for branch $BRANCH. Run /sdlc:start to begin."
+If $STATE doesn't exist: show "No SDLC project initialized for branch $BRANCH. Run /sdlc:00-start to begin."
 
 ## Step 2: Compute Phase Status
 

@@ -23,7 +23,7 @@ Read in parallel:
 - `$STATE` (project context — read and parse JSON)
 - `.claude/ai-sdlc/codebase/architecture.md` (if exists — brownfield codebase index)
 
-If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:research` first.
+If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:01-research` first.
 
 ## Step 2: Codebase Analysis
 
@@ -130,5 +130,5 @@ Recommended Approach: [1-line summary]
 
 File: $ARTIFACTS/research/synthesis.md
 
-Recommended Next: /sdlc:idea
+Recommended Next: /sdlc:03-product-spec
 ```

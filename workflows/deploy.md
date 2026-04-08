@@ -376,6 +376,6 @@ If `--dry-run` was set: state that no changes were made to state.json and no dep
 Auto-chain suggestions:
 ```
 Recommended next steps:
-  → Post-deployment maintenance planning: /sdlc:maintain
+  → Post-deployment maintenance planning: ask Claude to run the maintain workflow
   → (If generating release notes separately):  /sdlc:release
 ```

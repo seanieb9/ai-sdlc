@@ -27,7 +27,7 @@ Read in parallel:
 
 If business-process.md exists: before domain analysis, review its `## Data Model Implications Summary` table. Every flagged entity/field must be addressed during modelling — either incorporated or explicitly decided against with a reason recorded.
 
-If prd.md does not exist: STOP. Inform the user that the product spec must be defined first. Suggest `/sdlc:idea`.
+If prd.md does not exist: STOP. Inform the user that the product spec must be defined first. Suggest `/sdlc:03-product-spec`.
 
 If data-model.md already exists and $ARGUMENTS mentions changes to existing entities:
 → Automatically activate `--review` mode. Changes to existing entities ALWAYS require review.
@@ -381,5 +381,5 @@ Files Updated:
 
 ⚠️  GATE UNLOCKED: Tech Architecture and Code phases can now proceed.
 Recommended Next: /sdlc:verify --phase 5   ← run this before proceeding
-Then:           /sdlc:design
+Then:           /sdlc:06-tech-arch
 ```

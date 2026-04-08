@@ -12,8 +12,8 @@ Read in parallel:
 - `docs/architecture/TECH_ARCHITECTURE.md` — stack confirmation
 - `.sdlc/STATE.md` — project context
 
-If SCREEN_SPEC.md missing: STOP. Run `/sdlc:fe-setup` first.
-If DESIGN_TOKENS.md missing: STOP. Run `/sdlc:fe-setup` first.
+If SCREEN_SPEC.md missing: STOP. Run `ask Claude to run the fe-setup workflow` first.
+If DESIGN_TOKENS.md missing: STOP. Run `ask Claude to run the fe-setup workflow` first.
 
 Identify the screen: match $ARGUMENTS against screen route or name in SCREEN_SPEC.md. If ambiguous, show matching screens and ask for confirmation.
 
@@ -218,6 +218,6 @@ Files written:
 - components/ui/[...].tsx (if extracted)
 
 Recommended Next:
-  /sdlc:fe-screen [next screen from SCREEN_SPEC.md]
+  ask Claude to run the fe-screen workflow [next screen from SCREEN_SPEC.md]
   OR /sdlc:09-test-cases after all screens complete
 ```

@@ -29,7 +29,7 @@ Note the topic from `$ARGUMENTS`. If not provided, derive from state.json projec
 Check flags:
 - `--deep` → run all research dimensions at maximum depth
 - `--competitive-only` → skip market/trends/best-practice sections
-- `--customer-only` → skip competitive/analyst sections (prefer `/sdlc:01b-voc` for primary data)
+- `--customer-only` → skip competitive/analyst sections (prefer the voc workflow (workflows/voc.md) for primary data)
 
 ## Step 2: Build Research Query Set
 
@@ -83,7 +83,7 @@ Generate targeted queries across all research dimensions:
 - "[topic] early adopter enterprise pilot"
 - "what's next for [topic] [year]"
 
-### Dimension 6: Customer Voice (surface-level — deep VoC goes to `/sdlc:01b-voc`)
+### Dimension 6: Customer Voice (surface-level — deep VoC goes to the voc workflow (workflows/voc.md))
 - "[topic] user complaints reddit"
 - "[topic] pain points missing features"
 - "what customers want [topic]"
@@ -214,7 +214,7 @@ Consolidate into five structured sections:
 - Top 5 pain points (with sources)
 - Most requested features
 - What customers love about existing solutions
-- → Deep analysis: run `/sdlc:01b-voc` with primary data
+- → Deep analysis: run voc workflow inline (workflows/voc.md) with primary data
 
 ## Step 10: Write Output Documents
 
@@ -331,6 +331,6 @@ Files Updated:
 • $ARTIFACTS/research/gap-analysis.md
 
 Recommended Next:
-• Deep customer data → /sdlc:voc
-• Or proceed to → /sdlc:synthesize
+• Deep customer data → the voc workflow
+• Or proceed to → /sdlc:02-synthesize
 ```

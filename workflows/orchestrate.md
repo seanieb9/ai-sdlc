@@ -169,7 +169,7 @@ If the intent is ambiguous, ask: "Is this a new project, a new feature on an exi
 
 **new-project** (full lifecycle):
 ```
-research → voc? → synthesize → idea → personas? → journey? → business-process? → prototype? → data-model → design → fe-setup? → plan → build → test-cases → test-gen → observability → sre → verify → uat? → prr → deploy → maintain → retro
+feasibility? → research → voc? → synthesize → idea → personas? → journey? → business-process? → prototype? → data-model → design → fe-setup? → plan → build → test-cases → test-gen → observability → sre → verify → uat? → prr → deploy → maintain → retro
 ```
 
 **new-feature** (idea through deploy):
@@ -192,7 +192,7 @@ synthesize → plan → build → test-cases → verify
 idea
 ```
 
-Phases marked `?` are optional. Include them if the project context warrants it (e.g. `voc?` if primary user research is available; `uat?` if external stakeholders must sign off). Ask the user once: "Any optional phases to include? [voc / personas / journey / business-process / prototype / uat / fe-setup / none]"
+Phases marked `?` are optional. Include them if the project context warrants it (e.g. `voc?` if primary user research is available; `uat?` if external stakeholders must sign off). Ask the user once: "Any optional phases to include? [feasibility / voc / personas / journey / business-process / prototype / uat / fe-setup / none]"
 
 ### 4f. Phase Set Modifiers Based on Project Assumptions
 
@@ -583,7 +583,7 @@ Auto-chain log:
 
 Next steps:
   - Run retrospective: read and execute workflows/retro.md inline
-  - Archive workspace: /sdlc:start save
+  - Archive workspace: /sdlc:00-start save
   - Review decisions: /sdlc:status
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

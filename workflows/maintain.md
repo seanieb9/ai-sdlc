@@ -252,6 +252,6 @@ If any P0 debt items exist: warn prominently:
 Suggest:
 ```
 Next steps:
-  → Run project retrospective: /sdlc:retro
+  → Run project retrospective: ask Claude to run the retro workflow
   → Review P0 debt items before starting next feature
 ```

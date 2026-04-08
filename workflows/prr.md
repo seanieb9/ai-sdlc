@@ -257,5 +257,5 @@ Warnings: [N]
 Artifact: $ARTIFACTS/prr/prr-report.md
 
 [If APPROVED]: → Ready for /sdlc:deploy
-[If REJECTED]: → Resolve blocking items, then re-run /sdlc:prr
+[If REJECTED]: → Resolve blocking items, then re-run ask Claude to run the PRR workflow
 ```

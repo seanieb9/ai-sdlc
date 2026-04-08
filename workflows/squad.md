@@ -15,7 +15,7 @@ If no files are found:
 No active SDLC workflows found in this project.
 
 To start a new workflow:
-  Run /sdlc:start <idea> to begin a new project or feature.
+  Run /sdlc:00-start <idea> to begin a new project or feature.
 ```
 STOP.
 
@@ -104,7 +104,7 @@ List any branch where `currentPhase` is `review`, `verify`, or `uat`:
 ```
 NEEDS REVIEW:
   * <branch> — <projectName> is waiting in <currentPhase> phase (<N> days)
-    To review: /sdlc:verify or /sdlc:review on branch <rawBranch>
+    To review: /sdlc:verify or /sdlc:13-review on branch <rawBranch>
 ```
 
 ### Stale Phases
@@ -130,7 +130,7 @@ List branches where `openDebts > 5`:
 ```
 HIGH DEBT:
   <branch> — <N> open technical debt items
-    Run /sdlc:debt on branch <rawBranch> to review
+    Run ask Claude to run the debt workflow on branch <rawBranch> to review
 ```
 
 ---
@@ -164,7 +164,7 @@ QUICK COMMANDS:
     git checkout <branch> && /sdlc:verify
 
   Start new workflow:
-    git checkout -b <new-branch> && /sdlc:start <idea>
+    git checkout -b <new-branch> && /sdlc:00-start <idea>
 ```
 
 ---

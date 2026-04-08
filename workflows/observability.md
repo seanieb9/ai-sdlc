@@ -365,5 +365,5 @@ Files:
 • $ARTIFACTS/observability/observability.md
 • [implementation files]
 
-Recommended Next: /sdlc:sre
+Recommended Next: /sdlc:12-sre
 ```

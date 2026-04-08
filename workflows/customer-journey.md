@@ -169,6 +169,6 @@ Business processes: [N]
 
 File: $ARTIFACTS/journey/customer-journey.md
 
-Recommended Next: /sdlc:business-process (if any business processes were identified)
-  → Then: /sdlc:data-model ⚠️ (Critical Gate)
+Recommended Next: the business-process workflow (if any business processes were identified)
+  → Then: /sdlc:05-data-model ⚠️ (Critical Gate)
 ```

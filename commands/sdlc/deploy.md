@@ -39,7 +39,7 @@ Flags:
 </context>
 
 <execution_context>
-@~/.claude/sdlc/workflows/deploy.md
+@/Users/seanlew/.claude/sdlc/workflows/deploy.md
 </execution_context>
 
 <auto_verify>

@@ -27,7 +27,7 @@ Then use `$WORKSPACE`, `$STATE`, `$ARTIFACTS` throughout.
 If missing or fewer than 3 TC-IDs: STOP immediately. Tell the user:
 ```
 Cannot generate tests: test-cases.md not found or contains fewer than 3 TC-IDs.
-Run /sdlc:test-cases first to define test cases before generating automation.
+Run /sdlc:09-test-cases first to define test cases before generating automation.
 ```
 
 Read in parallel (after gate passes):
@@ -303,5 +303,5 @@ Suggest next step:
 ```
 → Run tests:     [test command from config]
 → Check coverage: [coverage command]
-→ Continue to:   /sdlc:observability
+→ Continue to:   /sdlc:11-observability
 ```

@@ -340,7 +340,7 @@ Artifact: $ARTIFACTS/design/threat-model.md
 
 → Review each CRITICAL and HIGH threat mitigation before proceeding.
 → All mitigations must have test cases (TC-IDs) in test-cases.md.
-→ Run /sdlc:test-cases after this phase to generate security test cases from threat records.
+→ Run /sdlc:09-test-cases after this phase to generate security test cases from threat records.
 ```
 
 ---

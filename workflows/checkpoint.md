@@ -113,6 +113,6 @@ Next action: [exact command]
 Open decisions: [N]
 Do-not-lose items: [N]
 
-To resume after /clear: /sdlc:restore
+To resume after /clear: /sdlc:resume
 To auto-checkpoint:     /loop 15m /sdlc:checkpoint
 ```

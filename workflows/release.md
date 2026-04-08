@@ -221,5 +221,5 @@ Git tag:
 Next:
   Run the git tag command above to create the version tag.
   Deploy per your deployment workflow.
-  Run /sdlc:start or /sdlc:iterate to begin the next iteration.
+  Run /sdlc:00-start or /sdlc:iterate to begin the next iteration.
 ```

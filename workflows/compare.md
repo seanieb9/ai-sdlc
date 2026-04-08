@@ -13,7 +13,7 @@ Create the output directory:
 mkdir -p "$ARTIFACTS/design"
 ```
 
-If $ARGUMENTS is empty: output "Please provide a design decision to compare. Example: /sdlc:compare 'message queue vs direct HTTP calls for async processing'" and STOP.
+If $ARGUMENTS is empty: output "Please provide a design decision to compare. Example: ask Claude to compare alternatives 'message queue vs direct HTTP calls for async processing'" and STOP.
 
 ---
 
@@ -262,6 +262,6 @@ Decision ID: DEC-NNN added to state.json
 
 Next:
   Share the ADR with your team for async review.
-  Run /sdlc:tech-arch to incorporate this decision into the full architecture.
+  Run /sdlc:06-tech-arch to incorporate this decision into the full architecture.
   Set a calendar reminder for the review trigger: <trigger>
 ```

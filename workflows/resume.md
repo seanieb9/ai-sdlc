@@ -103,7 +103,7 @@ Only proceed to execute the next action when the user confirms.
 
 ## If $STATE Does Not Exist or Has No Checkpoint
 
-Fall back to `/sdlc:start` behavior:
+Fall back to `/sdlc:00-start` behavior:
 - Inform the user which branch was detected
 - Display the standard SDLC dashboard
 - Route to the recommended next phase

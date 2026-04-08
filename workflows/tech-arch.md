@@ -644,7 +644,7 @@ When the project includes a front-end component, add a `## Frontend Architecture
 
 After Phase 6 verify passes, if a Frontend Architecture section is present: output this note:
 
-> **Frontend stack detected.** Run `/sdlc:fe-setup` before Phase 7 to configure design tokens and derive SCREEN_SPEC.md from the customer journey. Phase 7 planning requires SCREEN_SPEC.md to generate FE tasks.
+> **Frontend stack detected.** Ask Claude to run the fe-setup workflow before Phase 7 to configure design tokens and derive SCREEN_SPEC.md from the customer journey. Phase 7 planning requires SCREEN_SPEC.md to generate FE tasks.
 
 
 **Update $ARTIFACTS/design/api-spec.md:**
@@ -774,5 +774,5 @@ Files Updated:
 • $ARTIFACTS/design/solution-design.md
 
 Recommended Next: /sdlc:verify --phase 6   ← run this before proceeding
-Then:           /sdlc:plan
+Then:           /sdlc:07-plan
 ```
