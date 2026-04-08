@@ -476,6 +476,9 @@ Auto-chain trigger table:
 | `build` | code-quality | Always |
 | `build` | audit-deps | Always |
 | `build` | pii-audit | Only if observability.md exists (from pre-population or full phase) |
+| `research` | gaps | Always (validate gap analysis before synthesize) |
+| `data-model` | pii-audit | Always (identify PII fields at data layer before design locks in) |
+| `customer-journey` | clarify | Only if open questions exist after journey mapping |
 | `test-gen` | traceability | Always (verify test-to-requirement coverage) |
 | `deploy` | ci-verify | Hard gate — blocks deploy if CI pipeline missing or incomplete |
 | `deploy` | maintain | Always (generate initial maintenance entries after deploy) |

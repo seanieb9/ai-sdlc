@@ -54,6 +54,18 @@ Ask the user: "Before deploying, confirm:
 
 If the user answers "no" to question 1 for a production deployment: STOP. A backup is required before production deployment. Explain why: data corruption or failed migration without a backup is unrecoverable.
 
+### Security Readiness Gate
+
+Before any deployment proceeds, verify:
+
+1. **No hardcoded secrets**: Grep source for common patterns (`password =`, `api_key =`, `secret =`, `token =` as string literals). HARD STOP if found.
+2. **Dependency audit passed**: Check state.json `autoChainLog` — `audit-deps` must show `status: "success"` for this build. If not: run audit-deps workflow inline now.
+3. **Threat model addressed**: If threat-model ran (check autoChainLog), verify high-severity findings have been addressed. Check TECH_ARCHITECTURE.md or solution-design.md for mitigations.
+4. **PII compliance**: If pii-audit ran, verify no PII fields are exposed in logs. Check autoChainLog for pii-audit result.
+
+If checks 1 or 2 fail: HARD STOP. Do not deploy. Surface specific failure to user.
+If checks 3 or 4 have unresolved items: WARN user with specific items, ask for explicit confirmation before proceeding.
+
 Read in parallel (after gates pass):
 - `$ARTIFACTS/verify/verification-report.md`
 - `$ARTIFACTS/design/tech-architecture.md` — deployment architecture (if exists)

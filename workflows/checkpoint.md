@@ -103,6 +103,27 @@ Append to the `context_log` array in $STATE:
 
 ---
 
+## Step 4b: Update Institutional Memory
+
+Before confirming the checkpoint, capture learnings from this session that should persist beyond this context window.
+
+Review the session work and identify:
+- Any non-obvious patterns, constraints, or conventions discovered (e.g. "this codebase uses X pattern for Y")
+- Any user preferences or decisions stated verbally but not written to docs
+- Any surprises — things that didn't work as expected and how they were resolved
+
+If anything worth persisting is found, append it to the project's CLAUDE.md (create it at the project root if it doesn't exist):
+
+```markdown
+## Session Learnings — [date]
+- [learning 1]
+- [learning 2]
+```
+
+Keep each learning to one sentence. Maximum 5 learnings per session. If nothing worth persisting was found, skip this step silently.
+
+---
+
 ## Step 5: Confirm to User
 
 ```

@@ -1862,6 +1862,23 @@ A PR is ready to merge when:
 
 ---
 
+## Step 11.8: Self-Correction Gate
+
+Run this gate after all implementation steps and before updating state.json. Do not skip.
+
+### Self-Correction Gate (runs before marking task complete)
+
+Before marking the task done, run a rapid self-review:
+
+1. **Compile/syntax check**: Does the code have obvious syntax errors? Fix immediately.
+2. **Contract check**: Does the implementation match the API spec / interface contract? Fix if not.
+3. **Test alignment**: Do the test cases for this task pass against this implementation (mentally trace key paths)? Fix if not.
+4. **Clean architecture check**: Is logic in the right layer (no business logic in controllers, no DB calls in domain)? Refactor if not.
+
+If any check fails: fix it inline NOW before proceeding. Do NOT mark the task complete until all 4 checks pass. Maximum 2 self-correction attempts — if still failing after 2 attempts, mark task as BLOCKED and surface to user with specific failure description.
+
+---
+
 ## Step 12: Mark Task Complete
 
 After implementation and verification:
