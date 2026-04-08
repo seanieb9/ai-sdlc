@@ -431,23 +431,23 @@ Phases are executed by directing the user to run the corresponding command or by
 | Phase | Command |
 |---|---|
 | feasibility | `/sdlc:feasibility` |
-| research | `/sdlc:research` |
-| voc | `/sdlc:voc` |
-| synthesize | `/sdlc:synthesize` |
-| idea | `/sdlc:idea` |
-| personas | `/sdlc:personas` |
-| journey | `/sdlc:journey` |
-| business-process | `/sdlc:business-process` |
+| research | `/sdlc:01-research` |
+| voc | `/sdlc:01b-voc` |
+| synthesize | `/sdlc:02-synthesize` |
+| idea | `/sdlc:03-product-spec` |
+| personas | `/sdlc:03b-personas` |
+| journey | `/sdlc:04-customer-journey` |
+| business-process | `/sdlc:04b-business-process` |
 | prototype | `/sdlc:prototype` |
-| data-model | `/sdlc:data-model` |
-| design | `/sdlc:design` |
+| data-model | `/sdlc:05-data-model` |
+| design | `/sdlc:06-tech-arch` |
 | fe-setup | `/sdlc:fe-setup` |
-| plan | `/sdlc:plan` |
-| build | `/sdlc:build` |
-| test-cases | `/sdlc:test-cases` |
-| test-gen | `/sdlc:test-gen` |
-| observability | `/sdlc:observability` |
-| sre | `/sdlc:sre` |
+| plan | `/sdlc:07-plan` |
+| build | `/sdlc:08-code` |
+| test-cases | `/sdlc:09-test-cases` |
+| test-gen | `/sdlc:10-test-automation` |
+| observability | `/sdlc:11-observability` |
+| sre | `/sdlc:12-sre` |
 | verify | `/sdlc:verify` |
 | uat | `/sdlc:uat` |
 | prr | `/sdlc:prr` |
@@ -480,7 +480,7 @@ Auto-chain trigger table:
 | `test-gen` | traceability | Always (verify test-to-requirement coverage) |
 | `observability` | ci-verify | Always (verify CI pipeline has observability steps) |
 
-For each auto-chain skill: run it, capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
+For each auto-chain skill: read and execute `workflows/<skill>.md` inline (do NOT invoke as a slash command — the workflow files are the source of truth), capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
 ```json
 { "trigger": "<phase>", "skill": "<skill>", "status": "success|failed", "result": "<key result>", "runAt": "<ISO>" }
 ```
