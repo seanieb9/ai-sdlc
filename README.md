@@ -453,8 +453,8 @@ quality:
 | `/sdlc:00-start [idea]` | **Universal entry point** — new project, status check, daily brief, resume |
 | `/sdlc:sod` | Start of day — reads checkpoint, sets goal, delivers brief |
 | `/sdlc:eod` | End of day — clean stop, commit WIP, save checkpoint |
-| `/sdlc:checkpoint` | Save session state + update institutional memory in CLAUDE.md |
-| `/sdlc:resume` | Restore full context after `/clear` or auto-compact |
+| `/sdlc:checkpoint` | Save session state to `state.json` (checkpoint field) + update institutional memory in CLAUDE.md |
+| `/sdlc:resume` | Restore full context from `state.json` checkpoint after `/clear` or auto-compact |
 | `/sdlc:status` | Live dashboard: phases, gates, progress, stale flags |
 | `/sdlc:help` | Show all commands |
 | `/sdlc:verify` | Quality gate — run after each phase |
@@ -493,7 +493,7 @@ quality:
 | Command | What it does |
 |---------|-------------|
 | `/sdlc:roadmap` | Human session plan for the project |
-| `/sdlc:decide` | Record an architectural decision |
+| `/sdlc:decide` | Record a decision into `state.json` decisions array with downstream impact analysis |
 | `/sdlc:docs` | Audit & organise SDLC documents |
 
 > All specialist workflows (threat-model, pii-audit, test-gaps, traceability, retro, prr, etc.) run automatically via auto-chains — no manual invocation needed.
