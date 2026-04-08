@@ -38,7 +38,7 @@ Phase checklist summary:
   Phase 12 (SRE)              → Runbooks per CRITICAL dependency, SLOs defined
   Phase 13 (Review)           → REVIEW_REPORT.md complete, all HIGH/CRITICAL findings have TODO items
 
-Output: Verification result printed + STATE.md updated with verification log entry.
+Output: Verification result printed + `phases.verify` in state.json updated with result.
 
 Flags:
   --phase <N>   Verify a specific phase number

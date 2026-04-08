@@ -1,6 +1,6 @@
 ---
 name: sdlc:07-plan
-description: Create a detailed, phased execution plan in .sdlc/PLAN.md and .sdlc/TODO.md. Breaks down work into atomic tasks with dependencies. No code without a plan.
+description: Create a detailed, phased execution plan. Output goes to $ARTIFACTS/plan/implementation-plan.md. Breaks down work into atomic tasks with dependencies. No code without a plan.
 argument-hint: "<feature/phase> [--breakdown] [--estimate] [--dependencies]"
 allowed-tools:
   - Read
@@ -18,8 +18,7 @@ allowed-tools:
 Create a precise, executable plan before any code is written.
 
 Manages:
-  - .sdlc/PLAN.md — full execution plan with phases, tasks, dependencies, acceptance criteria
-  - .sdlc/TODO.md — current active task list (prioritized, with status)
+  - $ARTIFACTS/plan/implementation-plan.md — full execution plan with phases, tasks, dependencies, acceptance criteria
 
 Plan structure:
   1. Goal — what this plan achieves

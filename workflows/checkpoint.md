@@ -55,7 +55,7 @@ Determine precisely:
 
 **What only exists in conversation context:**
 - User preferences or constraints stated verbally but not written to any document
-- Decisions made during this session that affect downstream work but aren't yet in STATE.md
+- Decisions made during this session that affect downstream work but aren't yet in state.json
 - Any "don't forget" items the user mentioned
 
 ---

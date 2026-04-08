@@ -10,7 +10,7 @@ description: >
   - User makes a technical choice: "use Postgres", "JWT not sessions", "REST not GraphQL"
   - User makes a product choice: "remove the bulk import", "v1 won't have X", "SLA is 99.9%"
   Do NOT trigger on questions, exploratory discussion, or hypotheticals ("what if we used X?").
-  Do NOT trigger if .sdlc/STATE.md does not exist (no active SDLC project).
+  Do NOT trigger if state.json does not exist for the current branch (no active SDLC project).
   Invoke silently — no announcement, no preamble. Just record and flag if impact found.
 argument-hint: ""
 allowed-tools:
@@ -24,7 +24,7 @@ Record the decision that was just made in the conversation and flag any downstre
 
 ## Step 1: Read current state
 
-Read `.sdlc/STATE.md`. If it does not exist, stop — there is no active SDLC project to record into.
+Read `state.json` (`.claude/ai-sdlc/workflows/$BRANCH/state.json`). If it does not exist, stop — there is no active SDLC project to record into.
 
 ## Step 2: Identify the decision
 
@@ -33,18 +33,18 @@ From the conversation, extract:
 - **Type:** classify as one of: TECH | PRODUCT | SCOPE | CONSTRAINT | OVERRIDE
 - **Replaces:** Did this override a prior decision? If so, note what is now superseded.
 
-## Step 3: Write to STATE.md
+## Step 3: Append to state.json decisions array
 
-Append to the `## Decisions` section of `.sdlc/STATE.md`:
+Append an entry to the `decisions` array in state.json:
 
-```
-[YYYY-MM-DD] DECISION ([TYPE]): [what was decided] BECAUSE: [reason if stated, otherwise omit]
-```
-
-If this overrides a prior decision, mark the old one superseded:
-```
-[YYYY-MM-DD] DECISION (TECH): Use Postgres for primary storage BECAUSE: team familiarity
-[YYYY-MM-DD] SUPERSEDED by above: Use MongoDB for primary storage
+```json
+{
+  "date": "YYYY-MM-DD",
+  "type": "TECH|PRODUCT|SCOPE|CONSTRAINT|OVERRIDE",
+  "decision": "what was decided",
+  "reason": "reason if stated, otherwise omit",
+  "supersedes": "prior decision if overriding, otherwise omit"
+}
 ```
 
 ## Step 4: Assess downstream impact

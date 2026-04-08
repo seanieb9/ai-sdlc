@@ -31,7 +31,7 @@ Read in parallel:
 Check for anything that changed or needs attention since yesterday:
 
 **Stale decisions:**
-- Are there open decisions in NEXT_ACTION.md that have been sitting more than 1 day?
+- Are there open decisions in the `checkpoint.open_decisions` field of state.json that have been sitting more than 1 day?
 - Flag any that are blocking today's work
 
 **Dependency check:**

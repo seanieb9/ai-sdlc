@@ -1,6 +1,6 @@
 ---
 name: sdlc:checkpoint
-description: Save a precise session snapshot to .sdlc/NEXT_ACTION.md. Captures current phase/step, exact next action, open decisions, and any verbal context from this session. Run proactively before context fills or at natural stopping points.
+description: Save a precise session snapshot to state.json. Captures current phase/step, exact next action, open decisions, and any verbal context from this session. Run proactively before context fills or at natural stopping points.
 argument-hint: ""
 allowed-tools:
   - Read
@@ -21,7 +21,7 @@ Captures:
   - Any files that are mid-edit or incomplete
   - Verbal instructions, constraints, or preferences from this session that aren't written in any document
 
-Output: .sdlc/NEXT_ACTION.md (always overwritten with current state — not a log)
+Output: `checkpoint` field in state.json (always overwritten with current state — not a log)
 
 After saving, confirm with: phase/step, next action, count of open decisions and do-not-lose items.
 

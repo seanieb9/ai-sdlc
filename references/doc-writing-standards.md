@@ -231,7 +231,7 @@ Every document has a complexity budget. When it exceeds budget, shard or cut.
 | RUNBOOKS.md | Max 10 runbooks per file. Shard each runbook > 100 lines. |
 | OBSERVABILITY.md | Single file. No sharding — must be read whole for audit. |
 
-When a document approaches its budget: stop, shard, update the parent index, update STATE.md.
+When a document approaches its budget: stop, shard, update the parent index, update state.json artifacts list.
 
 ---
 

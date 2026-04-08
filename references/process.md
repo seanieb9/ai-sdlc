@@ -19,7 +19,7 @@ DATA MODEL ⚠️  → docs/data/DATA_MODEL.md  ← CRITICAL GATE
   ↓
 TECH ARCH      → docs/architecture/TECH_ARCHITECTURE.md, API_SPEC.md
   ↓
-PLAN           → .sdlc/PLAN.md, .sdlc/TODO.md
+PLAN           → $ARTIFACTS/plan/implementation-plan.md
   ↓
 CODE           → Implementation (clean architecture)
   ↓
@@ -44,7 +44,7 @@ These gates are enforced by the orchestrator. Bypassing requires `--force` flag 
 |------|--------------|---------|
 | DATA-MODEL | tech-arch, plan, code, test-cases | docs/data/DATA_MODEL.md |
 | PRODUCT-SPEC | data-model, test-cases | docs/product/PRODUCT_SPEC.md |
-| PLAN | code | .sdlc/PLAN.md with tasks |
+| PLAN | code | `$ARTIFACTS/plan/implementation-plan.md` |
 | TEST-CASES | test-automation | docs/qa/TEST_CASES.md |
 | OBSERVABILITY | sre | docs/sre/OBSERVABILITY.md |
 
@@ -66,12 +66,12 @@ The orchestrator classifies work before routing:
 
 ## Process Rules (Non-Negotiable)
 
-1. **No code without a plan.** .sdlc/PLAN.md must exist before /sdlc:08-code runs.
+1. **No code without a plan.** `$ARTIFACTS/plan/implementation-plan.md` must exist before /sdlc:08-code runs.
 2. **No plan without a data model.** docs/data/DATA_MODEL.md must exist before /sdlc:07-plan runs.
 3. **No data model changes without review.** Any modification to existing entities triggers impact analysis.
 4. **Documents are updated, never recreated.** Read existing content before writing. Append/update sections. Never overwrite history.
 5. **Requirements are immutable.** REQ-IDs, TC-IDs, BR-IDs are never renumbered. Only deprecated (with reason and date).
-6. **State is always maintained.** .sdlc/STATE.md updated after every phase completion.
+6. **State is always maintained.** `state.json` updated after every phase completion (at `.claude/ai-sdlc/workflows/$BRANCH/state.json`).
 7. **Quality is not bolted on.** Observability and tests are planned alongside implementation, not after.
 
 ---

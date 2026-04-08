@@ -40,7 +40,7 @@ Input: $ARGUMENTS
 
 Flags:
   --status        Show SDLC dashboard and current state, then exit
-  --force <phase> Override gate check for named phase (document reason in STATE.md)
+  --force <phase> Override gate check for named phase (document reason in state.json gateOverrides)
   --new           Force new project initialization even if state exists
 </context>
 
@@ -48,6 +48,5 @@ Flags:
 @~/.claude/sdlc/workflows/orchestrate.md
 @~/.claude/sdlc/references/process.md
 @~/.claude/sdlc/references/doc-management.md
-@~/.claude/sdlc/templates/state.md
 </execution_context>
 

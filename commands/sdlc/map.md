@@ -18,7 +18,7 @@ Flags:
 - `--refresh` — re-run the full analysis even if CODEBASE_MAP.md already exists
 - `--focus <area>` — limit analysis to a specific area (e.g. `--focus auth`, `--focus payments`)
 
-On completion, update `.sdlc/STATE.md` to record that the codebase has been mapped.
+On completion, update `phases.map.status` in state.json to record that the codebase has been mapped.
 </objective>
 
 <execution_context>

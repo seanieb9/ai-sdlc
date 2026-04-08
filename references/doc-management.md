@@ -48,11 +48,9 @@ docs/
   review/
     REVIEW_REPORT.md         ← Cross-cutting quality review findings
 
-.sdlc/
-  STATE.md                   ← Project state, phase progress, document index
-  TODO.md                    ← Active task list with statuses
-  PLAN.md                    ← Execution plan with phases and dependencies
-  DECISIONS.md               ← Decision overflow: create only when STATE.md ## Decisions exceeds 25 entries. Link from STATE.md: "→ see .sdlc/DECISIONS.md for full log"
+.claude/ai-sdlc/workflows/<branch>/
+  state.json                 ← Machine-readable project state: phase statuses, decisions, checkpoint, autoChainLog
+  artifacts/                 ← All phase output documents (prd.md, data-model.md, tech-architecture.md, etc.)
 ```
 
 ---
@@ -122,30 +120,30 @@ Shard headers:
 
 ### Orphaned Document
 - Not in the canonical registry
-- Not referenced from STATE.md document index
+- Not referenced from the phase artifacts list in state.json
 - No clear purpose distinct from a canonical document
 
 ---
 
-## STATE.md Document Index
+## Artifact Index
 
-The document index in STATE.md is the source of truth for what documents exist:
+The `phases` object in `state.json` is the source of truth for what phases are complete and what artifacts they produced:
 
-```markdown
-## Document Index
-- [x] docs/research/RESEARCH.md         ← checked = exists
-- [x] docs/data/DATA_MODEL.md           ← checked = exists
-- [ ] docs/architecture/API_SPEC.md     ← unchecked = not yet created
+```json
+"phases": {
+  "research": { "status": "completed", "artifacts": ["research.md", "gap-analysis.md"] },
+  "data-model": { "status": "pending", "artifacts": [] }
+}
 ```
 
-Run `/sdlc:docs --index` to rebuild this index from actual filesystem state.
+Run `/sdlc:docs --index` to list all artifact files currently under `$ARTIFACTS/`.
 
 ---
 
 ## Audit Frequency
 
 Run `/sdlc:docs --audit` at the start of every new phase to ensure:
-- No documents created outside the registry
+- No artifact files created outside the canonical registry
 - No orphaned or duplicate documents
 - All active documents have recent "Last Updated" timestamps
-- STATE.md document index is accurate
+- Phases marked complete in state.json have their expected artifact files present

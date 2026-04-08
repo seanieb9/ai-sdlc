@@ -18,7 +18,7 @@ allowed-tools:
 <objective>
 Implement planned tasks following clean architecture and clean code principles. A plan MUST exist before any implementation.
 
-Gate check: .sdlc/PLAN.md and .sdlc/TODO.md must exist. If not, run /sdlc:plan first.
+Gate check: `$ARTIFACTS/plan/implementation-plan.md` must exist and `phases.plan.status` in state.json must be `completed`. If not, run /sdlc:07-plan first.
 
 Implementation order (always follow this sequence):
   1. Domain entities and value objects (pure, no dependencies)
@@ -41,8 +41,8 @@ Code standards enforced:
 
 After implementation:
   - Run /simplify on all changed code
-  - Mark TODO items as done
-  - Update STATE.md
+  - Mark tasks complete in implementation-plan.md
+  - Update state.json task statuses
 </objective>
 
 <context>

@@ -278,5 +278,5 @@ Both engineers run `/sdlc:verify` after their respective phases. Both have equal
 - **Don't estimate AI execution time** — it's not a bottleneck
 - **Don't assign story points to code tasks** — the tasks exist for tracking, not for estimating
 - **Don't plan sprints around code phases** — code completes when the AI finishes, not when a sprint ends
-- **Don't create tickets for AI work** — AI tasks live in `.sdlc/TODO.md`, not a project management tool
+- **Don't create tickets for AI work** — AI tasks live in `implementation-plan.md` ($ARTIFACTS/plan/), not a project management tool
 - **Do plan around human review cycles** — the cadence is: human designs → AI executes → human reviews → next phase

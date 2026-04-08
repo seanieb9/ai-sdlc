@@ -9,7 +9,7 @@ description: >
   team coordination, or how long the project will take.
   Trigger patterns: "how long will this take?", "how should we plan this?", "who does what?",
   "can you give us a roadmap?", "how many sessions will this take?", "let's plan the project"
-  Do NOT trigger if .sdlc/STATE.md does not exist.
+  Do NOT trigger if state.json does not exist for the current branch.
   Optional — individual developers can skip this entirely and work phase by phase.
 argument-hint: "[--update] [--skip-voc] [--solo] [--simple] [--thorough]"
 allowed-tools:

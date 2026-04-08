@@ -18,7 +18,7 @@ Process:
   1. Check for broken mid-state — fix or stub out any half-implemented code
   2. Identify a clean stopping point (finish the task if close, stop before starting a new one if not)
   3. Commit completed work with a clear message
-  4. Save checkpoint to .sdlc/NEXT_ACTION.md with EOD framing (daily summary + tomorrow's first action)
+  4. Save checkpoint to state.json (checkpoint field) with EOD framing (daily summary + tomorrow's first action)
   5. Print EOD summary: today's progress, what was committed, first action tomorrow, blockers, open decisions
 
 The goal: leave the project in a known, committed, resumable state.

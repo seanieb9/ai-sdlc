@@ -13,7 +13,7 @@ allowed-tools:
 Orient Claude and plan the session in under two minutes.
 
 Process:
-  1. Read NEXT_ACTION.md + STATE.md + TODO.md + PLAN.md + git log in parallel
+  1. Read state.json (checkpoint field + phases) + relevant artifacts (implementation-plan.md if exists) + git log in parallel
   2. Check for stale decisions, unverified phases, or blockers from yesterday
   3. Plan today's session: realistic goal + first action + known decision points ahead
   4. Deliver SOD brief: where we left off, first action, today's goal, watch-outs, attention items

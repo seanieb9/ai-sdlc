@@ -1,6 +1,6 @@
 # SDLC Execution Mode
 
-Every phase command operates in INTERACTIVE mode. Check `.sdlc/STATE.md` → `Mode:` field before executing. If MODE is missing or STATE.md doesn't exist, default to INTERACTIVE.
+Every phase command operates in INTERACTIVE mode. All workflows are INTERACTIVE-only — there is no mode field to check. One pause per phase, before writing any output.
 
 ---
 
@@ -55,6 +55,4 @@ Wait for user response. On confirmation, write all documents and complete the ph
 
 ## Setting Mode
 
-**At project start:** The orchestrator asks during `/sdlc:00-start` initialization. Mode is recorded in `.sdlc/STATE.md` → `Mode:` field.
-
-**Changing mode mid-project:** Edit `.sdlc/STATE.md` directly.
+**Mode:** Always INTERACTIVE. There is no configuration needed — this cannot be changed.

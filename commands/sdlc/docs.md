@@ -33,22 +33,19 @@ Canonical document registry (these are the ONLY docs that should exist):
   docs/sre/RUNBOOKS.md
   docs/sre/SLO.md
   docs/review/REVIEW_REPORT.md
-  .sdlc/STATE.md
-  .sdlc/TODO.md
-  .sdlc/DECISIONS.md
-  .sdlc/PLAN.md
+  .claude/ai-sdlc/workflows/$BRANCH/state.json  ← machine-readable project state
 
 Audit checks:
-  - Docs outside canonical registry (candidates for consolidation)
+  - Artifact files outside canonical registry (candidates for consolidation)
   - Docs with duplicate content
   - Docs missing required sections
   - Stale docs (last updated > 30 days, still active feature)
   - Broken cross-references between docs
-  - STATE.md document index out of sync with actual files
+  - Phases marked complete in state.json but missing artifact files
 
 Actions:
   --audit   Run full audit, output findings
-  --index   Rebuild STATE.md document index from actual files
+  --index   List all artifact files that exist under $ARTIFACTS/
   --clean   Consolidate duplicate/stale docs (asks confirmation per action)
   --status  Show doc health dashboard
 </objective>
@@ -58,7 +55,7 @@ Command: $ARGUMENTS
 
 Flags:
   --audit   Full doc audit
-  --index   Rebuild document index in STATE.md
+  --index   List artifact files under $ARTIFACTS/
   --clean   Interactive cleanup of duplicate/stale docs
   --status  Doc health dashboard
 </context>
