@@ -6,7 +6,7 @@ Analyses test coverage by mapping every requirement and acceptance criterion to 
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution:
 ```bash

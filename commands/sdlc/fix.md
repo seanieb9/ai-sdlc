@@ -24,6 +24,6 @@ Flags:
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/fix.md
-@/Users/seanlew/.claude/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/fix.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 </execution_context>

@@ -45,6 +45,6 @@ Flags: $ARGUMENTS
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/status.md
+@~/.claude/sdlc/workflows/status.md
 </execution_context>
 

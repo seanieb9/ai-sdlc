@@ -6,7 +6,7 @@ STRIDE threat modeling against the current technical architecture. Identifies th
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution, set the phase artifact directory:
 ```bash

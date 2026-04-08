@@ -23,5 +23,5 @@ Do NOT re-read all docs in full. The checkpoint exists precisely to avoid that.
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/resume.md
+@~/.claude/sdlc/workflows/resume.md
 </execution_context>

@@ -42,10 +42,10 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/customer-journey.md
-@/Users/seanlew/.claude/sdlc/references/product-standards.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/customer-journey.md
+@~/.claude/sdlc/references/product-standards.md
+@~/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

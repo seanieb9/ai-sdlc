@@ -29,5 +29,5 @@ Recommend: /loop 15m /sdlc:checkpoint to auto-save on a timer while working.
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/checkpoint.md
+@~/.claude/sdlc/workflows/checkpoint.md
 </execution_context>

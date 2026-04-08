@@ -67,11 +67,11 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/observability.md
-@/Users/seanlew/.claude/sdlc/references/observability-standards.md
-@/Users/seanlew/.claude/sdlc/templates/observability.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/observability.md
+@~/.claude/sdlc/references/observability-standards.md
+@~/.claude/sdlc/templates/observability.md
+@~/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

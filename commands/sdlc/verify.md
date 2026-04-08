@@ -52,5 +52,5 @@ Phase(s) to verify: $ARGUMENTS
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>

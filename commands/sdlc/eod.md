@@ -26,6 +26,6 @@ Run /sdlc:sod tomorrow to start the next session.
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/eod.md
-@/Users/seanlew/.claude/sdlc/workflows/checkpoint.md
+@~/.claude/sdlc/workflows/eod.md
+@~/.claude/sdlc/workflows/checkpoint.md
 </execution_context>

@@ -23,6 +23,6 @@ Reminder (once only): suggest /loop 15m /sdlc:checkpoint after the user starts w
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/sod.md
-@/Users/seanlew/.claude/sdlc/workflows/resume.md
+@~/.claude/sdlc/workflows/sod.md
+@~/.claude/sdlc/workflows/resume.md
 </execution_context>

@@ -45,9 +45,9 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/orchestrate.md
-@/Users/seanlew/.claude/sdlc/references/process.md
-@/Users/seanlew/.claude/sdlc/references/doc-management.md
-@/Users/seanlew/.claude/sdlc/templates/state.md
+@~/.claude/sdlc/workflows/orchestrate.md
+@~/.claude/sdlc/references/process.md
+@~/.claude/sdlc/references/doc-management.md
+@~/.claude/sdlc/templates/state.md
 </execution_context>
 

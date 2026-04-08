@@ -42,8 +42,8 @@ Output: .sdlc/ROADMAP.md
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/roadmap.md
-@/Users/seanlew/.claude/sdlc/references/planning-standards.md
-@/Users/seanlew/.claude/sdlc/templates/roadmap.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/roadmap.md
+@~/.claude/sdlc/references/planning-standards.md
+@~/.claude/sdlc/templates/roadmap.md
+@~/.claude/sdlc/references/doc-writing-standards.md
 </execution_context>

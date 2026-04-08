@@ -54,11 +54,11 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/plan.md
-@/Users/seanlew/.claude/sdlc/references/process.md
-@/Users/seanlew/.claude/sdlc/references/clean-architecture.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/plan.md
+@~/.claude/sdlc/references/process.md
+@~/.claude/sdlc/references/clean-architecture.md
+@~/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

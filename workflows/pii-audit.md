@@ -6,7 +6,7 @@ Cross-references PII fields from the data model against observability log entrie
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution:
 ```bash

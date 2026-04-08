@@ -92,15 +92,15 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/review.md
-@/Users/seanlew/.claude/sdlc/references/clean-architecture.md
-@/Users/seanlew/.claude/sdlc/references/testing-standards.md
-@/Users/seanlew/.claude/sdlc/references/observability-standards.md
-@/Users/seanlew/.claude/sdlc/references/data-standards.md
-@/Users/seanlew/.claude/sdlc/references/resilience-patterns.md
-@/Users/seanlew/.claude/sdlc/references/microservices.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/review.md
+@~/.claude/sdlc/references/clean-architecture.md
+@~/.claude/sdlc/references/testing-standards.md
+@~/.claude/sdlc/references/observability-standards.md
+@~/.claude/sdlc/references/data-standards.md
+@~/.claude/sdlc/references/resilience-patterns.md
+@~/.claude/sdlc/references/microservices.md
+@~/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

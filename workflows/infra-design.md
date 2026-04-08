@@ -6,7 +6,7 @@ Generates infrastructure configuration files (Dockerfile, docker-compose, Kubern
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution:
 ```bash

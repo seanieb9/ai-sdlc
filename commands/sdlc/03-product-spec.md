@@ -47,12 +47,12 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/product-spec.md
-@/Users/seanlew/.claude/sdlc/references/product-standards.md
-@/Users/seanlew/.claude/sdlc/references/testing-standards.md
-@/Users/seanlew/.claude/sdlc/templates/product-spec.md
-@/Users/seanlew/.claude/sdlc/references/doc-writing-standards.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/product-spec.md
+@~/.claude/sdlc/references/product-standards.md
+@~/.claude/sdlc/references/testing-standards.md
+@~/.claude/sdlc/templates/product-spec.md
+@~/.claude/sdlc/references/doc-writing-standards.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

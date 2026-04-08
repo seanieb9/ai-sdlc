@@ -55,12 +55,12 @@ Flags:
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/code.md
-@/Users/seanlew/.claude/sdlc/references/clean-architecture.md
-@/Users/seanlew/.claude/sdlc/references/observability-standards.md
-@/Users/seanlew/.claude/sdlc/references/microservices.md
-@/Users/seanlew/.claude/sdlc/references/resilience-patterns.md
-@/Users/seanlew/.claude/sdlc/workflows/verify.md
+@~/.claude/sdlc/workflows/code.md
+@~/.claude/sdlc/references/clean-architecture.md
+@~/.claude/sdlc/references/observability-standards.md
+@~/.claude/sdlc/references/microservices.md
+@~/.claude/sdlc/references/resilience-patterns.md
+@~/.claude/sdlc/workflows/verify.md
 </execution_context>
 
 <auto_verify>

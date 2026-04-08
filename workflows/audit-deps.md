@@ -6,7 +6,7 @@ Scans project dependencies for known CVEs, outdated versions, unused packages, a
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution:
 ```bash

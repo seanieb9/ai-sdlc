@@ -40,5 +40,5 @@ After answering, offer the most likely follow-up actions. If the exploration rev
 </objective>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/explore.md
+@~/.claude/sdlc/workflows/explore.md
 </execution_context>

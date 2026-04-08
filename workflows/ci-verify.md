@@ -6,7 +6,7 @@ Gate check for the deploy phase. Verifies that a CI pipeline exists and contains
 
 ## Step 0: Workspace Resolution
 
-@/Users/seanlew/sdlc/workflows/workspace-resolution.md
+@~/.claude/sdlc/workflows/workspace-resolution.md
 
 After resolution:
 ```bash

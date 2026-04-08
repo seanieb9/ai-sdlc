@@ -15,6 +15,6 @@ Command name (optional): $ARGUMENTS
 </context>
 
 <execution_context>
-@/Users/seanlew/.claude/sdlc/workflows/help.md
+@~/.claude/sdlc/workflows/help.md
 </execution_context>
 
