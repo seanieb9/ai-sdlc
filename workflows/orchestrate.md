@@ -428,32 +428,32 @@ Running Phase: <PHASE-NAME>
 
 Phases are executed by directing the user to run the corresponding command or by invoking the workflow directly:
 
-| Phase | Command |
+| Phase | Invocation |
 |---|---|
-| feasibility | `/sdlc:feasibility` |
+| feasibility | inline `workflows/feasibility.md` |
 | research | `/sdlc:01-research` |
-| voc | `/sdlc:01b-voc` |
+| voc | inline `workflows/voc.md` |
 | synthesize | `/sdlc:02-synthesize` |
 | idea | `/sdlc:03-product-spec` |
-| personas | `/sdlc:03b-personas` |
+| personas | inline `workflows/personas.md` |
 | journey | `/sdlc:04-customer-journey` |
-| business-process | `/sdlc:04b-business-process` |
-| prototype | `/sdlc:prototype` |
+| business-process | inline `workflows/business-process.md` |
+| prototype | inline `workflows/prototype.md` |
 | data-model | `/sdlc:05-data-model` |
 | design | `/sdlc:06-tech-arch` |
-| fe-setup | `/sdlc:fe-setup` |
+| fe-setup | inline `workflows/fe-setup.md` |
 | plan | `/sdlc:07-plan` |
 | build | `/sdlc:08-code` |
 | test-cases | `/sdlc:09-test-cases` |
-| test-gen | `/sdlc:10-test-automation` |
+| test-gen | inline `workflows/test-automation.md` |
 | observability | `/sdlc:11-observability` |
 | sre | `/sdlc:12-sre` |
 | verify | `/sdlc:verify` |
-| uat | `/sdlc:uat` |
-| prr | `/sdlc:prr` |
+| uat | inline `workflows/uat.md` |
+| prr | inline `workflows/prr.md` |
 | deploy | `/sdlc:deploy` |
-| maintain | `/sdlc:maintain` |
-| retro | `/sdlc:retro` |
+| maintain | inline `workflows/maintain.md` |
+| retro | inline `workflows/retro.md` |
 
 If `--auto` flag is active, invoke the phase workflow inline without pausing. Otherwise, instruct the user to run the command and wait for them to confirm completion.
 
@@ -582,7 +582,7 @@ Auto-chain log:
   [List skills run and their results]
 
 Next steps:
-  - Run /sdlc:retro to close out the project
+  - Run retrospective: read and execute workflows/retro.md inline
   - Archive workspace: /sdlc:start save
   - Review decisions: /sdlc:status
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
