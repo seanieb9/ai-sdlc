@@ -11,7 +11,7 @@ AI coding assistants are powerful but undisciplined. Left to their own devices t
 - Jump straight to code before requirements are understood
 - Build on shaky data models that break everything downstream
 - Skip architecture decisions that matter at scale
-- Write tests that test implementation details instead of requirements
+- Generate tests that verify implementation details instead of requirements
 - Ship code with no observability, no resilience patterns, no runbooks
 - Produce undocumented decisions that haunt the team six months later
 
@@ -21,11 +21,9 @@ The result is fast-looking progress that collapses under real-world conditions.
 
 ## The Solution
 
-**AI-SDLC** is a Claude Code plugin (`/sdlc:*`) that enforces a rigorous, opinionated software development lifecycle. It works the way a senior engineering team works — research before spec, spec before data model, data model before architecture, architecture before code — and it doesn't let you skip steps.
+**AI-SDLC** is a Claude Code plugin that enforces a rigorous, opinionated software development lifecycle. It works the way a senior engineering team works — research before spec, spec before data model, data model before architecture, architecture before code — and it doesn't let you skip steps.
 
-Every phase produces a canonical artifact. Every artifact is verified before the next phase starts. Every requirement traces forward to a test case. Every test case maps to an automation script. Every architectural decision is recorded as an ADR with a review trigger. Nothing falls through the cracks.
-
-All commands operate in **INTERACTIVE mode** — you confirm direction before documents are written. Decisions that matter (tech stack, data model, architecture) pause for your review. Everything else runs.
+**You only type 9 commands.** The orchestrator handles everything else — 24 phases, 20+ auto-chains, and all quality gates — inline, automatically, with human review pauses only at the decisions that matter.
 
 ---
 
@@ -37,44 +35,31 @@ All commands operate in **INTERACTIVE mode** — you confirm direction before do
 /sdlc:00-start "I want to build a payment processing API"
 ```
 
-The orchestrator reads your description, classifies intent, detects complexity tier (SIMPLE / STANDARD / CRITICAL), and walks you through the full lifecycle in order:
+The orchestrator classifies intent, detects complexity (SIMPLE / STANDARD / CRITICAL), and runs the full lifecycle in order — completely inline, no additional commands needed:
 
 ```
-Research → Synthesize → Product Spec → Data Model → Tech Architecture
-→ Plan → Code → Test Cases → Test Automation → Observability → SRE → Review → Deploy
+Research → Synthesize → Product Spec ◉ → Customer Journey →
+Data Model ◉⚠️ → Tech Architecture ◉ → Plan ◉⚠️ → Code →
+Test Cases ◉⚠️ → Test Gen → Observability → SRE → Review → Verify ◉ → Deploy ◉
 ```
 
-Phase gates are enforced automatically. No coding without a plan. No plan without a data model. You confirm the decisions that matter; everything else runs.
-
-Each **checkpoint phase** (product spec, data model, architecture, plan, deploy) pauses for your review before proceeding.
+`◉` = human review pause. `⚠️` = hard gate. Everything else runs automatically.
 
 ---
 
-### 2. Add a new feature to an existing project
+### 2. Add a feature to an existing project
 
-**First time on an existing codebase — map it:**
-```
-/sdlc:map
-```
-Four parallel read-only agents scan the codebase and write a persistent index. Subsequent sessions load the index instead of re-scanning. Run once.
-
-**Then start the iteration:**
 ```
 /sdlc:iterate "add multi-currency support"
 /sdlc:iterate "loyalty points module"
 /sdlc:iterate --type enhancement "improve checkout performance"
 ```
 
-`/sdlc:iterate` determines which phases the change actually touches and runs only those — in the correct order, with impact propagation. New REQ-IDs, TC-IDs, and ADRs continue the existing sequence; they never restart from zero.
+`/sdlc:iterate` determines which phases the change touches and runs only those — in order, with impact propagation. New REQ-IDs, TC-IDs, and ADRs continue the existing sequence.
+
+**On an existing codebase:** `/sdlc:00-start` detects it automatically and maps the codebase inline before proceeding. No separate map command needed.
 
 Every iteration gets a stable ID (`ITER-001`, `ITER-002`, ...) tracked in `.claude/ai-sdlc/ITERATIONS/`.
-
-**Explore the codebase before starting:**
-```
-/sdlc:explore "where is payment processing handled?"
-/sdlc:explore "what calls OrderService?"
-/sdlc:explore "if I change the user_id field, what breaks?"
-```
 
 ---
 
@@ -82,179 +67,185 @@ Every iteration gets a stable ID (`ITER-001`, `ITER-002`, ...) tracked in `.clau
 
 ```
 /sdlc:fix "order total is wrong when a discount is applied"
-```
-
-Lighter path — no spec update unless the bug reveals a design gap:
-
-1. **Diagnose** — root cause, which data or behaviour is wrong
-2. **Check data model** — does this reveal a model gap? If yes, fix the model first
-3. **Plan** — what exactly changes, how it will be verified
-4. **Code** — implement the fix in clean architecture
-5. **Regression test** — new TC-ID added and automated
-6. **Verify** — did the fix introduce any new issues?
-
-For production incidents:
-```
 /sdlc:fix --hotfix "payment gateway returning 500"
 ```
 
+Lighter path — diagnose, plan, code, regression test, verify. No spec update unless the bug reveals a design gap.
+
 ---
 
-### 4. Modernise legacy code
+### 4. Modernise or refactor
 
 ```
-/sdlc:map          # build codebase index (if not done)
-
 /sdlc:iterate --type nfr "upgrade to Node 22 and address security advisories"
 /sdlc:iterate --type data "normalise the legacy orders schema"
+/sdlc:iterate --type enhancement "extract payment domain into bounded context"
 ```
 
-| Type flag | Use when |
-|-----------|----------|
+| Flag | Use when |
+|------|----------|
 | `--type nfr` | New SLA target, performance requirement, or security baseline |
 | `--type data` | Schema change, migration, data normalisation |
 | `--type enhancement` | Extend or improve an existing feature |
 
 ---
 
-### 5. Refactor
-
-```
-/sdlc:map
-/sdlc:iterate --type enhancement "extract payment domain into bounded context"
-/sdlc:iterate --type enhancement "move infrastructure dependencies behind port interfaces"
-/sdlc:13-review    # 12-dimension quality audit after completion
-```
-
-Refactors go through the plan phase — tasks ordered by clean architecture layer (domain → application → infrastructure → delivery), independently verifiable, dependency rule enforced throughout.
-
----
-
 ### Daily rhythm
 
 ```
-Morning:   /sdlc:sod              ← reads checkpoint, sets goal, delivers brief
-During:    /sdlc:checkpoint       ← save session state before context gets full
-Evening:   /sdlc:eod              ← clean stop, commit WIP, write tomorrow's first action
+Morning:   /sdlc:sod         ← reads checkpoint, sets goal, delivers brief
+During:    /sdlc:checkpoint  ← save state before context fills
+Evening:   /sdlc:eod         ← clean stop, commit WIP, write tomorrow's first action
 
-Status:    /sdlc:status           ← phases, active work, todos, next action
-Resume:    /sdlc:resume           ← picks up exactly where you left off after /clear
-Ship:      /sdlc:release          ← groups ITER-NNN + FIX-NNN into versioned release
+Status:    /sdlc:status      ← phases, active work, gates, stale flags
+Resume:    /sdlc:resume      ← restore exactly where you left off after /clear
 ```
+
+---
+
+## Commands (9 total)
+
+Everything else is automatic. You never need to type a phase command — the orchestrator handles the full lifecycle from `/sdlc:00-start`.
+
+| Command | What it does |
+|---------|-------------|
+| `/sdlc:00-start <idea>` | **Universal entry point** — new project, new feature, resume, status, brownfield |
+| `/sdlc:fix <bug>` | Bug fix / hotfix |
+| `/sdlc:iterate <feature>` | Scoped feature iteration |
+| `/sdlc:sod` | Start of day — reads checkpoint, plans session, delivers brief |
+| `/sdlc:eod` | End of day — commits WIP, saves checkpoint |
+| `/sdlc:checkpoint` | Save session state + update institutional memory in CLAUDE.md |
+| `/sdlc:resume` | Restore full context from `state.json` after `/clear` or auto-compact |
+| `/sdlc:status` | Live dashboard: phases, gates, progress, stale flags |
+| `/sdlc:help` | Show all commands and the auto-chain table |
 
 ---
 
 ## What You Get
 
-### Intent-driven routing — only the phases that matter
+### Intent-driven routing
 
-| Intent | Entry point | Phase path |
-|--------|------------|-----------|
+| Intent | Entry | Phase path |
+|--------|-------|-----------|
 | `new-project` | Research | Full lifecycle |
 | `new-feature` | Product spec | idea → data-model → design → plan → code → test-cases → test-gen → verify → deploy |
-| `bug-fix` | Plan | plan → code → test-cases → verify → deploy |
+| `bug-fix` | Plan | plan → code → test-cases → verify |
 | `refactor` | Synthesize | synthesize → data-model check → plan → code → test-cases → verify |
 
-```bash
+```
 /sdlc:00-start --intent bug-fix "order total wrong when discount applied"
 /sdlc:00-start --intent new-feature "add multi-currency support"
 ```
 
 ---
 
-### Hard-enforced phase gates
+### Human touchpoints — only where judgment matters
 
-11 gates that block progression when structural requirements aren't met. Cannot be implicitly skipped — bypass requires `--force` with a logged justification.
+You are paused for review at exactly these points. Everything else runs without interruption.
 
-| Gate | Upstream requires | Blocks |
-|------|-----------------|--------|
-| `idea→data-model` ⚠️ | `prd.md` ≥3 REQ-IDs, ≥3 acceptance criteria, out-of-scope section | data-model, test-cases |
-| `data-model→tech-arch` ⚠️ | Mermaid ERD, data dictionary for every entity, `id`/`created_at`/`updated_at` on every entity | tech-arch |
-| `plan→code` ⚠️ | ≥3 tasks with file changes, DoD, explicit approval | code |
-| `test-cases→test-gen` ⚠️ | ≥3 TC-IDs, coverage matrix, no duplicate IDs, pyramid shape check | test-gen |
-| `verify→deploy` | 0 open CRITICAL findings | deploy |
-| + 6 more | research, synthesize, tech-arch, observability, security gates | — |
+| Touchpoint | What you decide |
+|---|---|
+| Product spec `◉` | Confirm requirements, scope, and acceptance criteria before locking |
+| NFR review | Approve NFRs before data model begins — NFRs shape schema design |
+| Data model `◉` ⚠️ | Challenger review across 6 dimensions + approval before architecture |
+| Tech architecture `◉` | Adversarial debate across 6 dimensions + approval before planning |
+| Plan `◉` ⚠️ | Approve task breakdown before any code is written |
+| Verify `◉` | Quality gate — 0 open CRITICAL findings required before deploy |
+| Deploy `◉` | Security gate checklist + sign-off |
 
 ---
 
-### Auto-chains — quality checks that fire automatically
+### Auto-chains — the full pipeline
 
-After each phase completes, associated skills run silently and log results to `state.json`. No manual triggering required.
+After each phase completes, associated skills fire silently and log to `state.json`. The complete chain from idea to deploy-ready:
 
-| Trigger phase | Auto-chain skills |
-|---|---|
-| `idea` | `nfr-analysis` — NFRs decomposed into architectural implications before design begins |
-| `research` | `gaps` — validates gap analysis before synthesize proceeds |
-| `design` | `threat-model`, `adr-gen`, `infra-design`, `observability` (skeleton), `sre` (skeleton) |
-| `data-model` | `pii-audit` — identifies PII fields at data layer before design locks in |
-| `customer-journey` | `clarify` — validates journeys map to requirements (if open questions remain) |
-| `plan` | `roadmap` — generates phase timeline with actuals from plan |
-| `test-gen` | `test-gaps`, `traceability` |
-| `build` | `code-quality`, `audit-deps`, `pii-audit` (if observability.md exists) |
-| `deploy` | `ci-verify` (hard gate), `maintain` |
+| Trigger | Auto-chain | What it does |
+|---|---|---|
+| `idea` | `nfr-analysis` | Decomposes NFRs into architectural implications, ADR candidates, test layers |
+| `nfr-analysis` | `nfr-slo` | Derives SLO definitions + Prometheus alert skeletons from SLO candidates |
+| `research` | `gaps` | Validates gap analysis before synthesize proceeds |
+| `data-model` | `pii-audit` | Identifies PII fields before design locks in |
+| `data-model` | `migrate-scaffold` | Scaffolds forward + rollback migration stubs per entity |
+| `design` | `threat-model` | STRIDE analysis → CRITICAL/HIGH threats auto-create TC-SEC-IDs + plan tasks |
+| `design` | `adr-gen` | Validates ADR completeness, creates stubs for undocumented decisions |
+| `adr-gen` | `adr-test-coverage` | Ensures every ADR has a covering test case; creates stubs for gaps |
+| `design` | `contract-test-scaffold` | Scaffolds consumer-driven contract tests per API endpoint |
+| `design` | `infra-design` | Generates Dockerfile, Helm charts, Terraform stubs |
+| `design` | `observability` skeleton | Pre-populates observability structure so plan can scope it |
+| `design` | `sre` skeleton | Pre-populates runbook structure |
+| `customer-journey` | `clarify` | Validates journeys map to requirements (if open questions remain) |
+| `plan` | `roadmap` | Generates phase timeline with human session estimates |
+| `test-cases` | `bdd-tdd-scaffold` | Generates Gherkin feature files + failing TDD stubs per TC-ID |
+| `test-gen` | `test-gaps` | Identifies missing test coverage before build |
+| `test-gen` | `traceability` | Verifies every REQ/NFR/endpoint has a covering test |
+| `build` | `code-quality` | Static analysis, security scan, complexity check |
+| `build` | `debt-log` | CRITICAL/HIGH findings → `state.json` technicalDebts + plan tasks |
+| `build` | `audit-deps` | Dependency vulnerability audit |
+| `build` | `pii-audit` | Verifies no PII in logs (if observability.md exists) |
+| `deploy` | `ci-verify` | Hard gate — blocks deploy if CI pipeline missing |
+| `deploy` | `maintain` | Generates initial maintenance plan |
+
+---
+
+### The complete AC → TDD → verify chain
+
+The workflow the user described — and it works end-to-end automatically:
+
+```
+Write acceptance criteria (product spec)
+  ↓ nfr-analysis decomposes NFRs → SLOs auto-derived
+  ↓ [Human: NFR review before data model]
+  ↓ data-model → migration stubs scaffolded
+  ↓ design → threat model fires → CRITICAL/HIGH threats become TC-SEC + TASK-SEC
+           → every ADR gets a covering test case
+           → contract tests scaffolded per endpoint
+  ↓ test-cases → Gherkin feature files + failing TDD stubs per TC-ID
+  ↓ [Human: approve test cases]
+  ↓ code: implement against failing stubs
+       → lint + format + type-check + unit tests run after every file write
+       → TDD stub expected to fail first, passes after implementation
+  ↓ build complete → quality findings → debt register + plan tasks
+  ↓ [Human: verify gate]
+  ↓ deploy → security gate → checklist sign-off
+```
+
+---
+
+### Hard-enforced phase gates
+
+| Gate | Upstream requires | Blocks |
+|------|-----------------|--------|
+| `idea→data-model` ⚠️ | `prd.md` ≥3 REQ-IDs + acceptance criteria + out-of-scope section | data-model, test-cases |
+| `data-model→tech-arch` ⚠️ | Mermaid ERD + data dictionary + `id`/timestamps on every entity | tech-arch |
+| `tech-arch→plan` | `tech-architecture.md` + `api-spec.md` + `solution-design.md` ≥1 ADR | plan |
+| `plan→code` ⚠️ | `implementation-plan.md` ≥3 tasks + file changes + DoD + explicit approval | code |
+| `test-cases→test-gen` ⚠️ | `test-cases.md` ≥3 TC-IDs + coverage matrix + no duplicates | test-gen |
+| `observability→sre` | `observability.md` with logging spec + trace/span IDs | sre |
+| `verify→deploy` | `verification-report.md` — 0 open CRITICAL findings | deploy |
+
+All gates hard-enforced. Bypass with `--force` (reason required, logged to `state.json` gateOverrides).
 
 ---
 
 ### Self-correcting verification loop
 
-Every code task runs two verification passes before it can be marked complete:
+Every code task runs two passes before it can be marked complete:
 
-**Auto-Verify Gate** — runs tooling after implementation:
+**After every file write (PostToolUse stack):**
 
-| Check | Auto-fix on failure |
-|-------|-------------------|
-| Lint (`eslint` / `ruff` / `golangci-lint` / `rubocop`) | Auto-fix, re-run |
-| Format (`prettier` / `ruff format` / `gofmt`) | Auto-format, re-run |
-| Type check (`tsc --noEmit` / `mypy`) | Fix manually, re-run |
-| Unit tests + coverage gate | Diagnose, fix, re-run |
+| Check | On failure |
+|-------|-----------|
+| Lint (eslint / ruff / golangci-lint) | Auto-fix, re-run |
+| Format (prettier / ruff format / gofmt) | Auto-format, re-run |
+| Type check (tsc / mypy) | Fix manually, re-run |
+| Unit tests for changed file | TDD stubs fail first (expected) — fix until green |
 
-**Self-Correction Gate** — runs before marking done:
-1. Syntax check — obvious errors fixed inline
-2. Contract check — implementation matches API spec / interface
-3. Test alignment — key paths mentally traced against test cases
-4. Clean architecture — logic in the right layer
+**Self-correction gate before marking done:**
+1. Contract check — implementation matches API spec
+2. Test alignment — key paths traced against TC-IDs
+3. Clean architecture — logic in the right layer
 
-Max 2 self-correction attempts. If still failing: task marked BLOCKED and surfaced to user with specific failure description.
-
----
-
-### Data model challenger review
-
-After the data model is written but before it's finalised, an adversarial review takes an active attack posture against the design across six dimensions: missing entities, aggregate boundaries, missing invariants, primitive obsession, wrong cardinality, and naming/ubiquitous language.
-
-Findings are classified BLOCKING (must fix before proceeding) or WARN (can proceed with a recorded decision).
-
----
-
-### Architecture challenger review
-
-Before moving to planning, the architecture is reviewed from two explicit positions — a structured adversarial debate across six dimensions: over-engineering, NFR gaps, security surface, data model/API mismatch, operational survivability, and irreversible decisions.
-
-Both positions are presented side-by-side. Options: address now, or accept risk with a statement recorded in an ADR.
-
----
-
-### Requirements that actually drive the work
-
-Every requirement gets a `REQ-ID`. Every business rule gets a `BR-ID`. Every NFR gets a **numeric threshold** — not "fast" but "p95 < 200ms at 1000 RPS". These IDs flow through to test cases, automation scripts, and SLOs. When a requirement changes, the full impact is traceable.
-
----
-
-### End-to-end requirements traceability
-
-```
-REQ-001 (product spec)
-  → TC-012, TC-013 (test cases)
-    → test files (test automation)
-      → CI coverage gate
-NFR-003 (p95 < 200ms)
-  → ADR-005 (architecture decision)
-    → TC-041 (performance test)
-      → OBS-007 (SLO)
-        → sre/runbooks.md
-```
-
-Traceability matrix generated automatically after test-gen phase. No orphaned tests. No uncovered requirements.
+Max 2 attempts. Still failing → task marked BLOCKED, surfaced to user.
 
 ---
 
@@ -264,161 +255,175 @@ Traceability matrix generated automatically after test-gen phase. No orphaned te
 |-------|--------------|
 | Unit | Domain entities, value objects, use cases in isolation |
 | Integration | Repository implementations, adapter integrations |
-| Contract | API consumer-driven contracts (Pact) |
+| Contract | API consumer-driven contracts (auto-scaffolded from api-spec.md) |
 | E2E | Full user journeys via UI or API |
 | Performance | Latency and throughput against NFR thresholds |
 | Scalability | Behaviour under peak load multipliers |
 | Resilience | Circuit breaker trips, dependency failures, chaos scenarios |
 | Observability | Logs emitted, spans created, metrics incremented |
-| Security | OWASP API Top 10, auth bypass attempts, injection vectors |
+| Security | OWASP API Top 10 + TC-SEC-IDs from threat model |
 
 ---
 
 ### Security gate at deploy
 
-Before any deployment, a 4-check security gate runs:
+Before any deployment, a 4-check gate runs:
 
-1. **No hardcoded secrets** — grep for `password =`, `api_key =`, `secret =` as string literals. Hard stop if found.
-2. **Dependency audit passed** — `audit-deps` must show success in `autoChainLog`. Runs inline if not.
-3. **Threat model addressed** — high-severity findings from threat-model must have documented mitigations.
-4. **PII compliance** — no PII fields exposed in logs per pii-audit results.
+1. **No hardcoded secrets** — grep for `password =`, `api_key =`, `secret =`. Hard stop if found.
+2. **Dependency audit passed** — `audit-deps` must show success in `autoChainLog`.
+3. **Threat model addressed** — CRITICAL/HIGH threats must have documented mitigations + TC-SEC-IDs.
+4. **PII compliance** — no PII fields in logs per pii-audit results.
 
 Checks 1–2 are hard stops. Checks 3–4 warn and require explicit confirmation.
 
 ---
 
-### Institutional memory across sessions
+### Subagent roles for complex tasks
 
-`/sdlc:checkpoint` now captures session learnings and appends them to the project's `CLAUDE.md` — non-obvious patterns, user preferences, surprises, decisions made verbally. Max 5 learnings per session. Knowledge compounds across context windows.
+Four read-only subagent roles are prescribed for COMPLEX tasks or anything touching auth, payments, or PII:
+
+| Role | Tools | Purpose |
+|------|-------|---------|
+| `code-architect` | Read, Glob, Grep | Designs implementation before writing — outputs file list + signatures |
+| `code-simplifier` | Read, Glob, Grep | Reviews written code for over-engineering and unnecessary abstraction |
+| `security-reviewer` | Read, Glob, Grep | Reviews against threat model — auth checks, injection, output encoding |
+| `test-validator` | Read, Glob, Grep, Bash | Validates implementation matches TC-IDs, runs tests |
 
 ---
 
 ### Context management
 
-**End of day — `/sdlc:eod`:** reaches a clean stop, commits WIP, saves a precise snapshot, tells you exactly what to run first tomorrow.
+**PostCompact hook:** after every auto-compact, Claude automatically re-orients from `state.json` — no manual step.
 
-**After auto-compact:** a `PostCompact` hook automatically injects a resume instruction so Claude re-orients without any manual step.
+**SessionStart hook:** warns if no checkpoint exists or checkpoint is >24h old.
 
-**Session start:** a `SessionStart` hook warns if no checkpoint exists or the checkpoint is over 24h old.
-
-**Start of day — `/sdlc:sod`:** reads yesterday's checkpoint, flags stale decisions, sets a realistic goal, delivers a structured brief.
+**`/sdlc:checkpoint`:** saves session state to `state.json` + appends learnings to project `CLAUDE.md`. Knowledge compounds across sessions.
 
 ---
 
 ### Branch-scoped workspaces
 
-Every git branch has its own isolated workspace at `.claude/ai-sdlc/workflows/<branch>/`. Switching branches switches full context.
+Every git branch has its own isolated workspace. Switching branches switches full context.
 
 ```
 .claude/ai-sdlc/
   workflows/
     feature--payments/
-      state.json          ← phase status, decisions, checkpoint, autoChainLog
-      artifacts/          ← all phase outputs
+      state.json           ← phase status, decisions, checkpoint, autoChainLog, technicalDebts
+      artifacts/           ← all phase outputs (see full list below)
     main/
-  ITERATIONS/             ← ITER-001.md, ITER-002.md, ...
-```
-
----
-
-### Stale cascade
-
-When you re-run a phase, all downstream phases are automatically flagged stale. The artifact is still readable — but the dashboard warns before you proceed on a stale foundation.
-
-```
-✅ data-model   — completed 2026-03-25
-⚠️ tech-arch    — stale (data-model re-run)
-⚠️ plan         — stale (data-model re-run)
-⏳ code         — pending
+  ITERATIONS/              ← ITER-001.md, ITER-002.md, ...
 ```
 
 ---
 
 ## The Lifecycle
 
-Phases are organised in six tiers. `◉` = checkpoint phase (pauses for developer review). ⚠️ = hard gate.
+`◉` = checkpoint (human review pause). `⚠️` = hard gate. All phases run automatically via `/sdlc:00-start`.
 
 ### Tier 0 — ASSESS *(optional)*
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 0 | **Feasibility** `◉` | `/sdlc:00-start` | Go/No-Go viability: market size, technical risk, competitive moat, build vs buy |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 0 | **Feasibility** `◉` | Go/No-Go: market size, technical risk, competitive moat, build vs buy |
 
 ### Tier 1 — DISCOVER
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 1 | **Research** | `/sdlc:01-research` | Market landscape, competitive SWOT, best practices, emerging trends. Auto-chain: gaps. |
-| 2 | **Synthesize** | `/sdlc:02-synthesize` | Merge research + codebase analysis into unified strategic direction |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 1 | **Research** | Market landscape, competitive SWOT, best practices. → auto-chain: gaps |
+| 2 | **Synthesize** | Merge research + codebase into unified strategic direction |
 
 ### Tier 2 — DEFINE
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 3 | **Product Spec** `◉` | `/sdlc:03-product-spec` | REQ-IDs, BR-IDs, numeric NFR-IDs, acceptance criteria, BDD scenarios. Auto-chain: nfr-analysis. |
-| 4 | **Customer Journey** *(optional)* | `/sdlc:04-customer-journey` | Journey maps, failure paths, emotional states, screen flows. Auto-chain: clarify. |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 3 | **Product Spec** `◉` | REQ-IDs, BR-IDs, numeric NFR thresholds, acceptance criteria, BDD scenarios. → auto-chain: nfr-analysis → nfr-slo |
+| 4 | **Customer Journey** *(optional)* | Journey maps, failure paths, screen flows. → auto-chain: clarify |
 
 ### Tier 3 — BUILD
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 5 | **Data Model** `◉` ⚠️ | `/sdlc:05-data-model` | DDD canonical model — bounded contexts, aggregates, ERDs, invariants, data dictionary. Challenger review. Auto-chain: pii-audit. |
-| 6 | **Tech Architecture** `◉` | `/sdlc:06-tech-arch` | C4 diagrams, clean architecture, LLD, API spec, ADRs. Challenger review. Auto-chains: threat-model, adr-gen, infra-design, observability skeleton, sre skeleton. |
-| 7 | **Plan** `◉` ⚠️ | `/sdlc:07-plan` | Atomic tasks ordered by clean architecture layer. Auto-chain: roadmap. |
-| 8 | **Code** `◉` | `/sdlc:08-code` | Implement tasks. Auto-verify gate + self-correction gate per task. Auto-chains: code-quality, audit-deps, pii-audit. |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 5 | **Data Model** `◉` ⚠️ | DDD canonical model — bounded contexts, ERDs, invariants, data dictionary. Challenger review. → auto-chains: pii-audit, migrate-scaffold |
+| 6 | **Tech Architecture** `◉` | C4 diagrams, clean architecture, API spec, ADRs. Challenger review. → auto-chains: threat-model, adr-gen, adr-test-coverage, contract-test-scaffold, infra-design, observability skeleton, sre skeleton |
+| 7 | **Plan** `◉` ⚠️ | Atomic tasks ordered by clean architecture layer. → auto-chain: roadmap |
+| 8 | **Code** | Implement tasks. PostToolUse verification stack on every write. → auto-chains: code-quality, debt-log, audit-deps, pii-audit |
 
 ### Tier 4 — VERIFY
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 9 | **Test Cases** `◉` ⚠️ | `/sdlc:09-test-cases` | MECE Given/When/Then across 9 layers, anchored to every source document |
-| 10 | **Test Generation** | *(auto, after test-cases)* | Automation scripts — 1:1 TC-ID mapping, coverage gate, drift detection. Auto-chains: test-gaps, traceability. |
-| 11 | **Observability** | `/sdlc:11-observability` | Structured logging spec, OTel tracing, Prometheus RED metrics — OBS-IDs committed before SRE |
-| 12 | **SRE** | `/sdlc:12-sre` | SLOs, runbooks per critical failure scenario, incident response, resilience verification |
-| 13 | **Verify** `◉` | `/sdlc:verify` | Cross-cutting quality audit — 0 open CRITICAL findings required to proceed |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 9 | **Test Cases** `◉` ⚠️ | MECE Given/When/Then across 9 layers. → auto-chain: bdd-tdd-scaffold (Gherkin + TDD stubs) |
+| 10 | **Test Generation** *(auto)* | Automation scripts, 1:1 TC-ID mapping, coverage gate. → auto-chains: test-gaps, traceability |
+| 11 | **Observability** | Structured logging spec, OTel tracing, Prometheus RED metrics, OBS-IDs |
+| 12 | **SRE** | SLOs, runbooks per critical failure scenario, incident response, resilience verification |
+| 13 | **Verify** `◉` | Cross-cutting quality audit — 0 open CRITICAL findings required |
 
 ### Tier 5 — SHIP
-| # | Phase | Command | What it does |
-|---|-------|---------|-------------|
-| 14 | **Deploy** `◉` | `/sdlc:deploy` | Security gate, deployment checklist, rollback plan, handoff. Auto-chains: ci-verify (hard gate), maintain. |
+| # | Phase | What it does |
+|---|-------|-------------|
+| 14 | **Deploy** `◉` | Security gate, deployment checklist, rollback plan. → auto-chains: ci-verify (hard gate), maintain |
 
 ---
 
-## Phase Gates
+## What Gets Produced
 
-All gates are hard-enforced. Bypass with `--force` (reason required, logged to `state.json`).
+Every phase outputs to a canonical artifact. Updated in place — never `_v2` suffixes.
 
-| Gate | Upstream requires | Blocks |
-|------|-----------------|--------|
-| `research→synthesize` | `research.md` ≥2 named competitors + `gap-analysis.md` | synthesize |
-| `synthesize→idea` | `synthesis.md` with synthesis language, no `[TBD]` | idea |
-| `idea→data-model` ⚠️ | `prd.md` ≥3 REQ-IDs + ≥3 acceptance criteria + out-of-scope section | data-model, test-cases |
-| `data-model→tech-arch` ⚠️ | `data-model.md` ≥1 bounded context + Mermaid ERD + `data-dictionary.md` | tech-arch |
-| `tech-arch→plan` | `tech-architecture.md` + `api-spec.md` + `solution-design.md` ≥1 ADR | plan |
-| `plan→code` ⚠️ | `implementation-plan.md` ≥3 tasks + file changes + DoD + explicit approval | code |
-| `test-cases→test-gen` ⚠️ | `test-cases.md` ≥3 TC-IDs + coverage matrix + no duplicate IDs | test-gen |
-| `observability→sre` | `observability.md` with logging spec + `trace_id`/`span_id` mandatory | sre |
-| `verify→deploy` | `verification-report.md` 0 open CRITICAL findings | deploy |
+```
+.claude/ai-sdlc/workflows/<branch>/
+  state.json                      ← phase status, checkpoint, decisions, autoChainLog, technicalDebts
+  artifacts/
+    feasibility/                  feasibility.md
+    research/                     research.md, gap-analysis.md
+    nfr-analysis/                 nfr-analysis.md, slo-definitions.md
+    voc/                          voc.md
+    synthesize/                   synthesis.md
+    idea/                         prd.md
+    personas/                     personas.md
+    journey/                      customer-journey.md
+    business-process/             business-process.md
+    prototype/                    prototype-spec.md
+    data-model/                   data-model.md, data-dictionary.md ⚠️
+                                  migrations/001_create_*.sql, ...
+    design/                       tech-architecture.md, lld.md, api-spec.md,
+                                  solution-design.md (ADRs), threat-model.md,
+                                  contract-tests.md, adr-test-coverage.md,
+                                  adr-validation-report.md
+    infra-design/                 Dockerfile, helm/, terraform/
+    fe-setup/                     design-tokens.md, component-library.md, screen-spec.md
+    plan/                         implementation-plan.md
+    code-quality/                 quality-report.md
+    debt/                         technical-debt.md
+    test-cases/                   test-cases.md, bdd-features.md, tdd-stubs.md
+    test-gen/                     test-automation.md, test files
+    observability/                observability.md
+    sre/                          runbooks.md
+    verify/                       verification-report.md
+    uat/                          uat-plan.md
+    deploy/                       deployment-checklist.md
+    maintain/                     maintenance-plan.md
+    retro/                        retro.md
+.claude/ai-sdlc/ITERATIONS/       ITER-001.md, ITER-002.md, ...
+```
 
 ---
 
 ## Installation
 
-### New machine setup (30 seconds)
+### New machine (30 seconds)
 
 ```bash
 git clone https://github.com/seanieb9/ai-sdlc.git ~/sdlc
 cd ~/sdlc && bash install.sh
 ```
 
-`install.sh` merges two Claude Code hooks into `~/.claude/settings.json` without touching any existing settings:
+`install.sh` merges two Claude Code hooks into `~/.claude/settings.json`:
 - **SessionStart** — warns if no checkpoint or checkpoint is >24h old
-- **PostCompact** — auto-injects `/sdlc:resume` after every context compaction
+- **PostCompact** — auto-injects resume instruction after every context compaction
 
 Safe to re-run — skips hooks already installed.
 
-### Install the commands
+### Install commands and workflows
 
 ```bash
-# Install commands globally (available in all projects)
 cp -r ~/sdlc/commands/sdlc ~/.claude/commands/
-
-# Install workflow engine, references, and templates
 cp -r ~/sdlc/workflows ~/sdlc/references ~/sdlc/templates ~/.claude/sdlc/
 ```
 
@@ -441,98 +446,4 @@ quality:
   coverage:
     overall: 80
     businessLogic: 90
-```
-
----
-
-## Commands (28 total)
-
-### Session
-| Command | What it does |
-|---------|-------------|
-| `/sdlc:00-start [idea]` | **Universal entry point** — new project, status check, daily brief, resume |
-| `/sdlc:sod` | Start of day — reads checkpoint, sets goal, delivers brief |
-| `/sdlc:eod` | End of day — clean stop, commit WIP, save checkpoint |
-| `/sdlc:checkpoint` | Save session state to `state.json` (checkpoint field) + update institutional memory in CLAUDE.md |
-| `/sdlc:resume` | Restore full context from `state.json` checkpoint after `/clear` or auto-compact |
-| `/sdlc:status` | Live dashboard: phases, gates, progress, stale flags |
-| `/sdlc:help` | Show all commands |
-| `/sdlc:verify` | Quality gate — run after each phase |
-
-### Lifecycle phases
-| Command | Phase |
-|---------|-------|
-| `/sdlc:01-research` | Market, competitive & gap research |
-| `/sdlc:02-synthesize` | Combine research + codebase |
-| `/sdlc:03-product-spec` | Requirements, BDD, business rules |
-| `/sdlc:04-customer-journey` | Journey maps & screen flows |
-| `/sdlc:05-data-model` ⚠️ | Canonical data model — must run before design |
-| `/sdlc:06-tech-arch` | Clean arch, C4 model, API specs |
-| `/sdlc:07-plan` | Phased execution plan + TODO list |
-| `/sdlc:08-code` | Implement tasks |
-| `/sdlc:09-test-cases` | MECE GWT test cases |
-| `/sdlc:11-observability` | Logging, tracing, metrics |
-| `/sdlc:12-sre` | SLOs, runbooks, incident response |
-| `/sdlc:13-review` | Cross-cutting quality review |
-
-### Iteration & release
-| Command | What it does |
-|---------|-------------|
-| `/sdlc:iterate <feature>` | Scoped feature iteration |
-| `/sdlc:fix <bug>` | Bug fix / hotfix |
-| `/sdlc:release [version]` | Group iterations into a versioned release |
-| `/sdlc:deploy` | Deploy with security gate, checklist, rollback plan |
-
-### Brownfield
-| Command | What it does |
-|---------|-------------|
-| `/sdlc:map` | Map codebase → persistent index |
-| `/sdlc:explore <question>` | Answer codebase questions |
-
-### Project management
-| Command | What it does |
-|---------|-------------|
-| `/sdlc:roadmap` | Human session plan for the project |
-| `/sdlc:decide` | Record a decision into `state.json` decisions array with downstream impact analysis |
-| `/sdlc:docs` | Audit & organise SDLC documents |
-
-> All specialist workflows (threat-model, pii-audit, test-gaps, traceability, retro, prr, etc.) run automatically via auto-chains — no manual invocation needed.
-
----
-
-## What Gets Produced
-
-Every phase outputs to a canonical artifact. Updated in place — never versioned with `_v2` suffixes.
-
-```
-.claude/ai-sdlc/
-  workflows/
-    <branch>/
-      state.json                    ← phase status, checkpoint, autoChainLog, decisions
-      artifacts/
-        feasibility/                feasibility.md
-        research/                   research.md, gap-analysis.md
-        voc/                        voc.md
-        synthesize/                 synthesis.md
-        idea/                       prd.md
-        personas/                   personas.md
-        journey/                    customer-journey.md
-        business-process/           business-process.md
-        prototype/                  prototype-spec.md
-        data-model/                 data-model.md, data-dictionary.md  ⚠️
-        tech-arch/                  tech-architecture.md, lld.md, api-spec.md, solution-design.md
-        threat-model/               threat-model.md
-        infra-design/               Dockerfile, helm/, terraform/
-        fe-setup/                   design-tokens.md, component-library.md, screen-spec.md
-        plan/                       implementation-plan.md
-        test-cases/                 test-cases.md
-        test-gen/                   test-automation.md, test files
-        observability/              observability.md
-        sre/                        runbooks.md
-        verify/                     verification-report.md
-        uat/                        uat-plan.md
-        deploy/                     deployment-checklist.md
-        maintain/                   maintenance-plan.md
-        retro/                      retro.md
-  ITERATIONS/                       ITER-001.md, ITER-002.md, ...
 ```
