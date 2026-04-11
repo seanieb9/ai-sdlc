@@ -219,5 +219,5 @@ Files written:
 
 Recommended Next:
   ask Claude to run the fe-screen workflow [next screen from SCREEN_SPEC.md]
-  OR /sdlc:09-test-cases after all screens complete
+  OR the test cases phase (tell Claude to proceed) after all screens complete
 ```

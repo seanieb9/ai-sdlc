@@ -236,5 +236,5 @@ Files:
 • $ARTIFACTS/research/voc.md (new)
 • $ARTIFACTS/research/gap-analysis.md (enriched with primary evidence)
 
-Recommended Next: /sdlc:02-synthesize or the personas workflow
+Recommended Next: the synthesize phase (tell Claude to proceed) or the personas workflow
 ```

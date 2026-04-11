@@ -463,7 +463,7 @@ Entity stubs created:
   • {list entities}
 
 Next steps:
-  1. Implement domain entities: /sdlc:08-code --layer domain
+  1. Implement domain entities: the code phase (tell Claude to proceed) --layer domain
   2. Configure secrets in your secrets manager
   3. Create GitHub environments (staging, production) with protection rules
   4. Set KUBECONFIG_STAGING and KUBECONFIG_PRODUCTION secrets in GitHub

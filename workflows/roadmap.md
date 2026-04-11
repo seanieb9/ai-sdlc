@@ -148,7 +148,7 @@ AI phases:   Phase 8 (Code) and Phase 10 (Test Automation) run autonomously
 
 Next sync:   S1 after Phase 2 (Synthesize)
 
-Note: Update the roadmap as phases complete with /sdlc:roadmap --update
+Note: Update the roadmap as phases complete with the roadmap (tell Claude to update it)
 ```
 
 ---

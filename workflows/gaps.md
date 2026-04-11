@@ -30,7 +30,7 @@ PREREQUISITE NOT MET: Codebase map not found.
 
 ask Claude to run the gaps workflow relies on the codebase map for accurate analysis.
 
-STOP: Run /sdlc:map first, then re-run ask Claude to run the gaps workflow.
+STOP: Run /sdlc:00-start (handles brownfield mapping automatically) first, then re-run ask Claude to run the gaps workflow.
 ```
 **STOP execution.**
 

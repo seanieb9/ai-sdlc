@@ -332,5 +332,5 @@ Files Updated:
 
 Recommended Next:
 • Deep customer data → the voc workflow
-• Or proceed to → /sdlc:02-synthesize
+• Or proceed to → the synthesize phase (tell Claude to proceed)
 ```

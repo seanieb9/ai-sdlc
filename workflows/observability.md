@@ -365,5 +365,5 @@ Files:
 • $ARTIFACTS/observability/observability.md
 • [implementation files]
 
-Recommended Next: /sdlc:12-sre
+Recommended Next: the SRE phase (tell Claude to proceed)
 ```

@@ -389,5 +389,5 @@ Auto-chain suggestions:
 ```
 Recommended next steps:
   → Post-deployment maintenance planning: ask Claude to run the maintain workflow
-  → (If generating release notes separately):  /sdlc:release
+  → (If generating release notes separately):  tell Claude to create a release
 ```

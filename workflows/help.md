@@ -6,74 +6,71 @@ Display the SDLC system guide. If a specific command was provided in $ARGUMENTS,
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║           SDLC SYSTEM — Software Development Lifecycle           ║
+║           AI-SDLC — Software Development Lifecycle              ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  SESSION                                                         ║
-║  1.  /sdlc:00-start <idea>   Entry point — always start here     ║
-║  2.  /sdlc:sod               Start of day — orient & plan        ║
-║  3.  /sdlc:eod               End of day — commit & checkpoint    ║
-║  4.  /sdlc:checkpoint        Save session state                  ║
-║  5.  /sdlc:resume            Restore after /clear or compact     ║
-║  6.  /sdlc:status            Current state dashboard             ║
-║  7.  /sdlc:help              Show this guide                     ║
-║  8.  /sdlc:verify            Quality gate — run after each phase ║
+║  COMMANDS (9 total — everything else is automatic)              ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  LIFECYCLE PHASES (run in order)                                 ║
-║  9.  /sdlc:01-research       Market, competitive & gap research  ║
-║  10. /sdlc:02-synthesize     Combine research + codebase         ║
-║  11. /sdlc:03-product-spec   Requirements, BDD, business rules   ║
-║  12. /sdlc:04-customer-journey  Journey maps & screen flows      ║
-║  13. /sdlc:05-data-model  ⚠️  Canonical data model — must go first║
-║  14. /sdlc:06-tech-arch      Clean arch, C4 model, API specs     ║
-║  15. /sdlc:07-plan           Phased execution plan + TODO list   ║
-║  16. /sdlc:08-code           Implement tasks (requires plan)     ║
-║  17. /sdlc:09-test-cases     MECE GWT test cases                 ║
-║  18. /sdlc:11-observability  Logging, tracing, metrics           ║
-║  19. /sdlc:12-sre            SLOs, runbooks, incident response   ║
-║  20. /sdlc:13-review         Cross-cutting quality review        ║
+║  START & NAVIGATE                                                ║
+║  /sdlc:00-start <idea>  Universal entry point. Handles:         ║
+║                         • New project → full lifecycle          ║
+║                         • Existing codebase → maps + continues  ║
+║                         • "resume" → picks up from checkpoint   ║
+║                         • "status" → shows current phase        ║
+║                                                                  ║
+║  /sdlc:fix <bug>        Bug fix — diagnose, plan, code, test    ║
+║  /sdlc:iterate <feat>   Add/change a feature (scoped lifecycle) ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  ITERATION & RELEASE                                             ║
-║  21. /sdlc:iterate           Scoped feature iteration            ║
-║  22. /sdlc:fix               Bug fix / hotfix (lightweight)      ║
-║  23. /sdlc:release           Group iterations into a release     ║
-║  24. /sdlc:deploy            Deploy to environment               ║
+║  DAILY RHYTHM                                                    ║
+║  /sdlc:sod              Start of day — reads checkpoint, plans  ║
+║  /sdlc:eod              End of day — commits WIP, saves state   ║
+║  /sdlc:checkpoint       Save session state to state.json        ║
+║  /sdlc:resume           Restore after /clear or auto-compact    ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  BROWNFIELD (existing codebases)                                 ║
-║  25. /sdlc:map               Map codebase → CODEBASE_MAP.md      ║
-║  26. /sdlc:explore <q>       Answer codebase questions           ║
-╠══════════════════════════════════════════════════════════════════╣
-║  PROJECT MANAGEMENT                                              ║
-║  27. /sdlc:roadmap           Human session plan for the project  ║
-║  28. /sdlc:decide            Record an architectural decision    ║
-║  29. /sdlc:docs              Audit & organise SDLC documents     ║
+║  STATUS                                                          ║
+║  /sdlc:status           Phase progress, gates, active tasks     ║
+║  /sdlc:help             This guide                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-PHASE GATES (enforced by orchestrator):
-  • DATA-MODEL  must exist before: tech-arch, plan, code
-  • PLAN        must exist before: code
-  • PRODUCT-SPEC must exist before: data-model, test-cases
-  • TEST-CASES  must exist before: test-automation
+LIFECYCLE (fully automatic via /sdlc:00-start):
+  Research → Synthesize → Product Spec ◉ → Journey →
+  Data Model ◉⚠️ → Tech Arch ◉ → Plan ◉⚠️ → Code →
+  Test Cases ◉⚠️ → Test Gen → Observability → SRE →
+  Review → Verify ◉ → Deploy ◉
+  ◉ = human review pause   ⚠️ = hard gate
 
-DOCUMENT REGISTRY:
-  docs/research/      RESEARCH.md, GAP_ANALYSIS.md, SYNTHESIS.md, VOC.md
-  docs/product/       PERSONAS.md, PRODUCT_SPEC.md, CUSTOMER_JOURNEY.md, BUSINESS_PROCESS.md
-  docs/data/          DATA_MODEL.md, DATA_DICTIONARY.md
-  docs/architecture/  TECH_ARCHITECTURE.md, API_SPEC.md, SOLUTION_DESIGN.md
-  docs/qa/            TEST_CASES.md, TEST_AUTOMATION.md
-  docs/sre/           OBSERVABILITY.md, RUNBOOKS.md, SLO.md
-  docs/review/        REVIEW_REPORT.md
-  .claude/ai-sdlc/    state.json (checkpoint, todos, decisions, progress)
+AUTO-CHAINS (fire silently after each phase):
+  idea        → nfr-analysis → nfr-slo (SLO derivation)
+  data-model  → pii-audit, migrate-scaffold
+  design      → threat-model → security TC-IDs + tasks
+               adr-gen → adr-test-coverage
+               infra-design, contract-test-scaffold (if API spec)
+               observability skeleton, sre skeleton
+  test-cases  → bdd-tdd-scaffold (Gherkin + TDD stubs)
+  test-gen    → test-gaps, traceability
+  build       → code-quality → debt-log, audit-deps, pii-audit
+  plan        → roadmap
+  deploy      → ci-verify (hard gate), maintain
 
-QUICK START:
-  New project:   /sdlc:00-start "describe your idea here"
-  Brownfield:    /sdlc:map  →  /sdlc:00-start
-  Resume work:   /sdlc:resume
-  Daily start:   /sdlc:sod
+HUMAN TOUCHPOINTS (only these):
+  • Product spec — confirm requirements
+  • NFR review — approve before data model
+  • Data model — challenger review + approval
+  • Tech arch — adversarial debate + approval
+  • Plan — approve before coding
+  • Verify — quality gate before deploy
+  • Deploy — checklist sign-off
+
+BROWNFIELD QUICK START:
+  /sdlc:00-start "describe what you want to do"
+  (00-start detects existing codebase and maps it automatically)
+
+RESUME AFTER /clear:
+  /sdlc:resume   or   /sdlc:00-start "resume"
 ```
 
 ## If $ARGUMENTS has a command name — Show Command Detail:
 
-Read the command file from `commands/sdlc/[command-name].md` and show:
+Look up the workflow for the command described and show:
 - What the command does
 - When to use it
 - What it requires (inputs, predecessor phases)

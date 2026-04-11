@@ -198,7 +198,7 @@ For any stale phases, output a warning:
 ```
 WARNING: The following phases may be stale due to this iteration's changes:
   - <phase>: <reason>
-Run /sdlc:verify --phase <phase> to confirm or /sdlc:<phase> to refresh.
+Run /sdlc:00-start (verify is automatic, or say "verify phase N") <phase> to confirm or /sdlc:<phase> to refresh.
 ```
 
 ---
@@ -232,6 +232,6 @@ Stale phases: <list or "none">
 
 Manifest: .claude/ai-sdlc/ITERATIONS/<ITER-NNN>.md
 
-Next: Run /sdlc:verify to confirm all artifacts are consistent.
-      Run /sdlc:release when ready to version this and other completed iterations.
+Next: Run tell Claude to verify to confirm all artifacts are consistent.
+      Run tell Claude to create a release when ready to version this and other completed iterations.
 ```

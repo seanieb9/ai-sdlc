@@ -77,8 +77,8 @@ Read ALL of the following in parallel — do not skip any source:
 - `$ARTIFACTS/design/solution-design.md` — ADRs: every architectural decision is an implementation commitment that needs a test
 
 **Phase-dependent sources (read if available — skip the corresponding test layer if not yet created):**
-- `$ARTIFACTS/observability/observability.md` — every structured log, metric, and span commitment needs a test asserting it's emitted. **Created in Phase 11, which runs after Phase 8.** If not yet created: skip the Observability test layer (mark as DEFERRED in coverage matrix), then re-run `/sdlc:09-test-cases` after Phase 11 completes.
-- `$ARTIFACTS/sre/runbooks.md` — resilience behaviours documented here need corresponding tests. **Created in Phase 12, which runs after Phase 8.** If not yet created: skip the Resilience test layer detail (mark as DEFERRED), then re-run `/sdlc:09-test-cases` after Phase 12 completes.
+- `$ARTIFACTS/observability/observability.md` — every structured log, metric, and span commitment needs a test asserting it's emitted. **Created in Phase 11, which runs after Phase 8.** If not yet created: skip the Observability test layer (mark as DEFERRED in coverage matrix), then re-run the test cases phase after Phase 11 completes.
+- `$ARTIFACTS/sre/runbooks.md` — resilience behaviours documented here need corresponding tests. **Created in Phase 12, which runs after Phase 8.** If not yet created: skip the Resilience test layer detail (mark as DEFERRED), then re-run the test cases phase after Phase 12 completes.
 
 > **Two-pass pattern:** It is normal and correct to run Phase 9 twice — once after Phase 8 (covering Unit, Integration, Contract, E2E, Performance, Security) and once after Phases 11 and 12 (adding Observability and Resilience layers). The Phase 9 completion gate requires all 8 layers; the first pass covers 6.
 
@@ -765,5 +765,5 @@ MECE overlaps: [N] (all resolved)
 
 File: $ARTIFACTS/test-cases/test-cases.md
 
-Recommended Next: /sdlc:verify --phase 9   ← run this before proceeding
+Recommended Next: /sdlc:00-start (verify is automatic, or say "verify phase N") 9   ← run this before proceeding
 ```

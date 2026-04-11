@@ -25,7 +25,7 @@ If missing:
 WARNING: Codebase map not found at .claude/ai-sdlc/codebase/architecture.md
 
 The assessment will proceed but with reduced accuracy. For a more comprehensive assessment:
-  1. Run /sdlc:map first to build the codebase map
+  1. Run /sdlc:00-start (handles brownfield mapping automatically) first to build the codebase map
   2. Then re-run ask Claude to re-run the assess workflow
 
 Continuing with direct codebase inspection...

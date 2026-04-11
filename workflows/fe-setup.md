@@ -247,7 +247,7 @@ Files:
 - docs/frontend/COMPONENT_LIBRARY.md
 - docs/frontend/SCREEN_SPEC.md
 
-GATE UNLOCKED: /sdlc:07-plan can now include FE tasks.
-Recommended Next: /sdlc:07-plan
+GATE UNLOCKED: the plan phase (tell Claude to proceed) can now include FE tasks.
+Recommended Next: the plan phase (tell Claude to proceed)
   Then:           ask Claude to run the fe-screen workflow <screen-name> for each screen during Phase 8
 ```

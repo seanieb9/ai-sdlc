@@ -26,7 +26,7 @@ Read in parallel (ALL required):
 - `$ARTIFACTS/design/solution-design.md` — ADRs: auth strategy, DB choice, patterns
 - `$ARTIFACTS/idea/prd.md` — requirements and acceptance criteria to fulfill
 
-If implementation-plan.md missing: STOP. Run `/sdlc:07-plan` first.
+If implementation-plan.md missing: STOP. Run the plan phase first.
 If no tasks in $STATE or all complete: STOP. No tasks to work on.
 
 **Phase 8 scope boundary:**
@@ -1717,7 +1717,7 @@ For each command below:
    Still failing: [what remains broken]
 
    Options:
-     a) Fix [specific thing] and re-run /sdlc:08-code --task [TASK-ID]
+     a) Fix [specific thing] and re-run the code phase (tell Claude to proceed) --task [TASK-ID]
      b) Mark as known issue and track as TD-NNN (provide justification)
    ```
 
@@ -1937,8 +1937,8 @@ Update ROADMAP.md Phase Log:
   Phase 8 → ✅ Complete | [date]
 
 Recommended next:
-  /sdlc:verify --phase 8    ← run the quality gate before proceeding
-  /sdlc:09-test-cases          ← after verify passes
+  /sdlc:00-start (verify is automatic, or say "verify phase N") 8    ← run the quality gate before proceeding
+  the test cases phase (tell Claude to proceed)          ← after verify passes
 ```
 
 Also update `.sdlc/ROADMAP.md` Phase Log row for Phase 8 to `✅ Complete | [date]` if ROADMAP.md exists.
@@ -1960,7 +1960,7 @@ Done criteria:
   ✅ [criterion 2]
 
 Next task: TASK-[NNN+1]: [description]
-Run: /sdlc:08-code --task TASK-[NNN+1]
+Run: the code phase (tell Claude to proceed) --task TASK-[NNN+1]
 ```
 
 ---

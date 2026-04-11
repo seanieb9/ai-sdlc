@@ -85,7 +85,7 @@ Output:
 No progress.json or implementation-plan.md found for branch $BRANCH.
 
 To get started:
-  1. Run /sdlc:07-plan to generate an implementation plan
+  1. Run the plan phase (tell Claude to proceed) to generate an implementation plan
   2. Then run ask Claude to run the progress workflow again to see the task dashboard
 ```
 STOP.

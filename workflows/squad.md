@@ -104,7 +104,7 @@ List any branch where `currentPhase` is `review`, `verify`, or `uat`:
 ```
 NEEDS REVIEW:
   * <branch> — <projectName> is waiting in <currentPhase> phase (<N> days)
-    To review: /sdlc:verify or /sdlc:13-review on branch <rawBranch>
+    To review: tell Claude to verify or the review phase (tell Claude to proceed) on branch <rawBranch>
 ```
 
 ### Stale Phases
@@ -113,7 +113,7 @@ List branches where `stalePhasesCount > 0`:
 ```
 STALE ARTIFACTS:
   ! <branch> — <N> phase(s) marked stale (data-model, design)
-    To refresh: git checkout <rawBranch> && /sdlc:verify --all
+    To refresh: git checkout <rawBranch> && /sdlc:00-start (say "verify all phases")
 ```
 
 ### Blocked Branches
@@ -161,7 +161,7 @@ QUICK COMMANDS:
     git checkout <branch> && /sdlc:status
 
   Review artifacts:
-    git checkout <branch> && /sdlc:verify
+    git checkout <branch> && tell Claude to verify
 
   Start new workflow:
     git checkout -b <new-branch> && /sdlc:00-start <idea>

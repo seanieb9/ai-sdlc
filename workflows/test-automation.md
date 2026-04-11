@@ -27,7 +27,7 @@ Read in parallel — ALL required:
 - `$ARTIFACTS/design/tech-architecture.md` — for resilience pattern config (timeout values, circuit breaker thresholds)
 - Existing test files (Glob `**/*.test.*`, `**/*.spec.*`, `**/test_*.py`, etc.)
 
-If test-cases.md missing: STOP. Run `/sdlc:09-test-cases` first.
+If test-cases.md missing: STOP. Run the test cases phase first.
 If test-cases.md has untreated staleness findings: STOP. Resolve staleness before automating.
 
 ---
@@ -846,6 +846,6 @@ Files:
 • $ARTIFACTS/test-gen/test-automation.md
 • [test files created/updated]
 
-Recommended Next: /sdlc:verify --phase 10   ← run this before proceeding
-Then:           /sdlc:11-observability
+Recommended Next: /sdlc:00-start (verify is automatic, or say "verify phase N") 10   ← run this before proceeding
+Then:           the observability phase (tell Claude to proceed)
 ```

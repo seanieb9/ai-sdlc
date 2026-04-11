@@ -426,36 +426,36 @@ Running Phase: <PHASE-NAME>
 
 ### 7e. Execute Phase
 
-Phases are executed by directing the user to run the corresponding command or by invoking the workflow directly:
+All phases are executed inline by reading and executing the corresponding workflow file. There are no separate slash commands for individual phases — the orchestrator handles everything through `/sdlc:00-start`.
 
-| Phase | Invocation |
+| Phase | Workflow file |
 |---|---|
 | feasibility | inline `workflows/feasibility.md` |
-| research | `/sdlc:01-research` |
+| research | inline `workflows/research.md` |
 | voc | inline `workflows/voc.md` |
-| synthesize | `/sdlc:02-synthesize` |
-| idea | `/sdlc:03-product-spec` |
+| synthesize | inline `workflows/synthesize.md` |
+| idea | inline `workflows/product-spec.md` |
 | personas | inline `workflows/personas.md` |
-| journey | `/sdlc:04-customer-journey` |
+| journey | inline `workflows/customer-journey.md` |
 | business-process | inline `workflows/business-process.md` |
 | prototype | inline `workflows/prototype.md` |
-| data-model | `/sdlc:05-data-model` |
-| design | `/sdlc:06-tech-arch` |
+| data-model | inline `workflows/data-model.md` |
+| design | inline `workflows/tech-arch.md` |
 | fe-setup | inline `workflows/fe-setup.md` |
-| plan | `/sdlc:07-plan` |
-| build | `/sdlc:08-code` |
-| test-cases | `/sdlc:09-test-cases` |
+| plan | inline `workflows/plan.md` |
+| build | inline `workflows/code.md` |
+| test-cases | inline `workflows/test-cases.md` |
 | test-gen | inline `workflows/test-automation.md` |
-| observability | `/sdlc:11-observability` |
-| sre | `/sdlc:12-sre` |
-| verify | `/sdlc:verify` |
+| observability | inline `workflows/observability.md` |
+| sre | inline `workflows/sre.md` |
+| verify | inline `workflows/verify.md` |
 | uat | inline `workflows/uat.md` |
 | prr | inline `workflows/prr.md` |
-| deploy | `/sdlc:deploy` |
+| deploy | inline `workflows/deploy.md` |
 | maintain | inline `workflows/maintain.md` |
 | retro | inline `workflows/retro.md` |
 
-If `--auto` flag is active, invoke the phase workflow inline without pausing. Otherwise, instruct the user to run the command and wait for them to confirm completion.
+Execute the workflow inline — read the file and follow its instructions. The interactive pause (Step 7h) happens at checkpoint phases regardless.
 
 **Build phase note:** When the `build` phase starts, the PostToolUse verification stack activates automatically — see code.md Step 2.5 and the Verification Stack section for configuration. This stack runs after every file write during the build phase in this order: lint → format → type-check → unit tests for the changed file. Any failure stops further writes until resolved.
 
@@ -531,7 +531,7 @@ Quality gate for [<NEXT-PHASE>]: PASS | FAIL
 
 → "continue"     — proceed to [<next phase>]
 → "new session"  — save checkpoint and pause here
-→ "deep review"  — run full /sdlc:verify on this phase
+→ "deep review"  — run full verify on this phase (inline workflows/verify.md)
 → Give feedback  — revise this phase before proceeding
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

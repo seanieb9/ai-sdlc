@@ -291,7 +291,7 @@ Adjust patterns based on actual framework, language, and conventions found.
 ```markdown
 # Codebase Architecture Map
 *Generated: [date] | Refreshed: [date]*
-*Regenerate: /sdlc:map --refresh | Module update: /sdlc:map --module <path>*
+*Regenerate: /sdlc:00-start --brownfield (re-maps the codebase) | Module update: tell Claude to remap the module <path>*
 
 ---
 
@@ -480,6 +480,6 @@ Search recipes: [N]
 
 File: .claude/ai-sdlc/codebase/architecture.md
 
-To query the map: /sdlc:explore "<question>"
-To re-map a module: /sdlc:map --module <path>
+To query the map: ask Claude your codebase question directly "<question>"
+To re-map a module: tell Claude to remap the module <path>
 ```

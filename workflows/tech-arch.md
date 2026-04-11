@@ -773,6 +773,6 @@ Files Updated:
 • $ARTIFACTS/design/api-spec.md
 • $ARTIFACTS/design/solution-design.md
 
-Recommended Next: /sdlc:verify --phase 6   ← run this before proceeding
-Then:           /sdlc:07-plan
+Recommended Next: /sdlc:00-start (verify is automatic, or say "verify phase N") 6   ← run this before proceeding
+Then:           the plan phase (tell Claude to proceed)
 ```

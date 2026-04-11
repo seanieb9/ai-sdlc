@@ -23,7 +23,7 @@ Read in parallel:
 - `$STATE` (project context — read and parse JSON)
 - `.claude/ai-sdlc/codebase/architecture.md` (if exists — brownfield codebase index)
 
-If neither research doc exists: warn the user that research should come first, offer to run `/sdlc:01-research` first.
+If neither research doc exists: warn the user that research should come first, offer to run the research phase first.
 
 ## Step 2: Codebase Analysis
 
@@ -38,7 +38,7 @@ Use the map as the primary source of codebase knowledge. Extract from it:
 - Known tech debt and hotspot files
 - Cross-cutting concerns (auth, logging, error handling)
 
-Avoid re-scanning the entire codebase. Use `/sdlc:explore` queries for specific detail gaps not covered by the map. Only read individual files when the map points to a specific file that needs deeper analysis.
+Avoid re-scanning the entire codebase. Use ask Claude your codebase question directly queries for specific detail gaps not covered by the map. Only read individual files when the map points to a specific file that needs deeper analysis.
 
 **If no architecture.md exists (greenfield or map not yet run):**
 Perform a targeted scan:
@@ -51,7 +51,7 @@ Perform a targeted scan:
 - Note existing test patterns and coverage
 - Identify configuration and environment patterns
 
-Recommend running `/sdlc:map` after synthesis to build a persistent map at `.claude/ai-sdlc/codebase/architecture.md` for future sessions.
+Recommend running /sdlc:00-start (handles brownfield mapping automatically) after synthesis to build a persistent map at `.claude/ai-sdlc/codebase/architecture.md` for future sessions.
 
 **What to capture (regardless of source):**
 - Existing capabilities that overlap with research findings (reuse opportunities)
@@ -130,5 +130,5 @@ Recommended Approach: [1-line summary]
 
 File: $ARTIFACTS/research/synthesis.md
 
-Recommended Next: /sdlc:03-product-spec
+Recommended Next: the product spec phase (tell Claude to proceed)
 ```

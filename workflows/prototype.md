@@ -22,9 +22,9 @@ Then use `$WORKSPACE`, `$STATE`, `$ARTIFACTS` throughout.
 
 ## Step 1: Gate Check
 
-**HARD gate:** `$ARTIFACTS/idea/prd.md` must exist. If missing: STOP. Tell the user to complete the idea phase first (`/sdlc:03-product-spec` or `/sdlc:03-product-spec`).
+**HARD gate:** `$ARTIFACTS/idea/prd.md` must exist. If missing: STOP. Tell the user to complete the idea phase first (the product spec phase or the product spec phase).
 
-**Soft check:** `$ARTIFACTS/journey/customer-journey.md` is preferred. If missing: warn the user that journey mapping enriches the screen inventory, recommend running `/sdlc:04-customer-journey` first, but allow continuation.
+**Soft check:** `$ARTIFACTS/journey/customer-journey.md` is preferred. If missing: warn the user that journey mapping enriches the screen inventory, recommend running the customer journey phase first, but allow continuation.
 
 Read in parallel:
 - `$ARTIFACTS/idea/prd.md` — user flows, acceptance criteria, feature description
@@ -249,7 +249,7 @@ Please review the wireframes and open UX questions above.
 Resolve open questions before the data model is designed — screen flows directly influence schema decisions.
 
 Ready to continue?
-  → Proceed to data model:  /sdlc:05-data-model
+  → Proceed to data model:  the data model phase (tell Claude to proceed) ⚠️
   → Revise a screen first:  describe which screen to update
 ```
 

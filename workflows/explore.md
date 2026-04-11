@@ -10,7 +10,7 @@ Strategy: **read the map first, grep second, read files last and minimally.** Th
 
 Read `.claude/ai-sdlc/codebase/architecture.md` in full.
 
-If it does not exist: stop and tell the user to run `/sdlc:map` first. The explore command requires the map.
+If it does not exist: stop and tell the user to run /sdlc:00-start (handles brownfield mapping automatically) first. The explore command requires the map.
 
 From the map, extract:
 - Architecture pattern and layer locations
@@ -109,9 +109,9 @@ After answering, offer the most likely follow-up:
 Answer: [precise answer with file:line refs]
 
 Related:
-• To see callers: /sdlc:explore "what calls [X]"
+• To see callers: ask Claude your codebase question directly "what calls [X]"
 • To see full context: read [file]:[line range]
-• To understand dependencies: /sdlc:explore "what does [X] depend on"
+• To understand dependencies: ask Claude your codebase question directly "what does [X] depend on"
 ```
 
 ---

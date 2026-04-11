@@ -262,6 +262,6 @@ Decision ID: DEC-NNN added to state.json
 
 Next:
   Share the ADR with your team for async review.
-  Run /sdlc:06-tech-arch to incorporate this decision into the full architecture.
+  Run the tech architecture phase (tell Claude to proceed) to incorporate this decision into the full architecture.
   Set a calendar reminder for the review trigger: <trigger>
 ```

@@ -26,7 +26,7 @@ Read in parallel:
 - `$ARTIFACTS/business-process/business-process.md` — existing document (if any — update, never recreate)
 - `$STATE` — project context (read and parse JSON)
 
-If customer-journey.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest `/sdlc:04-customer-journey`.
+If customer-journey.md does not exist: STOP. Inform the user that customer journeys must be mapped first. Suggest the customer journey phase.
 
 ---
 
@@ -231,7 +231,7 @@ If gaps are found: document them as `⚠️ UNRESOLVED` items at the top of the 
 
 ## Data Model Implications Summary
 
-Consolidated list of all ⚠️ flags from individual process sections. This is the input consumed by `/sdlc:05-data-model`.
+Consolidated list of all ⚠️ flags from individual process sections. This is the input consumed by the data model phase ⚠️.
 
 | Entity/Field | Change | Required By |
 |-------------|--------|------------|
@@ -271,6 +271,6 @@ Open items:        [N]
 
 File: $ARTIFACTS/business-process/business-process.md
 
-Recommended Next: /sdlc:05-data-model ⚠️ (Critical Gate)
+Recommended Next: the data model phase (tell Claude to proceed) ⚠️ ⚠️ (Critical Gate)
   → Read business-process.md ## Data Model Implications Summary before modelling
 ```

@@ -212,7 +212,7 @@ Write `$ARTIFACTS/feasibility/feasibility.md`:
 [ ] [Step 2]
 [ ] [Step 3]
 
-**If GO: continue to** `/sdlc:01-research`
+**If GO: continue to** the research phase
 ```
 
 ---
@@ -247,7 +247,7 @@ Verdict: [GO | GO-WITH-CONDITIONS | NO-GO]
 Artifact: $ARTIFACTS/feasibility/feasibility.md
 
 Next steps:
-  → Continue to research:  /sdlc:01-research
+  → Continue to research:  the research phase (tell Claude to proceed)
   → Stop here and review first (come back when ready)
 ```
 

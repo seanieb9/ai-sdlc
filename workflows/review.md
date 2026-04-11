@@ -403,5 +403,5 @@ Remediation tasks added to $STATE: [N]
 
 File: $ARTIFACTS/review/review-report.md
 
-Recommended Next: /sdlc:verify --phase 13   ← confirms all HIGH/CRITICAL findings have tasks
+Recommended Next: /sdlc:00-start (verify is automatic, or say "verify phase N") 13   ← confirms all HIGH/CRITICAL findings have tasks
 ```

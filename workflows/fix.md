@@ -126,8 +126,8 @@ Output:
 ROOT CAUSE: Design Gap Detected
 The root cause appears to be a specification or architecture gap, not a coding error.
 
-Recommendation: After completing this fix, run /sdlc:03-product-spec to update the product spec
-with the missing requirement or constraint, then run /sdlc:verify to confirm consistency.
+Recommendation: After completing this fix, run the product spec phase (tell Claude to proceed) to update the product spec
+with the missing requirement or constraint, then run tell Claude to verify to confirm consistency.
 
 Proceeding with fix. A follow-up spec update is strongly recommended.
 ```
@@ -287,7 +287,7 @@ Update FIX-NNN.md Phase Status: deploy → completed.
     "severity": "HIGH",
     "phaseCreated": "fix",
     "status": "open",
-    "recommendation": "Run /sdlc:03-product-spec to update spec with missing requirement"
+    "recommendation": "Run the product spec phase (tell Claude to proceed) to update spec with missing requirement"
   }
   ```
 
@@ -306,6 +306,6 @@ Design gap found: <yes — TD-NNN added to debt register | no>
 Manifest: .claude/ai-sdlc/ITERATIONS/<FIX-NNN>.md
 
 Next:
-  Run /sdlc:verify to confirm artifact consistency.
-  Run /sdlc:release when ready to include this fix in a versioned release.
+  Run tell Claude to verify to confirm artifact consistency.
+  Run tell Claude to create a release when ready to include this fix in a versioned release.
 ```

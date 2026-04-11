@@ -22,7 +22,7 @@ Then use `$WORKSPACE`, `$STATE`, `$ARTIFACTS` throughout.
 
 ## Step 1: Gate Check
 
-**HARD gate:** `$ARTIFACTS/verify/verification-report.md` must exist. If missing: STOP. Tell the user to run `/sdlc:verify` to complete the verification phase first.
+**HARD gate:** `$ARTIFACTS/verify/verification-report.md` must exist. If missing: STOP. Tell the user to run tell Claude to verify to complete the verification phase first.
 
 Read the verification report and check for open CRITICAL findings. If any CRITICAL findings remain unresolved: STOP. List the open criticals and tell the user they must be resolved before UAT can begin.
 
@@ -249,7 +249,7 @@ Date: [date]
 Artifact updated: $ARTIFACTS/uat/uat-plan.md
 
 UAT is now complete. Ready for deployment:
-  → /sdlc:deploy
+  → the deploy phase (tell Claude to proceed)
 ```
 
 ---
@@ -270,5 +270,5 @@ When testing is complete and sign-off is obtained, run:
   ask Claude to run the UAT workflow --sign-off
 
 Then continue to:
-  → /sdlc:deploy
+  → the deploy phase (tell Claude to proceed)
 ```
