@@ -184,6 +184,16 @@ Write `$PHASE_ARTIFACTS/nfr-analysis.md`:
 
 ---
 
+## Step 5b: Trigger SLO Derivation
+
+If the SLO Candidates table in the artifact is non-empty (at least one row):
+  Read and execute `~/.claude/sdlc/workflows/nfr-slo.md` inline.
+  This generates SLO definitions from the candidates just identified.
+  
+If no SLO candidates: skip silently.
+
+---
+
 ## Step 6: Update State
 
 Read `$STATE`, then write back with the autoChainLog entry appended:

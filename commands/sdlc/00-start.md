@@ -48,5 +48,6 @@ Flags:
 @~/.claude/sdlc/workflows/orchestrate.md
 @~/.claude/sdlc/references/process.md
 @~/.claude/sdlc/references/doc-management.md
+@~/.claude/sdlc/references/security-posture.md
 </execution_context>
 

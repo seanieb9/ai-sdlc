@@ -345,6 +345,40 @@ Artifact: $ARTIFACTS/design/threat-model.md
 
 ---
 
+## Step 8b: Auto-Create Security Test Cases and Remediation Tasks
+
+For every threat rated CRITICAL or HIGH risk from Step 4:
+
+**Security test cases:** If `$ARTIFACTS/test-cases/test-cases.md` exists:
+  - Append a security TC-ID entry for each CRITICAL/HIGH threat:
+    ```
+    TC-SEC-NNN: [threat mitigation test]
+    Layer: Security
+    Source: T-NNN (threat-model.md)
+    Given: The system is running and [threat scenario applies]
+    When: An attacker attempts [specific attack from threat record]
+    Then: The system rejects the attempt with [expected response — 401/403/400/etc.] AND logs the attempt
+    Acceptance: The mitigation from T-NNN is demonstrably enforced
+    ```
+  - Number TC-SEC-NNN starting after the highest existing TC-ID in the file.
+  - If test-cases.md does not exist: write stubs to `$ARTIFACTS/threat-model/security-test-cases.md` for later incorporation.
+
+**Remediation tasks:** If `$ARTIFACTS/plan/implementation-plan.md` exists:
+  - Append a "## Security Remediation Tasks (from Threat Model)" section with one task per CRITICAL/HIGH threat:
+    ```
+    TASK-SEC-NNN: Mitigate T-NNN — [threat title]
+    Priority: CRITICAL (before launch) / HIGH (before production)
+    Layer: [delivery/auth-middleware/use-case/infrastructure — from threat record Implementation field]
+    Description: [mitigation from threat record]
+    Verification: [TC-SEC-NNN from above]
+    Done criteria: TC-SEC-NNN passes, no regression in existing security tests
+    ```
+  - If plan does not exist: write tasks to `$ARTIFACTS/threat-model/remediation-tasks.md`.
+
+Count how many TC-IDs and tasks were created. Include counts in the Step 9 state.json summary field.
+
+---
+
 ## Step 9: Update State
 
 Read `$STATE`, then write back with the autoChainLog entry appended:
@@ -355,7 +389,7 @@ Read `$STATE`, then write back with the autoChainLog entry appended:
   "triggeredAfter": "design",
   "status": "completed",
   "artifact": "<ARTIFACTS>/design/threat-model.md",
-  "summary": "<N> threats found: <X> CRITICAL, <Y> HIGH, <Z> MEDIUM, <W> LOW. OWASP: <N>/10 mitigated.",
+  "summary": "<N> threats found: <X> CRITICAL, <Y> HIGH, <Z> MEDIUM, <W> LOW. OWASP: <N>/10 mitigated. <TC> security TC-IDs created, <TASK> remediation tasks created.",
   "completedAt": "<ISO-timestamp>"
 }
 ```

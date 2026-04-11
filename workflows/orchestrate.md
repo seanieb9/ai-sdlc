@@ -457,6 +457,8 @@ Phases are executed by directing the user to run the corresponding command or by
 
 If `--auto` flag is active, invoke the phase workflow inline without pausing. Otherwise, instruct the user to run the command and wait for them to confirm completion.
 
+**Build phase note:** When the `build` phase starts, the PostToolUse verification stack activates automatically — see code.md Step 2.5 and the Verification Stack section for configuration. This stack runs after every file write during the build phase in this order: lint → format → type-check → unit tests for the changed file. Any failure stops further writes until resolved.
+
 ### 7f. Fire Auto-Chains
 
 After a checkpoint phase completes, run associated auto-chain skills silently. Record results in `autoChainLog`.
@@ -466,7 +468,7 @@ Auto-chain trigger table:
 | Trigger phase | Auto-chain skills | Condition |
 |---|---|---|
 | `idea` | nfr-analysis | Always — NFRs must inform design, not validate it post-facto |
-| `design` | threat-model | Only if project uses auth or calls external services |
+| `design` | threat-model | Always — every system has attack surface worth modeling |
 | `design` | adr-gen | Always |
 | `design` | infra-design | Always |
 | `design` | observability | Always (pre-populate skeleton so plan can scope observability tasks) |
@@ -482,6 +484,14 @@ Auto-chain trigger table:
 | `test-gen` | traceability | Always (verify test-to-requirement coverage) |
 | `deploy` | ci-verify | Hard gate — blocks deploy if CI pipeline missing or incomplete |
 | `deploy` | maintain | Always (generate initial maintenance entries after deploy) |
+| `nfr-analysis` (sub-chain) | nfr-slo | Always — SLO candidates become SLO definitions immediately |
+| `test-cases` | bdd-tdd-scaffold | Always — GWT scenarios become failing TDD stubs before coding starts |
+| `design` | contract-test-scaffold | Only if api-spec.md was produced in design phase |
+| `data-model` | migrate-scaffold | Always — new entities immediately get migration stubs |
+| `adr-gen` (sub-chain) | adr-test-coverage | Always — every ADR must have a covering test case |
+| `build` | debt-log | Always — quality findings written to technicalDebts and plan |
+
+**Note on sub-chain rows:** rows marked "(sub-chain)" are triggered from within the parent skill's workflow file (e.g. `workflows/nfr-analysis.md`, `workflows/adr-gen.md`), not from this table's main loop. They are documented here for visibility and auditing purposes only.
 
 For each auto-chain skill: read and execute `workflows/<skill>.md` inline (do NOT invoke as a slash command — the workflow files are the source of truth), capture the key result in one line (≤10 words), and log to state.json `autoChainLog`:
 ```json
@@ -525,6 +535,25 @@ Quality gate for [<NEXT-PHASE>]: PASS | FAIL
 → Give feedback  — revise this phase before proceeding
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+**Additional output when completing the `idea` phase:** after the auto-chain block above, also include the following NFR review section before accepting "continue":
+
+```
+⚠️  NFR Review Required before proceeding to Data Model
+
+    Review $ARTIFACTS/nfr-analysis/nfr-analysis.md before starting the data model phase.
+    NFRs shape schema design (indexing, partitioning, audit logging, encryption at field level).
+
+    Key questions to answer before data-model:
+    - Are all performance NFRs realistic given the chosen stack?
+    - Do any compliance NFRs (GDPR/HIPAA/PCI) add fields to entities (audit_log, consent_given, etc.)?
+    - Are any NFRs missing numeric thresholds? (e.g. "must be fast" → "p95 < 200ms")
+
+    → "continue"      — NFRs reviewed and approved, proceed to data-model
+    → "amend nfrs"    — go back and update NFRs in prd.md before data-model
+```
+
+If the user responds "amend nfrs": re-run the `idea` phase workflow with the amendment context, then re-run `nfr-analysis` auto-chain, then show this review pause again.
 
 **"new session"** handler: run checkpoint.md procedure, save state.json checkpoint block:
 ```json
